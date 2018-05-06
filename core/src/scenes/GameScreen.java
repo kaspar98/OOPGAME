@@ -4,15 +4,23 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.OOPGame;
 
-public class GameScreen implements Screen {
-    final OOPGame game;
+import helpers.GameInfo;
 
-    OrthographicCamera camera;
+public class GameScreen implements Screen {
+    private final OOPGame game;
+    private Viewport viewport;
+    private OrthographicCamera camera;
 
     public GameScreen(final OOPGame game) {
         this.game = game;
+        camera = new OrthographicCamera();
+        // Windowi suurust muutes püsib ascept ratio sama (lisab black bar'id kui vaja)
+        // https://youtu.be/D7u5B2Oh9r0?list=PLZm85UZQLd2SXQzsF-a0-pPF6IWDDdrXt&t=420
+        viewport = new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT, camera);
     }
 
     @Override
@@ -42,7 +50,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-
+        viewport.update(width, height);
     }
 
     @Override
