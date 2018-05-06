@@ -4,15 +4,19 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.OOPGame;
 
 public class GameScreen implements Screen {
-    final OOPGame game;
-
-    OrthographicCamera camera;
+    private final OOPGame game;
+    private Viewport viewport;
+    private OrthographicCamera camera;
 
     public GameScreen(final OOPGame game) {
         this.game = game;
+        camera = new OrthographicCamera();
+        viewport = new FitViewport(camera);
     }
 
     @Override

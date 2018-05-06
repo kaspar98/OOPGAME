@@ -6,15 +6,17 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.oopgame.game.OOPGame;
 
-public class MainMenuScreen implements Screen {
+import helpers.GameInfo;
 
+public class MainMenuScreen implements Screen {
     final OOPGame game;
-    OrthographicCamera camera;
+
+    private OrthographicCamera camera;
 
     public MainMenuScreen(final OOPGame game) {
         this.game = game;
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 800, 480);
+        camera.setToOrtho(false, GameInfo.WIDTH, GameInfo.HEIGHT);
 
     }
     @Override
@@ -65,7 +67,4 @@ public class MainMenuScreen implements Screen {
     public void dispose() {
 
     }
-
-    //Rest of class still omitted...
-
 }
