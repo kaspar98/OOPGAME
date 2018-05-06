@@ -8,6 +8,8 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.OOPGame;
 
+import helpers.GameInfo;
+
 public class GameScreen implements Screen {
     private final OOPGame game;
     private Viewport viewport;
@@ -16,7 +18,9 @@ public class GameScreen implements Screen {
     public GameScreen(final OOPGame game) {
         this.game = game;
         camera = new OrthographicCamera();
-        viewport = new FitViewport(camera);
+        // Windowi suurust muutes püsib ascept ratio sama (lisab black bar'id kui vaja)
+        // https://youtu.be/D7u5B2Oh9r0?list=PLZm85UZQLd2SXQzsF-a0-pPF6IWDDdrXt&t=420
+        viewport = new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT, camera);
     }
 
     @Override
@@ -46,7 +50,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-
+        viewport.update(width, height);
     }
 
     @Override
