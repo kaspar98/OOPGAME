@@ -14,7 +14,7 @@ import com.badlogic.gdx.physics.box2d.World;
 
 import helpers.GameInfo;
 
-public class Player {
+public class Player implements DynamicBodied {
     // viide OOPGame'ile, et SpriteBatch kätte saada ntks
     private OOPGame game;
 
@@ -49,7 +49,7 @@ public class Player {
 
         // loome Playerile keha
         body = world.createBody(bodyDef);
-        body.setUserData(bounds);
+        body.setUserData(this);
 
         // esialgselt katsetan keha kuju ringina
         // hiljem peaks ta vist olema mingi ristkülik, mille sisse jääb ainult Playeri tekstuuril
@@ -78,7 +78,6 @@ public class Player {
                     10* GameInfo.FORCE_MULTIPLIER,
                     0.0f,
                     true
-            );
         }
 
         // vasakule
@@ -114,6 +113,10 @@ public class Player {
         game.batch.draw(texture, bounds.x, bounds.y);
         /*Vector2 asukoht = fixture.getBody().getPosition();
         game.batch.draw(texture, asukoht.x, asukoht.y);*/
+    }
+
+    public void bodyUpdate() {
+        bounds.setCenter(body.getPosition());
     }
 
     public void dispose() {
