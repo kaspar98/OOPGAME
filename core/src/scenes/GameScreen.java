@@ -14,8 +14,10 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.oopgame.game.DynamicBodied;
 import com.oopgame.game.OOPGame;
 import com.oopgame.game.Player;
+import com.oopgame.game.TempSein;
 
 import helpers.GameInfo;
 
@@ -31,12 +33,14 @@ public class GameScreen implements Screen {
     private World world;
     private Box2DDebugRenderer debugRenderer;
 
+    private TempSein wall;
+
     public GameScreen(final OOPGame game) {
         this.game = game;
 
         Box2D.init();
 
-        world = new World(new Vector2(0, 0), true);
+        world = new World(new Vector2(0, -10), true);
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
@@ -48,6 +52,7 @@ public class GameScreen implements Screen {
         bg = new Texture(Gdx.files.internal("test_taust.png"));
         // loome Playeri tausta keskele
         player = new Player(game, bg.getWidth() / 2f, bg.getHeight() / 2f, world);
+        wall = new TempSein(world, 1024 / 2, -100);
 
         // debug renderer
         debugRenderer = new Box2DDebugRenderer();
@@ -93,11 +98,11 @@ public class GameScreen implements Screen {
 
         // käib for-iga läbi need värskendatavad kehad
         for (Body b : bodies) {
-            Rectangle e = (Rectangle) b.getUserData();
+            DynamicBodied e = (DynamicBodied) b.getUserData();
 
             if (e != null) {
                 // siia paneks hoopis mingi meetodi kutse
-                e.setCenter(b.getPosition());
+                e.bodyUpdate();
             }
         }
 
