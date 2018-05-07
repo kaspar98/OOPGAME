@@ -5,7 +5,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2D;
@@ -29,6 +28,7 @@ public class GameScreen implements Screen {
 
     private Player player;
     private Texture bg;
+    private Texture nebula1;
 
     private World world;
     private Box2DDebugRenderer debugRenderer;
@@ -48,8 +48,9 @@ public class GameScreen implements Screen {
         // https://youtu.be/D7u5B2Oh9r0?list=PLZm85UZQLd2SXQzsF-a0-pPF6IWDDdrXt&t=420
         viewport = new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT, camera);
 
-        // loeme sisse tausta faili
+        // loeme sisse tausta failid
         bg = new Texture(Gdx.files.internal("test_taust.png"));
+        nebula1 = new Texture(Gdx.files.internal("bg_starfield_nebula_1a.png"));
         // loome Playeri tausta keskele
         player = new Player(game, bg.getWidth() / 2f, bg.getHeight() / 2f, world);
         wall = new TempSein(world, 1024 / 2, -100);
@@ -77,8 +78,9 @@ public class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // liigutab kaamerat playeri positsiooni järgi
-        camera.position.x = player.bounds.x + player.bounds.width / 2f;
-        camera.position.y = player.bounds.y + player.bounds.height / 2f;
+        camera.position.x = player.sprite.getX() + player.sprite.getWidth() / 2f;
+        camera.position.y = player.sprite.getY() + player.sprite.getHeight() / 2f;
+
         // tell the camera to update its matrices.
         camera.update();
 
@@ -107,7 +109,10 @@ public class GameScreen implements Screen {
         }
 
         // tausta lisamine
-        game.batch.draw(bg, 0, 0);
+        // väga algne parallax
+        game.batch.draw(nebula1,
+                player.sprite.getX() / 1.05f - nebula1.getWidth() / 2f,
+                player.sprite.getY() / 1.05f - nebula1.getHeight() / 2f);
 
         // kutsub Playeris playeri renderimise välja
         player.render(delta);
