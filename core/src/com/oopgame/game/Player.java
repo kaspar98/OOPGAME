@@ -78,6 +78,7 @@ public class Player implements DynamicBodied {
                     10* GameInfo.FORCE_MULTIPLIER,
                     0.0f,
                     true
+            );
         }
 
         // vasakule
