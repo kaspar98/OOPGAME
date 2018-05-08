@@ -11,6 +11,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 
 import helpers.GameInfo;
 
@@ -69,7 +70,7 @@ public class Player implements DynamicBodied {
     }
 
     // testimiseks väga lambine inputi jälgimine
-    public void inputs() {
+    public void inputs(TouchPad touchpad) {
         // iga nupuvajutus rakendab Playeri kehale jõudu antud vektori suunas
         // paremale
         if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
@@ -106,6 +107,26 @@ public class Player implements DynamicBodied {
                     true
             );
         }
+
+        // touchpadi inputist saadud info põhjalt paneme playeri vastava vektori suunas liikuma
+        float touchpadX = touchpad.getTouchpad().getKnobPercentX();
+        float touchpadY = touchpad.getTouchpad().getKnobPercentY();
+
+        body.applyForceToCenter(
+                touchpadX*GameInfo.FORCE_MULTIPLIER,
+                touchpadY*GameInfo.FORCE_MULTIPLIER,
+                true
+        );
+        // touchpadi inputist saadud info põhjal keerame playeri vaatama sinna kuhu ta parasjagu kiirendab
+        // (kuna tekstuuri nina ei ole seal kus body nina asub lahutame 90 kraadi)
+        // (kuna arctan annab vahemikus -90 kuni 90 kraadi peame tegutsema kahes osas)
+        if (touchpadX < 0) {
+            sprite.setRotation((float) Math.toDegrees(Math.atan(touchpadY / touchpadX))- 90 + 180);
+        }
+        if (touchpadX > 0) {
+            sprite.setRotation((float) Math.toDegrees(Math.atan(touchpadY / touchpadX)) - 90);
+
+        }
     }
 
     // topib tekstuuri SpriteBatchile, x ja y boundsi järgi
@@ -119,7 +140,7 @@ public class Player implements DynamicBodied {
         sprite.setCenter(body.getPosition().x, body.getPosition().y);
 
         // muudab sprite'i suunda vastavalt keha suunale
-        sprite.setRotation(MathUtils.radiansToDegrees * (body.getAngle()));
+        //sprite.setRotation(MathUtils.radiansToDegrees * (body.getAngle()));
     }
 
     public void dispose() {
