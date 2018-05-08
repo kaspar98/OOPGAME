@@ -1,4 +1,5 @@
 package com.oopgame.game;
+// KASUTATUD TUTORIAL http://www.bigerstaff.com/libgdx-touchpad-example/
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
