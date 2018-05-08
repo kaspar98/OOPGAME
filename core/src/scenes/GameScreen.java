@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -17,6 +18,7 @@ import com.oopgame.game.DynamicBodied;
 import com.oopgame.game.OOPGame;
 import com.oopgame.game.Player;
 import com.oopgame.game.TempSein;
+import com.oopgame.game.TouchPad;
 
 import helpers.GameInfo;
 
@@ -34,6 +36,8 @@ public class GameScreen implements Screen {
     private Box2DDebugRenderer debugRenderer;
 
     private TempSein wall;
+    private TouchPad touchpad;
+    private  Stage stage;
 
     public GameScreen(final OOPGame game) {
         this.game = game;
@@ -57,6 +61,15 @@ public class GameScreen implements Screen {
 
         // debug renderer
         debugRenderer = new Box2DDebugRenderer();
+
+        // teeme touchpadi
+        touchpad = new TouchPad();
+        // ja määrame selle asukoha
+        touchpad.getTouchpad().setBounds(15, 15, 200, 200);
+        // loome lava, millele touchpadi paigutada + loome touchpadi inpute töötleva protsessori
+        stage = new Stage(new FitViewport(800, 480), game.batch);
+        stage.addActor(touchpad.getTouchpad());
+        Gdx.input.setInputProcessor(stage);
 
     }
 
@@ -123,9 +136,12 @@ public class GameScreen implements Screen {
         // debug camera render
         debugRenderer.render(world, camera.combined);
 
-        // input checks
-        player.inputs();
+        // input checks koos touchpadiga
+        player.inputs(touchpad);
 
+        // stage loodud touchpadi jaoks
+        stage.act(Gdx.graphics.getDeltaTime());
+        stage.draw();
 
     }
 
@@ -154,5 +170,6 @@ public class GameScreen implements Screen {
         // võtame playeri tekstuuri ja tausta maha mälust
         player.dispose();
         bg.dispose();
+        touchpad.dispose();
     }
 }
