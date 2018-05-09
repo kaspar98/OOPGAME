@@ -47,17 +47,17 @@ public class GameScreen implements Screen {
         world = new World(new Vector2(0, -10), true);
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 800, 480);
+        camera.setToOrtho(false, GameInfo.WIDTH, GameInfo.HEIGHT);
         // Windowi suurust muutes püsib ascept ratio sama (lisab black bar'id kui vaja)
         // https://youtu.be/D7u5B2Oh9r0?list=PLZm85UZQLd2SXQzsF-a0-pPF6IWDDdrXt&t=420
-        viewport = new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT, camera);
+       viewport = new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT, camera);
 
         // loeme sisse tausta failid
         bg = new Texture(Gdx.files.internal("test_taust.png"));
         nebula1 = new Texture(Gdx.files.internal("bg_starfield_nebula_1a.png"));
         // loome Playeri tausta keskele
         player = new Player(game, bg.getWidth() / 2f, bg.getHeight() / 2f, world);
-        wall = new TempSein(world, 1024 / 2, -100);
+        wall = new TempSein(world, 1024 / 2, 200);
 
         // debug renderer
         debugRenderer = new Box2DDebugRenderer();

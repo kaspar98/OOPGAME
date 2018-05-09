@@ -2,14 +2,17 @@ package com.oopgame.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.MassData;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 
@@ -31,8 +34,17 @@ public class Player implements DynamicBodied {
     public Player(OOPGame game, float x, float y, World world) {
         this.game = game;
 
-        texture = new Texture(Gdx.files.internal("player_laev.png"));
+        Pixmap pixmapSource = new Pixmap(Gdx.files.internal("player_laev.png"));
+        Pixmap pixmapResize = new Pixmap(pixmapSource.getWidth()/4*3, pixmapSource.getHeight()/4*3, pixmapSource.getFormat());
+        pixmapResize.drawPixmap(pixmapSource,
+                0, 0, pixmapSource.getWidth(), pixmapSource.getHeight(),
+                0, 0, pixmapResize.getWidth(), pixmapResize.getHeight()
+        );
+        Texture texture = new Texture(pixmapResize);
+        pixmapSource.dispose();
+        pixmapResize.dispose();
 
+        // texture = new Texture(Gdx.files.internal("player_laev.png"));
         // loome tekstuuriga tegeleva sprite'i
         sprite = new Sprite(texture);
         sprite.setPosition(
@@ -61,8 +73,8 @@ public class Player implements DynamicBodied {
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = circle;
         fixtureDef.density = 0.5f;
-        fixtureDef.friction = 0.4f;
-        fixtureDef.restitution = 0.6f;
+        fixtureDef.friction = 0.0f;
+        fixtureDef.restitution = 0.1f;
 
         fixture = body.createFixture(fixtureDef);
 
@@ -111,7 +123,8 @@ public class Player implements DynamicBodied {
         // touchpadi inputist saadud info põhjalt paneme playeri vastava vektori suunas liikuma
         float touchpadX = touchpad.getTouchpad().getKnobPercentX();
         float touchpadY = touchpad.getTouchpad().getKnobPercentY();
-
+        if (touchpadX!=0 && touchpadY!=0)
+            body.setTransform(body.getPosition().x +touchpadX*3, body.getPosition().y+touchpadY*3,0);
         body.applyForceToCenter(
                 touchpadX*GameInfo.FORCE_MULTIPLIER,
                 touchpadY*GameInfo.FORCE_MULTIPLIER,
