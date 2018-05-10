@@ -5,6 +5,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2D;
@@ -31,33 +32,42 @@ public class GameScreen implements Screen {
     private Player player;
     private Texture bg;
     private Texture nebula1;
+    private Sprite sprite_nebula1;
 
     private World world;
     private Box2DDebugRenderer debugRenderer;
 
     private TempSein wall;
     private TouchPad touchpad;
-    private  Stage stage;
+    private Stage stage;
 
     public GameScreen(final OOPGame game) {
         this.game = game;
 
         Box2D.init();
 
-        world = new World(new Vector2(0, -10), true);
+        world = new World(new Vector2(0, 0), true);
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, GameInfo.WIDTH, GameInfo.HEIGHT);
+        camera.zoom = GameInfo.SCALING;
+
         // Windowi suurust muutes püsib ascept ratio sama (lisab black bar'id kui vaja)
         // https://youtu.be/D7u5B2Oh9r0?list=PLZm85UZQLd2SXQzsF-a0-pPF6IWDDdrXt&t=420
-       viewport = new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT, camera);
+        viewport = new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT, camera);
 
         // loeme sisse tausta failid
         bg = new Texture(Gdx.files.internal("test_taust.png"));
         nebula1 = new Texture(Gdx.files.internal("bg_starfield_nebula_1a.png"));
+        sprite_nebula1 = new Sprite(nebula1);
+        sprite_nebula1.setScale(GameInfo.SCALING);
         // loome Playeri tausta keskele
-        player = new Player(game, bg.getWidth() / 2f, bg.getHeight() / 2f, world);
-        wall = new TempSein(world, 1024 / 2, 200);
+        player = new Player(game,
+                0/*g.getWidth() / 2f * GameInfo.SCALING*/,
+                0/*bg.getHeight() / 2f * GameInfo.SCALING*/, world);
+        wall = new TempSein(world,
+                1024 / 2 * GameInfo.SCALING,
+                200 * GameInfo.SCALING);
 
         // debug renderer
         debugRenderer = new Box2DDebugRenderer();
@@ -90,19 +100,6 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0.2f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // liigutab kaamerat playeri positsiooni järgi
-        camera.position.x = player.sprite.getX() + player.sprite.getWidth() / 2f;
-        camera.position.y = player.sprite.getY() + player.sprite.getHeight() / 2f;
-
-        // tell the camera to update its matrices.
-        camera.update();
-
-        // tell the SpriteBatch to render in the
-        // coordinate system specified by the camera.
-        game.batch.setProjectionMatrix(camera.combined);
-
-
-        game.batch.begin();
 
         // see osa on väga temporary, see katab hetkel ainult Playeri keha värskendamist,
         // teistel objektidel võivad olla hoopis teised asjad, mide värskendada.
@@ -121,11 +118,28 @@ public class GameScreen implements Screen {
             }
         }
 
+        // liigutab kaamerat playeri positsiooni järgi
+        camera.position.x = player.sprite.getX() + player.sprite.getWidth() / 2f;
+        camera.position.y = player.sprite.getY() + player.sprite.getHeight() / 2f;
+
+        // tell the camera to update its matrices.
+        camera.update();
+
+        // tell the SpriteBatch to render in the
+        // coordinate system specified by the camera.
+        game.batch.setProjectionMatrix(camera.combined);
+
+
+        game.batch.begin();
+
         // tausta lisamine
         // väga algne parallax
-        game.batch.draw(nebula1,
-                player.sprite.getX() / 1.05f - nebula1.getWidth() / 2f,
-                player.sprite.getY() / 1.05f - nebula1.getHeight() / 2f);
+        sprite_nebula1.draw(game.batch);
+        sprite_nebula1.rotate(0.001f);
+        sprite_nebula1.setPosition(
+                player.sprite.getX() * 0.99f - sprite_nebula1.getWidth() / 2f + sprite_nebula1.getWidth() / 2 * GameInfo.SCALING,
+                player.sprite.getY() * 0.99f - sprite_nebula1.getHeight() / 2f + sprite_nebula1.getHeight() / 2 * GameInfo.SCALING
+        );
 
         // kutsub Playeris playeri renderimise välja
         player.render(delta);

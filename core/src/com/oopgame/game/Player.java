@@ -34,23 +34,15 @@ public class Player implements DynamicBodied {
     public Player(OOPGame game, float x, float y, World world) {
         this.game = game;
 
-        Pixmap pixmapSource = new Pixmap(Gdx.files.internal("player_laev.png"));
-        Pixmap pixmapResize = new Pixmap(pixmapSource.getWidth()/4*3, pixmapSource.getHeight()/4*3, pixmapSource.getFormat());
-        pixmapResize.drawPixmap(pixmapSource,
-                0, 0, pixmapSource.getWidth(), pixmapSource.getHeight(),
-                0, 0, pixmapResize.getWidth(), pixmapResize.getHeight()
-        );
-        Texture texture = new Texture(pixmapResize);
-        pixmapSource.dispose();
-        pixmapResize.dispose();
-
-        // texture = new Texture(Gdx.files.internal("player_laev.png"));
+        texture = new Texture(Gdx.files.internal("player_laev.png"));
         // loome tekstuuriga tegeleva sprite'i
+
         sprite = new Sprite(texture);
         sprite.setPosition(
                 x - texture.getWidth() / 2f,
                 y - texture.getHeight() / 2f
         );
+        sprite.setScale(GameInfo.SCALING);
 
 
         this.world = world;
@@ -68,7 +60,7 @@ public class Player implements DynamicBodied {
         // nähtav kosmoselaeva põhiosa ning tiivad jääksid välja sellest
         // siis oleks Playeril rohkem "dodge'imise" ruumi, mingi lisa rahuldustunne :D
         CircleShape circle = new CircleShape();
-        circle.setRadius(texture.getWidth() / 2f);
+        circle.setRadius(sprite.getWidth() * GameInfo.SCALING / 2f);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = circle;
@@ -123,8 +115,8 @@ public class Player implements DynamicBodied {
         // touchpadi inputist saadud info põhjalt paneme playeri vastava vektori suunas liikuma
         float touchpadX = touchpad.getTouchpad().getKnobPercentX();
         float touchpadY = touchpad.getTouchpad().getKnobPercentY();
-        if (touchpadX!=0 && touchpadY!=0)
-            body.setTransform(body.getPosition().x +touchpadX*3, body.getPosition().y+touchpadY*3,0);
+        /*if (touchpadX!=0 && touchpadY!=0)
+            body.setTransform(body.getPosition().x +touchpadX*3, body.getPosition().y+touchpadY*3,0);*/
         body.applyForceToCenter(
                 touchpadX*GameInfo.FORCE_MULTIPLIER,
                 touchpadY*GameInfo.FORCE_MULTIPLIER,
@@ -140,6 +132,8 @@ public class Player implements DynamicBodied {
             sprite.setRotation((float) Math.toDegrees(Math.atan(touchpadY / touchpadX)) - 90);
 
         }
+
+        System.out.println(body.getLinearVelocity().len());
     }
 
     // topib tekstuuri SpriteBatchile, x ja y boundsi järgi

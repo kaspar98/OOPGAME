@@ -6,6 +6,8 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 
+import helpers.GameInfo;
+
 public class TempSein {
     Body body;
 
@@ -17,7 +19,7 @@ public class TempSein {
         body = world.createBody(wallBodyDef);
 
         PolygonShape box = new PolygonShape();
-        box.setAsBox(512, 100);
+        box.setAsBox(512 * GameInfo.SCALING, 100 * GameInfo.SCALING);
         body.createFixture(box, 0);
         box.dispose();
     }
