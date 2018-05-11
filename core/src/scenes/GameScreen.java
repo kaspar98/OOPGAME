@@ -1,7 +1,9 @@
 package scenes;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -42,6 +44,9 @@ public class GameScreen implements Screen {
     private Stage stage;
 
     private DustParticleManager tolm;
+
+    private Music musicA;
+    private Music musicB;
 
     public GameScreen(final OOPGame game) {
         this.game = game;
@@ -86,6 +91,41 @@ public class GameScreen implements Screen {
         stage = new Stage(new FitViewport(800, 480), game.batch);
         stage.addActor(touchpad.getTouchpad());
         Gdx.input.setInputProcessor(stage);
+
+        // muusikaga jamamine
+        // musicA on veits intense'im versioon b-st
+        // idee oleks seda valjumaks keerata, kui mingi vastased lähedal
+        // numbriga 1 on intro
+        // numbriga 2 oleks nö tavaline soundtrack
+        // numbriga 3 (seda veel hetkel pole valmis kompileerinud) oleks mingi boss leveli versioon, või kui vastaseid väga palju, või kui elusid vähe on
+        musicA = Gdx.audio.newMusic(Gdx.files.internal("tha_mcis_a1.mp3"));
+        musicA.setVolume(0.1f);
+        musicA.play();
+        musicA.setLooping(false);
+        musicA.setOnCompletionListener(new Music.OnCompletionListener() {
+            @Override
+            public void onCompletion(Music music) {
+                float volume = musicB.getVolume();
+                musicA = Gdx.audio.newMusic(Gdx.files.internal("tha_mcis_a2.mp3"));
+                musicA.setVolume(volume);
+                musicA.setLooping(true);
+                musicA.play();
+            }
+        });
+
+        musicB = Gdx.audio.newMusic(Gdx.files.internal("tha_mcis_b1.mp3"));
+        musicB.play();
+        musicB.setLooping(false);
+        musicB.setOnCompletionListener(new Music.OnCompletionListener() {
+            @Override
+            public void onCompletion(Music music) {
+                float volume = musicB.getVolume();
+                musicB = Gdx.audio.newMusic(Gdx.files.internal("tha_mcis_b2.mp3"));
+                musicB.setVolume(volume);
+                musicB.setLooping(true);
+                musicB.play();
+            }
+        });
     }
 
     @Override
@@ -95,6 +135,21 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        // TODO: eraldi muusika manageri klass, kuhu saab teada anda, kui valju muusika olema peaks ja millist osa muusikast mängida
+        // sellega saab testida muusika üleminekut:
+        float volume = musicA.getVolume();
+        if (Gdx.input.isKeyPressed(Input.Keys.UP))
+            volume += 0.01f;
+        else if (Gdx.input.isKeyPressed(Input.Keys.DOWN))
+            volume -= 0.01f;
+
+        if (volume > 1)
+            volume = 1;
+        else if (volume < 0)
+            volume = 0;
+
+        musicA.setVolume(volume);
+
         // box2d world steps
         world.step(1 / 60f, 6, 2);
 
@@ -192,6 +247,10 @@ public class GameScreen implements Screen {
         player.dispose();
         nebula1.dispose();
         tolm.dispose();
+
         touchpad.dispose();
+
+        musicA.dispose();
+        musicB.dispose();
     }
 }
