@@ -27,7 +27,7 @@ public class Player implements DynamicBodied {
     public Sprite sprite;
 
     private World world;
-    private Body body;
+    public Body body;
     private Fixture fixture;
 
     // konstruktor x ja y alusel
@@ -38,6 +38,7 @@ public class Player implements DynamicBodied {
         // loome tekstuuriga tegeleva sprite'i
 
         sprite = new Sprite(texture);
+        // positsiooni sisendi arvutus (keskpunkt) -> (nurgapunkt)
         sprite.setPosition(
                 x - texture.getWidth() / 2f,
                 y - texture.getHeight() / 2f
