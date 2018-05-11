@@ -18,7 +18,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.DynamicBodied;
 import com.oopgame.game.OOPGame;
 import com.oopgame.game.Player;
-import com.oopgame.game.TempSein;
+import com.oopgame.game.Seinad;
 import com.oopgame.game.TouchPad;
 
 import helpers.GameInfo;
@@ -37,7 +37,7 @@ public class GameScreen implements Screen {
     private World world;
     private Box2DDebugRenderer debugRenderer;
 
-    private TempSein walls;
+    private Seinad walls;
     private TouchPad touchpad;
     private Stage stage;
 
@@ -63,9 +63,10 @@ public class GameScreen implements Screen {
         sprite_nebula1.setScale(GameInfo.SCALING);
         // loome Playeri tausta keskele
         player = new Player(game,
-                0/*g.getWidth() / 2f * GameInfo.SCALING*/,
-                0/*bg.getHeight() / 2f * GameInfo.SCALING*/, world);
-        walls = new TempSein(world);
+                GameInfo.W_WIDTH / 2f,
+                GameInfo.W_WIDTH / 2f,
+                world);
+        walls = new Seinad(world);
 
         // debug renderer
         debugRenderer = new Box2DDebugRenderer();
