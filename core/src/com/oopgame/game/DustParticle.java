@@ -16,7 +16,7 @@ public class DustParticle extends Sprite {
         setPosition(asukoht.x, asukoht.y);
     }
 
-    public void uuenda(Vector2 vel) {
+    public void update(Vector2 vel) {
         setPosition(
                 getX() - vel.x / 120,
                 getY() - vel.y / 120

@@ -41,7 +41,7 @@ public class DustParticleManager {
             tolm.add(new DustParticle(tekstuur, uusAsukoht(false)));
 
         for (DustParticle tükk : tolm) {
-            tükk.uuenda(vel);
+            tükk.update(vel);
 
             if (new Vector2(
                     tükk.getX() - pos.x,
