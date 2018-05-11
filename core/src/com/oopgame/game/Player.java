@@ -13,6 +13,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.MassData;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 
@@ -35,15 +36,22 @@ public class Player implements DynamicBodied {
         this.game = game;
 
         texture = new Texture(Gdx.files.internal("player_laev.png"));
-        // loome tekstuuriga tegeleva sprite'i
 
+        // loome tekstuuriga tegeleva sprite'i ja seadistame ta vastavalt suurendusele
         sprite = new Sprite(texture);
+
+        sprite.setSize(
+                texture.getWidth() * GameInfo.SCALING,
+                texture.getHeight() * GameInfo.SCALING
+        );
+
+        sprite.setOrigin(sprite.getWidth() / 2f, sprite.getHeight() / 2f);
+
         // positsiooni sisendi arvutus (keskpunkt) -> (nurgapunkt)
         sprite.setPosition(
-                x - texture.getWidth() / 2f,
-                y - texture.getHeight() / 2f
+                x - sprite.getWidth() / 2f,
+                y - sprite.getHeight() / 2f
         );
-        sprite.setScale(GameInfo.SCALING);
 
 
         this.world = world;
@@ -56,22 +64,18 @@ public class Player implements DynamicBodied {
         body = world.createBody(bodyDef);
         body.setUserData(this);
 
-        // esialgselt katsetan keha kuju ringina
-        // hiljem peaks ta vist olema mingi ristkülik, mille sisse jääb ainult Playeri tekstuuril
-        // nähtav kosmoselaeva põhiosa ning tiivad jääksid välja sellest
-        // siis oleks Playeril rohkem "dodge'imise" ruumi, mingi lisa rahuldustunne :D
-        CircleShape circle = new CircleShape();
-        circle.setRadius(sprite.getWidth() * GameInfo.SCALING / 2f);
+        PolygonShape box = new PolygonShape();
+        box.setAsBox(sprite.getWidth() * 0.15f, sprite.getHeight() * 0.45f);
 
         FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = circle;
-        fixtureDef.density = 0.5f;
-        fixtureDef.friction = 0.0f;
+        fixtureDef.shape = box;
+        fixtureDef.density = 0.9f;
+        fixtureDef.friction = 0.5f;
         fixtureDef.restitution = 0.1f;
 
         fixture = body.createFixture(fixtureDef);
 
-        circle.dispose();
+        box.dispose();
     }
 
     // testimiseks väga lambine inputi jälgimine
@@ -87,24 +91,39 @@ public class Player implements DynamicBodied {
         }*/
 
         // touchpadi inputist saadud info põhjalt paneme playeri vastava vektori suunas liikuma
-        float touchpadX = touchpad.getTouchpad().getKnobPercentX();
-        float touchpadY = touchpad.getTouchpad().getKnobPercentY();
-        /*if (touchpadX!=0 && touchpadY!=0)
-            body.setTransform(body.getPosition().x +touchpadX*3, body.getPosition().y+touchpadY*3,0);*/
+        Vector2 touchpadVector = new Vector2(
+                touchpad.getTouchpad().getKnobPercentX(),
+                touchpad.getTouchpad().getKnobPercentY()
+        );
         body.applyForceToCenter(
-                touchpadX*GameInfo.FORCE_MULTIPLIER,
-                touchpadY*GameInfo.FORCE_MULTIPLIER,
+                touchpadVector.x * GameInfo.FORCE_MULTIPLIER,
+                touchpadVector.y * GameInfo.FORCE_MULTIPLIER,
                 true
         );
+        /*float touchpadX = touchpad.getTouchpad().getKnobPercentX();
+        float touchpadY = touchpad.getTouchpad().getKnobPercentY();
+        *//*if (touchpadX!=0 && touchpadY!=0)
+            body.setTransform(body.getPosition().x +touchpadX*3, body.getPosition().y+touchpadY*3,0);*//*
+        body.applyForceToCenter(
+                touchpadX * GameInfo.FORCE_MULTIPLIER,
+                touchpadY * GameInfo.FORCE_MULTIPLIER,
+                true
+        );*/
         // touchpadi inputist saadud info põhjal keerame playeri vaatama sinna kuhu ta parasjagu kiirendab
         // (kuna tekstuuri nina ei ole seal kus body nina asub lahutame 90 kraadi)
         // (kuna arctan annab vahemikus -90 kuni 90 kraadi peame tegutsema kahes osas)
-        if (touchpadX < 0) {
+        /*if (touchpadX < 0) {
             sprite.setRotation((float) Math.toDegrees(Math.atan(touchpadY / touchpadX))- 90 + 180);
         }
         if (touchpadX > 0) {
             sprite.setRotation((float) Math.toDegrees(Math.atan(touchpadY / touchpadX)) - 90);
-
+        }*/
+        if (touchpadVector.len() > 0) {
+            sprite.setRotation(touchpadVector.angle() - 90);
+            body.setTransform(
+                    body.getPosition(),
+                    (touchpadVector.angle() - 90) * MathUtils.degRad
+            );
         }
 
         System.out.println(body.getLinearVelocity().len());
@@ -119,9 +138,6 @@ public class Player implements DynamicBodied {
     public void bodyUpdate() {
         // muudab sprite'i keskpunkti asukoht vastavalt keha asukohale
         sprite.setCenter(body.getPosition().x, body.getPosition().y);
-
-        // muudab sprite'i suunda vastavalt keha suunale
-        //sprite.setRotation(MathUtils.radiansToDegrees * (body.getAngle()));
     }
 
     public void dispose() {
