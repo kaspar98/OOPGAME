@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.oopgame.game.DustParticleManager;
 import com.oopgame.game.DynamicBodied;
 import com.oopgame.game.OOPGame;
 import com.oopgame.game.Player;
@@ -30,7 +31,6 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
 
     private Player player;
-    private Texture bg;
     private Texture nebula1;
     private Sprite sprite_nebula1;
 
@@ -40,6 +40,8 @@ public class GameScreen implements Screen {
     private Seinad walls;
     private TouchPad touchpad;
     private Stage stage;
+
+    private DustParticleManager tolm;
 
     public GameScreen(final OOPGame game) {
         this.game = game;
@@ -57,15 +59,20 @@ public class GameScreen implements Screen {
         viewport = new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT, camera);
 
         // loeme sisse tausta failid
-        bg = new Texture(Gdx.files.internal("test_taust.png"));
         nebula1 = new Texture(Gdx.files.internal("bg_starfield_nebula_1a.png"));
         sprite_nebula1 = new Sprite(nebula1);
         sprite_nebula1.setScale(GameInfo.SCALING);
+
         // loome Playeri tausta keskele
-        player = new Player(game,
+        player = new Player(
+                game,
                 GameInfo.W_WIDTH / 2f,
                 GameInfo.W_WIDTH / 2f,
-                world);
+                world
+        );
+
+        tolm = new DustParticleManager(game.batch, player);
+
         walls = new Seinad(world);
 
         // debug renderer
@@ -79,7 +86,6 @@ public class GameScreen implements Screen {
         stage = new Stage(new FitViewport(800, 480), game.batch);
         stage.addActor(touchpad.getTouchpad());
         Gdx.input.setInputProcessor(stage);
-
     }
 
     @Override
@@ -128,6 +134,7 @@ public class GameScreen implements Screen {
         // coordinate system specified by the camera.
         game.batch.setProjectionMatrix(camera.combined);
 
+        tolm.update();
 
         game.batch.begin();
 
@@ -138,6 +145,8 @@ public class GameScreen implements Screen {
                 player.sprite.getX() * 0.99f - sprite_nebula1.getWidth() / 2f + sprite_nebula1.getWidth() / 2 * GameInfo.SCALING,
                 player.sprite.getY() * 0.99f - sprite_nebula1.getHeight() / 2f + sprite_nebula1.getHeight() / 2 * GameInfo.SCALING
         );
+
+        tolm.render();
 
         // kutsub Playeris playeri renderimise välja
         player.render(delta);
@@ -181,7 +190,8 @@ public class GameScreen implements Screen {
     public void dispose() {
         // võtame playeri tekstuuri ja tausta maha mälust
         player.dispose();
-        bg.dispose();
+        nebula1.dispose();
+        tolm.dispose();
         touchpad.dispose();
     }
 }
