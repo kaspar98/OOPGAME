@@ -37,7 +37,7 @@ public class GameScreen implements Screen {
     private World world;
     private Box2DDebugRenderer debugRenderer;
 
-    private TempSein wall;
+    private TempSein walls;
     private TouchPad touchpad;
     private Stage stage;
 
@@ -65,9 +65,7 @@ public class GameScreen implements Screen {
         player = new Player(game,
                 0/*g.getWidth() / 2f * GameInfo.SCALING*/,
                 0/*bg.getHeight() / 2f * GameInfo.SCALING*/, world);
-        wall = new TempSein(world,
-                1024 / 2 * GameInfo.SCALING,
-                200 * GameInfo.SCALING);
+        walls = new TempSein(world);
 
         // debug renderer
         debugRenderer = new Box2DDebugRenderer();
@@ -135,7 +133,6 @@ public class GameScreen implements Screen {
         // tausta lisamine
         // väga algne parallax
         sprite_nebula1.draw(game.batch);
-        sprite_nebula1.rotate(0.001f);
         sprite_nebula1.setPosition(
                 player.sprite.getX() * 0.99f - sprite_nebula1.getWidth() / 2f + sprite_nebula1.getWidth() / 2 * GameInfo.SCALING,
                 player.sprite.getY() * 0.99f - sprite_nebula1.getHeight() / 2f + sprite_nebula1.getHeight() / 2 * GameInfo.SCALING
