@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.oopgame.game.BackgroundManager;
 import com.oopgame.game.DustParticleManager;
 import com.oopgame.game.DynamicBodied;
 import com.oopgame.game.OOPGame;
@@ -33,8 +34,8 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
 
     private Player player;
-    private Texture nebula1;
-    private Sprite sprite_nebula1;
+
+    private BackgroundManager bgManager;
 
     private World world;
     private Box2DDebugRenderer debugRenderer;
@@ -63,21 +64,21 @@ public class GameScreen implements Screen {
         // https://youtu.be/D7u5B2Oh9r0?list=PLZm85UZQLd2SXQzsF-a0-pPF6IWDDdrXt&t=420
         viewport = new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT, camera);
 
-        // loeme sisse tausta failid
-        nebula1 = new Texture(Gdx.files.internal("bg_starfield_nebula_1a.png"));
-        sprite_nebula1 = new Sprite(nebula1);
-        sprite_nebula1.setScale(GameInfo.SCALING);
-
         // loome Playeri tausta keskele
         player = new Player(
                 game,
-                GameInfo.W_WIDTH / 2f,
-                GameInfo.W_WIDTH / 2f,
+                /*GameInfo.W_WIDTH / 2f*/GameInfo.W_WIDTH,
+                /*GameInfo.W_WIDTH / 2f*/GameInfo.W_HEIGHT,
                 world
         );
 
+        // tolmuefekti jaoks DustParticleManager
         tolm = new DustParticleManager(game.batch, player);
 
+        // tausta jaoks BackgroundManageri:
+        bgManager = new BackgroundManager(game.batch, camera);
+
+        // seinad mänguvälja ümber
         walls = new Seinad(world);
 
         // debug renderer
@@ -181,8 +182,11 @@ public class GameScreen implements Screen {
         tolm.update();
 
         // liigutab kaamerat playeri positsiooni järgi
-        camera.position.x = player.sprite.getX() + player.sprite.getWidth() / 2f;
-        camera.position.y = player.sprite.getY() + player.sprite.getHeight() / 2f;
+        camera.position.set(
+                player.sprite.getX() + player.sprite.getWidth() / 2f,
+                player.sprite.getY() + player.sprite.getHeight() / 2f,
+                0
+        );
 
         // tell the camera to update its matrices.
         camera.update();
@@ -194,12 +198,8 @@ public class GameScreen implements Screen {
         game.batch.begin();
 
         // tausta lisamine
-        // väga algne parallax
-        sprite_nebula1.draw(game.batch);
-        sprite_nebula1.setPosition(
-                player.sprite.getX() * 0.99f - sprite_nebula1.getWidth() / 2f + sprite_nebula1.getWidth() / 2 * GameInfo.SCALING,
-                player.sprite.getY() * 0.99f - sprite_nebula1.getHeight() / 2f + sprite_nebula1.getHeight() / 2 * GameInfo.SCALING
-        );
+        bgManager.update();
+        bgManager.render();
 
         tolm.render();
 
@@ -245,8 +245,7 @@ public class GameScreen implements Screen {
     public void dispose() {
         // võtame playeri tekstuuri ja tausta maha mälust
         player.dispose();
-        nebula1.dispose();
-        tolm.dispose();
+        bgManager.dispose();
 
         touchpad.dispose();
 
