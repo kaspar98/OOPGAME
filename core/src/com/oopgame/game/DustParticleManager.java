@@ -17,51 +17,49 @@ public class DustParticleManager {
     // salvestan hoopis positsiooni ja velocity vektorid,
     // sest tuleb välja, et nende isendit ennast uuendatakse,
     // mitte ei asendata uue isendiga
-    private Vector2 playerPos;
-    private Vector2 playerVel;
+    private Vector2 pos;
+    private Vector2 vel;
 
-    private float spawnDistance = (GameInfo.WIDTH / 2 + 16) * GameInfo.SCALING;
-    private float maxDistance = spawnDistance + 16 * GameInfo.SCALING;
+    private float spawnDistance = (GameInfo.HYPOTENUSE + 16) * GameInfo.SCALING;
+    private float maxDistance = spawnDistance + 32 * GameInfo.SCALING;
 
 
     public DustParticleManager(SpriteBatch batch, Player player) {
         this.batch = batch;
 
-        this.playerPos = player.body.getPosition();
-        this.playerVel = player.body.getLinearVelocity();
+        this.pos = player.body.getPosition();
+        this.vel = player.body.getLinearVelocity();
 
         tekstuur = new Texture(Gdx.files.internal("bgl_motiondust_1_t.png"));
+
+        while (tolm.size < 10)
+            tolm.add(new DustParticle(tekstuur, uusAsukoht(true)));
     }
 
     public void update() {
-        float x = playerPos.x;
-        float y = playerPos.y;
-
-        float dx = playerVel.x;
-        float dy = playerVel.y;
-
-        float suund = playerVel.angleRad();
-
         while (tolm.size < 10)
-            tolm.add(new DustParticle(tekstuur, uusAsukoht(suund, x, y)));
+            tolm.add(new DustParticle(tekstuur, uusAsukoht(false)));
 
         for (DustParticle tükk : tolm) {
-            tükk.setPosition(tükk.getX() - dx / 10f, tükk.getY() - dy / 10f);
+            tükk.uuenda(vel);
+
             if (new Vector2(
-                    tükk.getX() - x,
-                    tükk.getY() -y
+                    tükk.getX() - pos.x,
+                    tükk.getY() - pos.y
             ).len() > maxDistance) {
-                tükk.setPosition(uusAsukoht(suund, x, y));
+                tükk.setPosition(uusAsukoht(false));
             }
         }
     }
 
-    private Vector2 uusAsukoht(float suund, float x, float y) {
-        float suvaline = MathUtils.degreesToRadians * MathUtils.random(-45f, 45f) + suund;
+    private Vector2 uusAsukoht(boolean suvalineKaugus) {
+        float suvaline = MathUtils.degreesToRadians * (MathUtils.random(-45f, 45f) + vel.angle());
+
+        float d = (suvalineKaugus ? MathUtils.random(spawnDistance) : spawnDistance);
 
         return new Vector2(
-                MathUtils.cos(suvaline) * spawnDistance + x,
-                MathUtils.sin(suvaline) * spawnDistance + y
+                MathUtils.cos(suvaline) * d + pos.x,
+                MathUtils.sin(suvaline) * d + pos.y
         );
     }
 
