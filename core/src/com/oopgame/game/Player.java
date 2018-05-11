@@ -76,42 +76,15 @@ public class Player implements DynamicBodied {
 
     // testimiseks väga lambine inputi jälgimine
     public void inputs(TouchPad touchpad) {
-        // iga nupuvajutus rakendab Playeri kehale jõudu antud vektori suunas
-        // paremale
-        if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
+        // iseenesest me enam seda ei vaja, aga jätsin igaksjuhuks alles praegu, kui peaks tahtma
+        // kusaltki meelde tuletada, kuidas me tegime input key polli
+        /*if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
             body.applyForceToCenter(
                     10 * GameInfo.FORCE_MULTIPLIER,
                     0.0f,
                     true
             );
-        }
-
-        // vasakule
-        if (Gdx.input.isKeyPressed(Keys.LEFT)) {
-            body.applyForceToCenter(
-                    -10 * GameInfo.FORCE_MULTIPLIER,
-                    0.0f,
-                    true
-            );
-        }
-
-        // üles
-        if (Gdx.input.isKeyPressed(Keys.UP)) {
-            body.applyForceToCenter(
-                    0.0f,
-                    10 * GameInfo.FORCE_MULTIPLIER,
-                    true
-            );
-        }
-
-        // alla
-        if (Gdx.input.isKeyPressed(Keys.DOWN)) {
-            body.applyForceToCenter(
-                    0.0f,
-                    -10 * GameInfo.FORCE_MULTIPLIER,
-                    true
-            );
-        }
+        }*/
 
         // touchpadi inputist saadud info põhjalt paneme playeri vastava vektori suunas liikuma
         float touchpadX = touchpad.getTouchpad().getKnobPercentX();
