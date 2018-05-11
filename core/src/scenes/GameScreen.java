@@ -123,6 +123,8 @@ public class GameScreen implements Screen {
             }
         }
 
+        tolm.update();
+
         // liigutab kaamerat playeri positsiooni järgi
         camera.position.x = player.sprite.getX() + player.sprite.getWidth() / 2f;
         camera.position.y = player.sprite.getY() + player.sprite.getHeight() / 2f;
@@ -133,8 +135,6 @@ public class GameScreen implements Screen {
         // tell the SpriteBatch to render in the
         // coordinate system specified by the camera.
         game.batch.setProjectionMatrix(camera.combined);
-
-        tolm.update();
 
         game.batch.begin();
 
