@@ -7,6 +7,9 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import helpers.GameInfo;
 
 public class Background extends Sprite {
+    float dx = 0;
+    float dy = 0;
+
     float cropX;
     float cropY;
 
@@ -25,6 +28,8 @@ public class Background extends Sprite {
                 getHeight() * GameInfo.SCALING
         );
 
+        setOrigin(getWidth() / 2f, getHeight() / 2f);
+
         this.cropX = cropX;
         this.cropY = cropY;
 
@@ -34,8 +39,8 @@ public class Background extends Sprite {
 
     public void update(float x, float y) {
         setPosition(
-                x * parallaxConstantX - cropX,
-                y * parallaxConstantY - cropY
+                dx + x * parallaxConstantX - cropX,
+                dy + y * parallaxConstantY - cropY
         );
     }
 
