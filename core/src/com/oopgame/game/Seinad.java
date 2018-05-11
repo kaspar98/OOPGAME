@@ -1,18 +1,15 @@
 package com.oopgame.game;
 
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 
 import helpers.GameInfo;
 
-public class TempSein {
-    Array<Body> bodies = new Array<Body>();
+public class Seinad {
+    Array<Sein> seinad = new Array<Sein>();
 
-    public TempSein(World world) {
+    public Seinad(World world) {
         float seinaPaksusPool = 120;
         float seinaPikkusPool = GameInfo.W_WIDTH / 2f + seinaPaksusPool * 3;
 
@@ -37,23 +34,29 @@ public class TempSein {
                 {GameInfo.W_WIDTH, GameInfo.W_HEIGHT / 2f}
         };*/
 
+        float[][] suurused = new float[][]{
+                {seinaPikkusPool, seinaPaksusPool},
+                {seinaPaksusPool, seinaPikkusPool}
+        };
+
+        float lüke = 20 * GameInfo.FORCE_MULTIPLIER;
+
+        Vector2[] lükked = new Vector2[]{
+                new Vector2(0, lüke),
+                new Vector2(0, -lüke),
+                new Vector2(lüke, 0),
+                new Vector2(-lüke, 0)
+        };
+
         for (int i = 0; i < 4; i++) {
-            BodyDef bodyDef = new BodyDef();
-
-            bodyDef.position.set(coords[i][0], coords[i][1]);
-
-            Body body = world.createBody(bodyDef);
-
-            PolygonShape box = new PolygonShape();
-            if (i / 2 == 0)
-                box.setAsBox(seinaPikkusPool, seinaPaksusPool);
-            else
-                box.setAsBox(seinaPaksusPool, seinaPikkusPool);
-
-            body.createFixture(box, 0).setSensor(true);
-            box.dispose();
-
-            bodies.add(body);
+            seinad.add(new Sein(
+                    world,
+                    coords[i][0],
+                    coords[i][1],
+                    suurused[i / 2][0],
+                    suurused[i / 2][1],
+                    lükked[i]
+            ));
         }
     }
 }
