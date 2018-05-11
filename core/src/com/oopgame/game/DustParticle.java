@@ -24,7 +24,7 @@ public class DustParticle extends Sprite {
         setSize(vel.len() / 12, GameInfo.SCALING);
         setRotation(vel.angle());
     }
-    
+
     public void setPosition(Vector2 asukoht) {
         super.setPosition(asukoht.x, asukoht.y);
     }
