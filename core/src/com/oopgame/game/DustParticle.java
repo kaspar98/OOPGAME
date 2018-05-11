@@ -25,14 +25,6 @@ public class DustParticle extends Sprite {
         setRotation(vel.angle());
     }
 
-    public float getCenterX() {
-        return getX() + getWidth() / 2f;
-    }
-
-    public float getCenterY() {
-        return getY() + getHeight() / 2f;
-    }
-
     public void setPosition(Vector2 asukoht) {
         super.setPosition(asukoht.x, asukoht.y);
     }
