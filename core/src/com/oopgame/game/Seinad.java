@@ -14,10 +14,10 @@ public class Seinad {
         float seinaPikkusPool = GameInfo.W_WIDTH / 2f + seinaPaksusPool * 3;
 
         float[][] coords = new float[][]{
-                {GameInfo.W_WIDTH / 2f, -seinaPaksusPool * 2},
-                {GameInfo.W_WIDTH / 2f, GameInfo.W_HEIGHT + seinaPaksusPool * 2},
-                {-seinaPaksusPool * 2, GameInfo.W_HEIGHT / 2f},
-                {GameInfo.W_WIDTH + seinaPaksusPool * 2, GameInfo.W_HEIGHT / 2f}
+                {GameInfo.W_WIDTH / 2f, -seinaPaksusPool},
+                {GameInfo.W_WIDTH / 2f, GameInfo.W_HEIGHT + seinaPaksusPool},
+                {-seinaPaksusPool, GameInfo.W_HEIGHT / 2f},
+                {GameInfo.W_WIDTH + seinaPaksusPool, GameInfo.W_HEIGHT / 2f}
         };
 
         // praegu lükkasin seinad nii paika, et 0,0 koordinaadis saaks ka liikuda,
@@ -35,8 +35,8 @@ public class Seinad {
         };*/
 
         float[][] suurused = new float[][]{
-                {GameInfo.W_WIDTH / 2f + seinaPaksusPool * 3, seinaPaksusPool},
-                {seinaPaksusPool, GameInfo.W_HEIGHT / 2f + seinaPaksusPool * 3}
+                {GameInfo.W_WIDTH / 2f + seinaPaksusPool * 2, seinaPaksusPool},
+                {seinaPaksusPool, GameInfo.W_HEIGHT / 2f + seinaPaksusPool * 2}
         };
 
         float lüke = 20 * GameInfo.FORCE_MULTIPLIER;

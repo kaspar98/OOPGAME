@@ -65,8 +65,8 @@ public class GameScreen implements Screen {
         // loome Playeri tausta keskele
         player = new Player(
                 game,
-                /*GameInfo.W_WIDTH / 2f*/GameInfo.W_WIDTH,
-                /*GameInfo.W_WIDTH / 2f*/GameInfo.W_HEIGHT,
+                /*GameInfo.W_WIDTH / 2f*//*GameInfo.W_WIDTH*/0,
+                /*GameInfo.W_WIDTH / 2f*//*GameInfo.W_HEIGHT*/0,
                 world
         );
 
