@@ -35,8 +35,8 @@ public class Seinad {
         };*/
 
         float[][] suurused = new float[][]{
-                {seinaPikkusPool, seinaPaksusPool},
-                {seinaPaksusPool, seinaPikkusPool}
+                {GameInfo.W_WIDTH / 2f + seinaPaksusPool * 3, seinaPaksusPool},
+                {seinaPaksusPool, GameInfo.W_HEIGHT / 2f + seinaPaksusPool * 3}
         };
 
         float lüke = 20 * GameInfo.FORCE_MULTIPLIER;
