@@ -11,8 +11,9 @@ public class DustParticle extends Sprite {
         super(texture);
         setSize(0, GameInfo.SCALING);
 
+        setOrigin(getWidth(), getHeight() / 2f);
+
         setPosition(asukoht.x, asukoht.y);
-        flip(true, false);
     }
 
     public void uuenda(Vector2 vel) {
@@ -21,7 +22,7 @@ public class DustParticle extends Sprite {
                 getY() - vel.y / 120
         );
 
-        setSize(vel.len() / 12, GameInfo.SCALING);
+        setSize(vel.len() / 12, getHeight());
         setRotation(vel.angle());
     }
 
