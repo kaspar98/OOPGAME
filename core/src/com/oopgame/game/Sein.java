@@ -22,7 +22,7 @@ public class Sein {
         box.setAsBox(hx, hy);
 
         fixture = body.createFixture(box, 0);
-        fixture.setSensor(true);
+        /*fixture.setSensor(true);*/
         fixture.setUserData(this);
 
         box.dispose();
