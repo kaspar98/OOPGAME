@@ -17,7 +17,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.BackgroundManager;
 import com.oopgame.game.DustParticleManager;
-import com.oopgame.game.DynamicBodied;
+import com.oopgame.game.BodiedSprite;
 import com.oopgame.game.OOPGame;
 import com.oopgame.game.Player;
 import com.oopgame.game.Seinad;
@@ -64,9 +64,8 @@ public class GameScreen implements Screen {
 
         // loome Playeri tausta keskele
         player = new Player(
-                game,
-                /*GameInfo.W_WIDTH / 2f*//*GameInfo.W_WIDTH*/0,
-                /*GameInfo.W_WIDTH / 2f*//*GameInfo.W_HEIGHT*/0,
+                /*GameInfo.W_WIDTH / 2f*//*GameInfo.W_WIDTH*/10,
+                /*GameInfo.W_WIDTH / 2f*//*GameInfo.W_HEIGHT*/10,
                 world
         );
 
@@ -169,7 +168,7 @@ public class GameScreen implements Screen {
 
         // käib for-iga läbi need värskendatavad kehad
         for (Body b : bodies) {
-            DynamicBodied e = (DynamicBodied) b.getUserData();
+            BodiedSprite e = (BodiedSprite) b.getUserData();
 
             if (e != null) {
                 // siia paneks hoopis mingi meetodi kutse
@@ -180,9 +179,10 @@ public class GameScreen implements Screen {
         tolm.update();
 
         // liigutab kaamerat playeri positsiooni järgi
+        Vector2 vel = player.getBody().getLinearVelocity();
         camera.position.set(
-                player.sprite.getX() + player.sprite.getWidth() / 2f,
-                player.sprite.getY() + player.sprite.getHeight() / 2f,
+                player.getX() + player.getWidth() / 2f + vel.x / 12f,
+                player.getY() + player.getHeight() / 2f + vel.y / 12f,
                 0
         );
 
@@ -202,7 +202,7 @@ public class GameScreen implements Screen {
         tolm.render();
 
         // kutsub Playeris playeri renderimise välja
-        player.render(delta);
+        player.draw(game.batch);
 
         game.batch.end();
 
@@ -216,7 +216,6 @@ public class GameScreen implements Screen {
         // stage loodud touchpadi jaoks
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
-
     }
 
     @Override
