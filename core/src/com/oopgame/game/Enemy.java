@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
@@ -54,11 +55,11 @@ public class Enemy extends Sprite {
         body = world.createBody(bodyDef);
         body.setUserData(this);
 
-        PolygonShape box = new PolygonShape();
-        box.setAsBox(getWidth() * 0.15f, getHeight() * 0.45f);
+        CircleShape circle = new CircleShape();
+        circle.setRadius(getHeight()/2f);
 
         FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = box;
+        fixtureDef.shape = circle;
         fixtureDef.density = 0.9f;
         fixtureDef.friction = 0.5f;
         fixtureDef.restitution = 0.1f;
@@ -66,7 +67,7 @@ public class Enemy extends Sprite {
         fixture = body.createFixture(fixtureDef);
         fixture.setUserData(this);
 
-        box.dispose();
+        circle.dispose();
     }
     public void draw(Batch batch) {
         super.draw(batch);
@@ -91,7 +92,7 @@ public class Enemy extends Sprite {
 
         // leiame vektori playeri poole et panna vaenlast õigele poole vaatama
         Vector2 playeriPoole = new Vector2(x-getX(), y-getY());
-        // paneb kehale ka uuesti suuna
+
         // muudab sprite'i keskpunkti asukoht vastavalt keha asukohale
         body.setAngularVelocity(0);
         setCenter(body.getPosition().x, body.getPosition().y);
