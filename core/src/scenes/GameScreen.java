@@ -66,7 +66,7 @@ public class GameScreen implements Screen, ContactListener {
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, GameInfo.WIDTH, GameInfo.HEIGHT);
-        camera.zoom = GameInfo.SCALING;
+        camera.zoom = GameInfo.CAM_SCALING;
 
         // Windowi suurust muutes püsib ascept ratio sama (lisab black bar'id kui vaja)
         // https://youtu.be/D7u5B2Oh9r0?list=PLZm85UZQLd2SXQzsF-a0-pPF6IWDDdrXt&t=420
@@ -224,7 +224,7 @@ public class GameScreen implements Screen, ContactListener {
 
 
         // debug camera render
-        /*debugRenderer.render(world, camera.combined);*/
+        debugRenderer.render(world, camera.combined);
 
         // input checks koos touchpadiga
         player.inputs(touchpad);
