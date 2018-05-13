@@ -94,7 +94,6 @@ public class Enemy extends Sprite {
         Vector2 playeriPoole = new Vector2(x-getX(), y-getY());
 
         // muudab sprite'i keskpunkti asukoht vastavalt keha asukohale
-        body.setTransform(body.getPosition(), playeriPoole.angle());
         body.setAngularVelocity(0);
         setCenter(body.getPosition().x, body.getPosition().y);
         setRotation(playeriPoole.angle()+90);
