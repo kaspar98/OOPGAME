@@ -20,7 +20,7 @@ public class DustParticleManager {
     private Vector2 pos;
     private Vector2 vel;
 
-    private float spawnDistance = (GameInfo.HYPOTENUSE + 16) * GameInfo.SCALING;
+    private float spawnDistance = (GameInfo.OUTER_RADIUS + 16) * GameInfo.SCALING;
     private float maxDistance = spawnDistance + 32 * GameInfo.SCALING;
 
 

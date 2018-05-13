@@ -11,7 +11,7 @@ public class Seinad {
 
     public Seinad(World world) {
         float seinaPaksusPool = 120;
-        float seinaPikkusPool = GameInfo.W_WIDTH / 2f + seinaPaksusPool * 3;
+        float seinaPikkusPool = GameInfo.W_WIDTH / 2f + seinaPaksusPool * 2;
 
         float[][] coords = new float[][]{
                 {GameInfo.W_WIDTH / 2f, -seinaPaksusPool},
