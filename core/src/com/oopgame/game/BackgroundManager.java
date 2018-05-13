@@ -2,6 +2,7 @@ package com.oopgame.game;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
 import helpers.GameInfo;
@@ -18,9 +19,11 @@ public class BackgroundManager {
 
         this.camera = camera;
 
-        backgrounds.add(new Background("bg_starfield_nebula_1g_t2.png",
-                GameInfo.WIDTH / 2f * GameInfo.SCALING,
-                GameInfo.HEIGHT / 2f * GameInfo.SCALING));
+        backgrounds.add(
+                new Background(
+                        ("bg_starfield_nebula_a" + MathUtils.random(1, 11)+"_t2.png"),
+                        GameInfo.WIDTH / 2f * GameInfo.SCALING,
+                        GameInfo.HEIGHT / 2f * GameInfo.SCALING));
 
         /*Background background = new Background("bg_starfield_nebula_1a_t2.png", 0);
         background.parallaxConstantY = background.parallaxConstantX;
