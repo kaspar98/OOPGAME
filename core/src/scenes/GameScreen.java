@@ -21,6 +21,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.BackgroundManager;
 import com.oopgame.game.DustParticleManager;
+import com.oopgame.game.EnemyManager;
 import com.oopgame.game.OOPGame;
 import com.oopgame.game.Player;
 import com.oopgame.game.Sein;
@@ -50,6 +51,7 @@ public class GameScreen implements Screen, ContactListener {
     private UIManager uiManager;
 
     private DustParticleManager tolm;
+    private EnemyManager enemies;
 
     private Music musicA;
     private Music musicB;
@@ -72,8 +74,8 @@ public class GameScreen implements Screen, ContactListener {
 
         // loome Playeri tausta keskele
         player = new Player(
-                /*GameInfo.W_WIDTH / 2f*//*GameInfo.W_WIDTH*/10,
-                /*GameInfo.W_WIDTH / 2f*//*GameInfo.W_HEIGHT*/10,
+                /*GameInfo.W_WIDTH / 2f*//*GameInfo.W_WIDTH*/100,
+                /*GameInfo.W_WIDTH / 2f*//*GameInfo.W_HEIGHT*/100,
                 world
         );
 
@@ -90,6 +92,9 @@ public class GameScreen implements Screen, ContactListener {
 
         // debug renderer
         debugRenderer = new Box2DDebugRenderer();
+
+        // tüüpi 1 vaenlaste jaoks
+        enemies = new EnemyManager(game.batch, player, world);
 
         // teeme touchpadi
         touchpad = new TouchPad();
@@ -189,6 +194,7 @@ public class GameScreen implements Screen, ContactListener {
 
         tolm.update();
 
+        enemies.update(player);
         // liigutab kaamerat playeri positsiooni järgi
         player.updateCam(camera);
 
@@ -206,6 +212,7 @@ public class GameScreen implements Screen, ContactListener {
         bgManager.render();
 
         tolm.render();
+        enemies.render();
 
         // kutsub Playeris playeri renderimise välja
         player.draw(game.batch);
@@ -230,6 +237,7 @@ public class GameScreen implements Screen, ContactListener {
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
+        stage.getViewport().update(width, height);
     }
 
     @Override
@@ -252,6 +260,8 @@ public class GameScreen implements Screen, ContactListener {
         // võtame playeri tekstuuri ja tausta maha mälust
         player.dispose();
         bgManager.dispose();
+        tolm.dispose();
+        enemies.dispose();
 
         touchpad.dispose();
 
