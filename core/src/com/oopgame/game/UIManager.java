@@ -17,9 +17,10 @@ public class UIManager {
     UIBar health;
     UIBar shield;
 
-    public UIManager(SpriteBatch batch, OrthographicCamera camera) {
+    public UIManager(SpriteBatch batch, OrthographicCamera camera, Player player) {
         this.batch = batch;
         this.camera = camera;
+        this.player = player;
 
         compass = new Sprite(new Texture("ui1_compass1_t.png"));
         compass.setSize(
@@ -28,10 +29,10 @@ public class UIManager {
         compass.setCenter(camera.position.x, camera.position.y);
 
         health = new UIBar(new Texture("ui1_health1_t.png"),
-                100, -115 * GameInfo.SCALING, 0, camera);
+                player.getMaxHealth(), -117 * GameInfo.SCALING, 0, camera);
 
         shield = new UIBar(new Texture("ui1_shield1_t.png"),
-                100, 115 * GameInfo.SCALING, 0, camera);
+                player.getMaxShield(), 117 * GameInfo.SCALING, 0, camera);
     }
 
     public void update() {
@@ -39,8 +40,8 @@ public class UIManager {
                 camera.position.x,
                 camera.position.y);
 
-        health.update(100);
-        shield.update(100);
+        health.update(player.getHealth());
+        shield.update(player.getShield());
     }
 
     public void render() {
