@@ -21,8 +21,10 @@ public class Player extends Sprite {
     Body body;
     Fixture fixture;
 
-    private float health;
-    private float shield;
+    private float health = 100;
+    private float maxHealth = 100;
+    private float shield = 100;
+    private float maxShield = 100;
 
     private Sprite thruster;
     private float thrusterRadius;
@@ -79,6 +81,9 @@ public class Player extends Sprite {
         thrusterSound.setLooping(thrusterSoundId, true);
 
         forces = new Vector2();
+
+        health = 100;
+        shield = 100;
     }
 
     // testimiseks väga lambine inputi jälgimine
@@ -175,5 +180,21 @@ public class Player extends Sprite {
 
     public void subForce(Vector2 force) {
         forces.sub(force);
+    }
+
+    public float getHealth() {
+        return health;
+    }
+
+    public float getMaxHealth() {
+        return maxHealth;
+    }
+
+    public float getShield() {
+        return shield;
+    }
+
+    public float getMaxShield() {
+        return maxShield;
     }
 }
