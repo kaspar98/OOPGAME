@@ -39,7 +39,7 @@ public class Seinad {
                 {seinaPaksusPool, GameInfo.W_HEIGHT / 2f + seinaPaksusPool * 2}
         };
 
-        float lüke = 20 * GameInfo.FORCE_MULTIPLIER;
+        float lüke = 1.5f * GameInfo.FORCE_MULTIPLIER;
 
         Vector2[] lükked = new Vector2[]{
                 new Vector2(0, lüke),
