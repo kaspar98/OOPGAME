@@ -16,8 +16,8 @@ public class TouchPad {
     public TouchPad() {
         // touchpadi tekstuurid
         touchpadSkin = new Skin();
-        touchpadSkin.add("touchBackground", new Texture("touchBackground2.png"));
-        touchpadSkin.add("touchKnob", new Texture("touchKnob2.png"));
+        touchpadSkin.add("touchBackground", new Texture("ui1_touchpad1_t.png"));
+        touchpadSkin.add("touchKnob", new Texture("ui1_touchpad1_stick1_t.png"));
 
         // joonistatav osa
         touchpadStyle = new Touchpad.TouchpadStyle();
