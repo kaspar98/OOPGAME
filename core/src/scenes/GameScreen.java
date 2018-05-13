@@ -77,7 +77,7 @@ public class GameScreen implements Screen, ContactListener {
                 world
         );
 
-        uiManager = new UIManager(game.batch, camera);
+        uiManager = new UIManager(game.batch, camera, player);
 
         // tolmuefekti jaoks DustParticleManager
         tolm = new DustParticleManager(game.batch, player);
@@ -165,7 +165,7 @@ public class GameScreen implements Screen, ContactListener {
         // arguments to glClearColor are the red, green
         // blue and alpha component in the range [0,1]
         // of the color to be used to clear the screen.
-        Gdx.gl.glClearColor(0, 0, 0.2f, 1);
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 
@@ -217,7 +217,7 @@ public class GameScreen implements Screen, ContactListener {
 
 
         // debug camera render
-        debugRenderer.render(world, camera.combined);
+        /*debugRenderer.render(world, camera.combined);*/
 
         // input checks koos touchpadiga
         player.inputs(touchpad);
@@ -269,7 +269,6 @@ public class GameScreen implements Screen, ContactListener {
                 Sein sein = (Sein) contact.getFixtureA().getUserData();
 
                 player.addForce(sein.getForce());
-                System.out.println("asdA");
             }
         } else if (contact.getFixtureB().getUserData() instanceof Sein) {
             if (contact.getFixtureA().getUserData() instanceof Player) {
@@ -277,7 +276,6 @@ public class GameScreen implements Screen, ContactListener {
                 Sein sein = (Sein) contact.getFixtureB().getUserData();
 
                 player.addForce(sein.getForce());
-                System.out.println("asdB");
             }
         }
     }
@@ -286,19 +284,17 @@ public class GameScreen implements Screen, ContactListener {
     public void endContact(Contact contact) {
         if (contact.getFixtureA().getUserData() instanceof Sein) {
             if (contact.getFixtureB().getUserData() instanceof Player) {
-                Player player = (Player) contact.getFixtureB().getUserData();
+                /*Player player = (Player) contact.getFixtureB().getUserData();*/
                 Sein sein = (Sein) contact.getFixtureA().getUserData();
 
                 player.subForce(sein.getForce());
-                System.out.println("asdA");
             }
         } else if (contact.getFixtureB().getUserData() instanceof Sein) {
             if (contact.getFixtureA().getUserData() instanceof Player) {
-                Player player = (Player) contact.getFixtureA().getUserData();
+                /*Player player = (Player) contact.getFixtureA().getUserData();*/
                 Sein sein = (Sein) contact.getFixtureB().getUserData();
 
                 player.subForce(sein.getForce());
-                System.out.println("asdB");
             }
         }
     }
