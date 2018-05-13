@@ -33,7 +33,7 @@ public class Player extends Sprite {
     private long thrusterSoundId;
 
     private Vector2 forces;
-    private int tippkiirus = 65;
+    private int tippkiirus = 45;
 
     public Player(float x, float y, World world) {
         super(new Texture(Gdx.files.internal("player_laev.png")));
@@ -137,7 +137,6 @@ public class Player extends Sprite {
 
         // kontrollib kas player sõidab lubatust kiiremini
         // kui sõidab siis alandab kiirust
-        
         float speedX = body.getLinearVelocity().x;
         float speedY = body.getLinearVelocity().y;
         float kordaja = tippkiirus*tippkiirus/(speedX*speedX+speedY*speedY);
