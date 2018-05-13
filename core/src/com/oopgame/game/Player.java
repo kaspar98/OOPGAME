@@ -33,6 +33,7 @@ public class Player extends Sprite {
     private long thrusterSoundId;
 
     private Vector2 forces;
+    private int tippkiirus = 65;
 
     public Player(float x, float y, World world) {
         super(new Texture(Gdx.files.internal("player_laev.png")));
@@ -133,6 +134,16 @@ public class Player extends Sprite {
     public void update() {
         body.applyForceToCenter(forces, true);
 
+
+        // kontrollib kas player sõidab lubatust kiiremini
+        // kui sõidab siis alandab kiirust
+        
+        float speedX = body.getLinearVelocity().x;
+        float speedY = body.getLinearVelocity().y;
+        float kordaja = tippkiirus*tippkiirus/(speedX*speedX+speedY*speedY);
+        if (body.getLinearVelocity().len()>tippkiirus) {
+            body.setLinearVelocity(speedX*kordaja, speedY*kordaja);
+        }
         // muudab sprite'i keskpunkti asukoht vastavalt keha asukohale
         body.setAngularVelocity(0);
         setCenter(body.getPosition().x, body.getPosition().y);
