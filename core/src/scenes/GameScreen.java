@@ -17,11 +17,11 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.BackgroundManager;
 import com.oopgame.game.DustParticleManager;
-import com.oopgame.game.BodiedSprite;
 import com.oopgame.game.OOPGame;
 import com.oopgame.game.Player;
 import com.oopgame.game.Seinad;
 import com.oopgame.game.TouchPad;
+import com.oopgame.game.UIManager;
 
 import helpers.GameInfo;
 
@@ -41,6 +41,8 @@ public class GameScreen implements Screen {
     private Seinad walls;
     private TouchPad touchpad;
     private Stage stage;
+
+    private UIManager uiManager;
 
     private DustParticleManager tolm;
 
@@ -68,6 +70,8 @@ public class GameScreen implements Screen {
                 /*GameInfo.W_WIDTH / 2f*//*GameInfo.W_HEIGHT*/10,
                 world
         );
+
+        uiManager = new UIManager(game.batch, camera);
 
         // tolmuefekti jaoks DustParticleManager
         tolm = new DustParticleManager(game.batch, player);
@@ -155,7 +159,7 @@ public class GameScreen implements Screen {
         // arguments to glClearColor are the red, green
         // blue and alpha component in the range [0,1]
         // of the color to be used to clear the screen.
-        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClearColor(0, 0, 0.2f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 
@@ -166,25 +170,21 @@ public class GameScreen implements Screen {
         Array<Body> bodies = new Array<Body>();
         world.getBodies(bodies);
 
+        player.update();
         // käib for-iga läbi need värskendatavad kehad
-        for (Body b : bodies) {
+        /*for (Body b : bodies) {
             BodiedSprite e = (BodiedSprite) b.getUserData();
 
             if (e != null) {
                 // siia paneks hoopis mingi meetodi kutse
                 e.bodyUpdate();
             }
-        }
+        }*/
 
         tolm.update();
 
         // liigutab kaamerat playeri positsiooni järgi
-        Vector2 vel = player.getBody().getLinearVelocity();
-        camera.position.set(
-                player.getX() + player.getWidth() / 2f + vel.x / 12f,
-                player.getY() + player.getHeight() / 2f + vel.y / 12f,
-                0
-        );
+        player.updateCam(camera);
 
         // tell the camera to update its matrices.
         camera.update();
@@ -203,6 +203,9 @@ public class GameScreen implements Screen {
 
         // kutsub Playeris playeri renderimise välja
         player.draw(game.batch);
+
+        uiManager.update();
+        uiManager.render();
 
         game.batch.end();
 
@@ -245,6 +248,8 @@ public class GameScreen implements Screen {
         bgManager.dispose();
 
         touchpad.dispose();
+
+        uiManager.dispose();
 
         musicA.dispose();
         musicB.dispose();
