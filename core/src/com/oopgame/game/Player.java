@@ -21,11 +21,16 @@ public class Player extends Sprite {
     Body body;
     Fixture fixture;
 
+    private float health;
+    private float shield;
+
     private Sprite thruster;
     private float thrusterRadius;
 
     private Sound thrusterSound;
     private long thrusterSoundId;
+
+    private Vector2 forces;
 
     public Player(float x, float y, World world) {
         super(new Texture(Gdx.files.internal("player_laev.png")));
@@ -58,6 +63,7 @@ public class Player extends Sprite {
         fixtureDef.restitution = 0.1f;
 
         fixture = body.createFixture(fixtureDef);
+        fixture.setUserData(this);
 
         box.dispose();
 
@@ -71,6 +77,8 @@ public class Player extends Sprite {
         thrusterSound = Gdx.audio.newSound(Gdx.files.internal("thruster.mp3"));
         thrusterSoundId = thrusterSound.play(0);
         thrusterSound.setLooping(thrusterSoundId, true);
+
+        forces = new Vector2();
     }
 
     // testimiseks väga lambine inputi jälgimine
@@ -108,7 +116,7 @@ public class Player extends Sprite {
             );
         }
 
-        System.out.println(body.getLinearVelocity().len());
+        /*System.out.println(body.getLinearVelocity().len());*/
     }
 
     @Override
@@ -118,6 +126,8 @@ public class Player extends Sprite {
     }
 
     public void update() {
+        body.applyForceToCenter(forces, true);
+
         // muudab sprite'i keskpunkti asukoht vastavalt keha asukohale
         body.setAngularVelocity(0);
         setCenter(body.getPosition().x, body.getPosition().y);
@@ -140,7 +150,7 @@ public class Player extends Sprite {
         );
     }
 
-    public void setBoosterPower(float value) {
+    private void setBoosterPower(float value) {
         thrusterSound.setVolume(thrusterSoundId, value * 0.3f);
         thruster.setSize(
                 thruster.getWidth(),
@@ -157,5 +167,13 @@ public class Player extends Sprite {
                 body.getPosition().y - MathUtils.sinDeg(this.getRotation() + 90) * thrusterRadius);
 
         thruster.setRotation(this.getRotation());
+    }
+
+    public void addForce(Vector2 force) {
+        forces.add(force);
+    }
+
+    public void subForce(Vector2 force) {
+        forces.sub(force);
     }
 }
