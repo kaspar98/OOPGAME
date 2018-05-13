@@ -24,8 +24,8 @@ public class Player extends Sprite {
     private Sprite thruster;
     private float thrusterRadius;
 
-    Sound thrusterSound;
-    long thrusterSoundId;
+    private Sound thrusterSound;
+    private long thrusterSoundId;
 
     public Player(float x, float y, World world) {
         super(new Texture(Gdx.files.internal("player_laev.png")));
