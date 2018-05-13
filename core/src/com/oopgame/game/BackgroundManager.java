@@ -12,7 +12,10 @@ public class BackgroundManager {
 
     private OrthographicCamera camera;
 
-    Array<Background> backgrounds = new Array<Background>();
+    private Array<Background> backgrounds = new Array<Background>();
+
+    // TODO: planeedid tuleb veel ära sorteerida parallaxConstandi järgi!!!
+    private Array<Planet> planets = new Array<Planet>();
 
     public BackgroundManager(SpriteBatch batch, OrthographicCamera camera) {
         this.batch = batch;
@@ -21,9 +24,9 @@ public class BackgroundManager {
 
         backgrounds.add(
                 new Background(
-                        ("bg_starfield_nebula_a" + MathUtils.random(1, 11)+"_t2.png"),
-                        GameInfo.WIDTH / 2f * GameInfo.SCALING,
-                        GameInfo.HEIGHT / 2f * GameInfo.SCALING));
+                        ("bg_starfield_nebula_a" + MathUtils.random(1, 11) + "_t2.png"),
+                        GameInfo.WIDTH / 2f * GameInfo.CAM_SCALING,
+                        GameInfo.HEIGHT / 2f * GameInfo.CAM_SCALING));
 
         /*Background background = new Background("bg_starfield_nebula_1a_t2.png", 0);
         background.parallaxConstantY = background.parallaxConstantX;
@@ -36,16 +39,23 @@ public class BackgroundManager {
         /*backgrounds.add(new Background("dev_grid1_t.png",
                 GameInfo.WIDTH / 2f * GameInfo.SCALING,
                 GameInfo.HEIGHT / 2f * GameInfo.SCALING));*/
+
+        for (int i = 1; i < 8; i++)
+            planets.add(new Planet("planet_a" + i + "_t.png"));
     }
 
     public void update() {
         for (Background background : backgrounds)
             background.update(camera.position.x, camera.position.y);
+        for (Planet planet : planets)
+            planet.update(camera.position.x, camera.position.y);
     }
 
     public void render() {
         for (Background background : backgrounds)
             background.draw(batch);
+        for (Planet planet : planets)
+            planet.draw(batch);
     }
 
     public void dispose() {
