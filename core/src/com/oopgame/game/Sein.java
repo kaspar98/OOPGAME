@@ -10,9 +10,9 @@ import com.badlogic.gdx.physics.box2d.World;
 public class Sein {
     private Body body;
     Fixture fixture;
-    private Vector2 lüke;
+    private Vector2 force;
 
-    public Sein(World world, float x, float y, float hx, float hy, Vector2 lüke) {
+    public Sein(World world, float x, float y, float hx, float hy, Vector2 force) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.position.set(x, y);
 
@@ -22,11 +22,15 @@ public class Sein {
         box.setAsBox(hx, hy);
 
         fixture = body.createFixture(box, 0);
-        /*fixture.setSensor(true);*/
+        fixture.setSensor(true);
         fixture.setUserData(this);
 
         box.dispose();
 
-        this.lüke = lüke;
+        this.force = force;
+    }
+
+    public Vector2 getForce() {
+        return force;
     }
 }
