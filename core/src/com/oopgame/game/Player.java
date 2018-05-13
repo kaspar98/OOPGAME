@@ -19,11 +19,11 @@ import helpers.GameInfo;
 
 public class Player extends Sprite {
     Body body;
-    Fixture fixture;
+    private Fixture fixture;
 
-    private float health = 100;
+    private float health = 90;
     private float maxHealth = 100;
-    private float shield = 100;
+    private float shield = 2;
     private float maxShield = 100;
 
     private Sprite thruster;
@@ -82,9 +82,6 @@ public class Player extends Sprite {
         thrusterSound.setLooping(thrusterSoundId, true);
 
         forces = new Vector2();
-
-        health = 100;
-        shield = 100;
     }
 
     // testimiseks väga lambine inputi jälgimine
@@ -134,12 +131,12 @@ public class Player extends Sprite {
     public void update() {
         body.applyForceToCenter(forces, true);
 
-
         // kontrollib kas player sõidab lubatust kiiremini
         // kui sõidab siis alandab kiirust
         float speedX = body.getLinearVelocity().x;
         float speedY = body.getLinearVelocity().y;
         float kordaja = tippkiirus*tippkiirus/(speedX*speedX+speedY*speedY);
+
         if (body.getLinearVelocity().len()>tippkiirus) {
             body.setLinearVelocity(speedX*kordaja, speedY*kordaja);
         }
@@ -159,8 +156,8 @@ public class Player extends Sprite {
 
     public void updateCam(OrthographicCamera camera) {
         camera.position.set(
-                body.getPosition().x + body.getLinearVelocity().x / 24f,
-                body.getPosition().y + body.getLinearVelocity().y / 24f,
+                body.getPosition().x + body.getLinearVelocity().x / 12f,
+                body.getPosition().y + body.getLinearVelocity().y / 12f,
                 0
         );
     }
