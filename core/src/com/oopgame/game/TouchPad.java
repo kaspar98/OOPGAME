@@ -26,7 +26,7 @@ public class TouchPad {
         touchpadStyle.background = touchBackground;
         touchpadStyle.knob = touchKnob;
 
-        touchpad = new Touchpad(10, touchpadStyle);
+        touchpad = new Touchpad(5, touchpadStyle);
     }
 
     public Touchpad getTouchpad(){
