@@ -10,6 +10,10 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
@@ -19,13 +23,14 @@ import com.oopgame.game.BackgroundManager;
 import com.oopgame.game.DustParticleManager;
 import com.oopgame.game.OOPGame;
 import com.oopgame.game.Player;
+import com.oopgame.game.Sein;
 import com.oopgame.game.Seinad;
 import com.oopgame.game.TouchPad;
 import com.oopgame.game.UIManager;
 
 import helpers.GameInfo;
 
-public class GameScreen implements Screen {
+public class GameScreen implements Screen, ContactListener {
     private final OOPGame game;
 
     private Viewport viewport;
@@ -55,6 +60,7 @@ public class GameScreen implements Screen {
         Box2D.init();
 
         world = new World(new Vector2(0, 0), true);
+        world.setContactListener(this);
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, GameInfo.WIDTH, GameInfo.HEIGHT);
@@ -253,5 +259,57 @@ public class GameScreen implements Screen {
 
         musicA.dispose();
         musicB.dispose();
+    }
+
+    @Override
+    public void beginContact(Contact contact) {
+        if (contact.getFixtureA().getUserData() instanceof Sein) {
+            if (contact.getFixtureB().getUserData() instanceof Player) {
+                Player player = (Player) contact.getFixtureB().getUserData();
+                Sein sein = (Sein) contact.getFixtureA().getUserData();
+
+                player.addForce(sein.getForce());
+                System.out.println("asdA");
+            }
+        } else if (contact.getFixtureB().getUserData() instanceof Sein) {
+            if (contact.getFixtureA().getUserData() instanceof Player) {
+                Player player = (Player) contact.getFixtureA().getUserData();
+                Sein sein = (Sein) contact.getFixtureB().getUserData();
+
+                player.addForce(sein.getForce());
+                System.out.println("asdB");
+            }
+        }
+    }
+
+    @Override
+    public void endContact(Contact contact) {
+        if (contact.getFixtureA().getUserData() instanceof Sein) {
+            if (contact.getFixtureB().getUserData() instanceof Player) {
+                Player player = (Player) contact.getFixtureB().getUserData();
+                Sein sein = (Sein) contact.getFixtureA().getUserData();
+
+                player.subForce(sein.getForce());
+                System.out.println("asdA");
+            }
+        } else if (contact.getFixtureB().getUserData() instanceof Sein) {
+            if (contact.getFixtureA().getUserData() instanceof Player) {
+                Player player = (Player) contact.getFixtureA().getUserData();
+                Sein sein = (Sein) contact.getFixtureB().getUserData();
+
+                player.subForce(sein.getForce());
+                System.out.println("asdB");
+            }
+        }
+    }
+
+    @Override
+    public void preSolve(Contact contact, Manifold oldManifold) {
+
+    }
+
+    @Override
+    public void postSolve(Contact contact, ContactImpulse impulse) {
+
     }
 }
