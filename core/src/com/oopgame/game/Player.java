@@ -1,8 +1,10 @@
 package com.oopgame.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -19,6 +21,12 @@ public class Player extends Sprite {
     Body body;
     Fixture fixture;
 
+    private Sprite thruster;
+    private float thrusterRadius;
+
+    Sound thrusterSound;
+    long thrusterSoundId;
+
     public Player(float x, float y, World world) {
         super(new Texture(Gdx.files.internal("player_laev.png")));
 
@@ -26,8 +34,8 @@ public class Player extends Sprite {
                 getTexture().getWidth() * GameInfo.SCALING,
                 getTexture().getHeight() * GameInfo.SCALING
         );
-
         setOrigin(getWidth() / 2f, getHeight() / 2f);
+
 
         // positsiooni sisendi arvutus (keskpunkt) -> (nurgapunkt)
         setCenter(x, y);
@@ -52,6 +60,17 @@ public class Player extends Sprite {
         fixture = body.createFixture(fixtureDef);
 
         box.dispose();
+
+        thruster = new Sprite(new Texture("player_ship_1b_booster1_t.png"));
+        thruster.setSize(
+                getWidth() * GameInfo.SCALING * 4,
+                0);
+        thrusterRadius = getHeight() / 2f - 10 * GameInfo.SCALING;
+        updateBooster();
+
+        thrusterSound = Gdx.audio.newSound(Gdx.files.internal("thruster.mp3"));
+        thrusterSoundId = thrusterSound.play(0);
+        thrusterSound.setLooping(thrusterSoundId, true);
     }
 
     // testimiseks väga lambine inputi jälgimine
@@ -77,8 +96,12 @@ public class Player extends Sprite {
                 true
         );
 
+        setBoosterPower(touchpadVector.len());
+
         if (touchpadVector.len() > 0) {
             setRotation(touchpadVector.angle() - 90);
+
+            // paneb Playeri kehale ka uuesti suuna
             body.setTransform(
                     body.getPosition(),
                     (touchpadVector.angle() - 90) * MathUtils.degRad
@@ -88,15 +111,25 @@ public class Player extends Sprite {
         System.out.println(body.getLinearVelocity().len());
     }
 
+    @Override
+    public void draw(Batch batch) {
+        thruster.draw(batch);
+        super.draw(batch);
+    }
+
     public void update() {
         // muudab sprite'i keskpunkti asukoht vastavalt keha asukohale
         body.setAngularVelocity(0);
         setCenter(body.getPosition().x, body.getPosition().y);
+
+        updateBooster();
     }
 
     public void dispose() {
         // võtab spraidiga seotud assetid mälust maha
+        thruster.getTexture().dispose();
         getTexture().dispose();
+        thrusterSound.dispose();
     }
 
     public void updateCam(OrthographicCamera camera) {
@@ -105,5 +138,24 @@ public class Player extends Sprite {
                 body.getPosition().y + body.getLinearVelocity().y / 24f,
                 0
         );
+    }
+
+    public void setBoosterPower(float value) {
+        thrusterSound.setVolume(thrusterSoundId, value * 0.3f);
+        thruster.setSize(
+                thruster.getWidth(),
+                10 * value + MathUtils.random(-1, 1));
+    }
+
+    private void updateBooster() {
+        thruster.setOrigin(
+                thruster.getWidth() / 2f,
+                thruster.getHeight());
+
+        thruster.setOriginBasedPosition(
+                body.getPosition().x - MathUtils.cosDeg(this.getRotation() + 90) * thrusterRadius,
+                body.getPosition().y - MathUtils.sinDeg(this.getRotation() + 90) * thrusterRadius);
+
+        thruster.setRotation(this.getRotation());
     }
 }
