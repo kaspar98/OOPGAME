@@ -18,14 +18,17 @@ public class Planet extends Sprite {
 
         float resizeXY = (
                 parallaxConstant = getTexture().getWidth() * MathUtils.random(0.05f, 0.1f)
-        ) * GameInfo.SCALING;
+        ) * GameInfo.CAM_SCALING;
 
-        parallaxConstant = 1 - 1f / (getTexture().getWidth() * 0.2f - parallaxConstant) * 2;
+        parallaxConstant = 1 - 1f / (getTexture().getWidth() * 0.13f - parallaxConstant) * 2f;
 
         setSize(resizeXY, resizeXY);
 
-        dx = MathUtils.random(0, GameInfo.WIDTH * 0.9f) * GameInfo.SCALING;
-        dy = MathUtils.random(0, GameInfo.HEIGHT * 0.9f) * GameInfo.SCALING;
+        float rangeMax = GameInfo.W_WIDTH * GameInfo.CAM_SCALING * 0.5f;
+        float rangeMin = rangeMax * 0.2f;
+
+        dx = MathUtils.random(-rangeMin, rangeMax);
+        dy = MathUtils.random(-rangeMin, rangeMax);
     }
 
     public void update(float x, float y) {
