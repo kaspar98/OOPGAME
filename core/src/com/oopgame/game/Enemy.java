@@ -1,26 +1,19 @@
 package com.oopgame.game;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 
 import helpers.GameInfo;
 
@@ -65,6 +58,7 @@ public class Enemy extends Sprite {
         fixtureDef.restitution = 0.1f;
 
         fixture = body.createFixture(fixtureDef);
+        fixture.setSensor(true);
         fixture.setUserData(this);
 
         circle.dispose();
@@ -111,5 +105,9 @@ public class Enemy extends Sprite {
     public void dispose() {
         // võtab spraidiga seotud assetid mälust maha
         getTexture().dispose();
+    }
+
+    public Body getBody() {
+        return body;
     }
 }
