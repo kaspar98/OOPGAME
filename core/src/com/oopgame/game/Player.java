@@ -33,7 +33,7 @@ public class Player extends Sprite {
     private long thrusterSoundId;
 
     private Vector2 forces;
-    private int tippkiirus = /*45*/120;
+    private int tippkiirus = 45;
 
     public Player(float x, float y, World world) {
         super(new Texture(Gdx.files.internal("player_laev.png")));
