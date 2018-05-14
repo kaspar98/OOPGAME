@@ -110,4 +110,9 @@ public class Enemy extends Sprite {
     public Body getBody() {
         return body;
     }
+
+    // tagastab distantsi etteantud punktist
+    public float getDistance(float x, float y){
+        return new Vector2(x-getX(), y-getY()).len();
+    }
 }
