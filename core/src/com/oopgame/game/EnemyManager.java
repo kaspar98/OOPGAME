@@ -11,12 +11,15 @@ public class EnemyManager {
     private Vector2 pos;
     private World world;
 
-    public EnemyManager(SpriteBatch batch, Player player, World world) {
+    private UIManager uiManager;
+
+    public EnemyManager(SpriteBatch batch, Player player, World world, UIManager uiManager) {
         this.batch = batch;
-
         this.pos = player.body.getPosition();
+        this.world = world;
+        this.uiManager = uiManager;
 
-        vaenlased.add(new Enemy(10, 10, world));
+        addEnemy();
     }
 
     public void update(Player player) {
@@ -37,6 +40,14 @@ public class EnemyManager {
         for (Enemy e : vaenlased) {
             e.dispose();
         }
+    }
+
+    public void addEnemy() {
+        Enemy enemy = new Enemy(10, 10, world);
+
+        vaenlased.add(enemy);
+
+        uiManager.addMarker(enemy.getBody().getPosition());
     }
 }
 
