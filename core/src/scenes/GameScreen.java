@@ -94,7 +94,7 @@ public class GameScreen implements Screen, ContactListener {
         debugRenderer = new Box2DDebugRenderer();
 
         // tüüpi 1 vaenlaste jaoks
-        enemies = new EnemyManager(game.batch, player, world);
+        enemies = new EnemyManager(game.batch, player, world, uiManager);
 
         // teeme touchpadi
         touchpad = new TouchPad();
