@@ -33,7 +33,7 @@ public class Player extends Sprite {
     private long thrusterSoundId;
 
     private Vector2 forces;
-    private int tippkiirus = 45;
+    private int tippkiirus = /*45*/120;
 
     public Player(float x, float y, World world) {
         super(new Texture(Gdx.files.internal("player_laev.png")));
@@ -156,8 +156,8 @@ public class Player extends Sprite {
 
     public void updateCam(OrthographicCamera camera) {
         camera.position.set(
-                body.getPosition().x + body.getLinearVelocity().x / 12f,
-                body.getPosition().y + body.getLinearVelocity().y / 12f,
+                body.getPosition().x + body.getLinearVelocity().x / 12f * GameInfo.CAM_SCALING * 20,
+                body.getPosition().y + body.getLinearVelocity().y / 12f * GameInfo.CAM_SCALING * 20,
                 0
         );
     }
