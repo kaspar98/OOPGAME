@@ -161,6 +161,14 @@ public class GameScreen implements Screen, ContactListener {
         else if (volume < 0)
             volume = 0;
 
+        // lihtsalt testimiseks
+        /*if (Gdx.input.isKeyPressed(Input.Keys.R))
+            camera.zoom = GameInfo.CAM_SCALING;
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
+            camera.zoom += camera.zoom * GameInfo.CAM_SCALING;
+        else if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
+            camera.zoom -= camera.zoom * GameInfo.CAM_SCALING;*/
+
         musicA.setVolume(volume);
 
         // box2d world steps
