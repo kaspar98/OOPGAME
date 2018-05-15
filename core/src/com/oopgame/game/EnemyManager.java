@@ -29,7 +29,6 @@ public class EnemyManager {
     }
 
     public void update(Player player) {
-        bulletManager.update();
         pos = player.body.getPosition();
         for (Enemy e : vaenlased) {
             e.update(pos.x, pos.y);
@@ -41,7 +40,6 @@ public class EnemyManager {
     }
 
     public void render() {
-        bulletManager.render();
         for (Enemy e : vaenlased) {
             e.draw(batch);
         }
@@ -51,7 +49,6 @@ public class EnemyManager {
         for (Enemy e : vaenlased) {
             e.dispose();
         }
-        bulletManager.dispose();
     }
 
     public void addEnemy() {

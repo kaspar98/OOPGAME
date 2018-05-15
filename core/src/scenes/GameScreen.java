@@ -31,7 +31,6 @@ import com.oopgame.game.Sein;
 import com.oopgame.game.Seinad;
 import com.oopgame.game.TouchPad;
 import com.oopgame.game.UIManager;
-import com.oopgame.game.UIMarker;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -54,12 +53,13 @@ public class GameScreen implements Screen, ContactListener {
     private Seinad walls;
     private TouchPad touchpad;
     private Stage stage;
+    private int score = 0;
 
     private UIManager uiManager;
 
     private DustParticleManager tolm;
     private BulletManager bulletManager;
-    private EnemyManager enemies;
+    private EnemyManager enemyManager;
     // et säilitada update tsükli lõpuni objekte
     private Set<Bullet> bulletsToKill;
 
@@ -106,7 +106,7 @@ public class GameScreen implements Screen, ContactListener {
         debugRenderer = new Box2DDebugRenderer();
 
         // tüüpi 1 vaenlaste jaoks
-        enemies = new EnemyManager(game.batch, player, world, uiManager, bulletManager);
+        enemyManager = new EnemyManager(game.batch, player, world, uiManager, bulletManager);
         bulletsToKill = new HashSet<Bullet>();
 
         // teeme touchpadi
@@ -215,7 +215,8 @@ public class GameScreen implements Screen, ContactListener {
 
         tolm.update();
 
-        enemies.update(player);
+        enemyManager.update(player);
+        bulletManager.update();
         // liigutab kaamerat playeri positsiooni järgi
         player.updateCam(camera);
 
@@ -233,7 +234,8 @@ public class GameScreen implements Screen, ContactListener {
         bgManager.render();
 
         tolm.render();
-        enemies.render();
+        bulletManager.render();
+        enemyManager.render();
 
         // kutsub Playeris playeri renderimise välja
         player.draw(game.batch);
@@ -259,9 +261,10 @@ public class GameScreen implements Screen, ContactListener {
             b.die();
             world.destroyBody(b.getBody());
         }
-        for (Enemy e:enemies.getVaenlased()) {
+        for (Enemy e: enemyManager.getVaenlased()) {
             if (e.getHealth()<=0) {
                 e.die();
+                score += e.getScoreValue();
                 world.destroyBody(e.getBody());
             }
         }
@@ -295,7 +298,8 @@ public class GameScreen implements Screen, ContactListener {
         player.dispose();
         bgManager.dispose();
         tolm.dispose();
-        enemies.dispose();
+        enemyManager.dispose();
+        bulletManager.dispose();
 
         touchpad.dispose();
 

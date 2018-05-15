@@ -32,6 +32,7 @@ public class Enemy extends Sprite {
     private float viimatiTulistatud = 3;
     private float lasuDamage = 1;
     private float tulistamisKaugus = 55;
+    private int scoreValue = 10;
 
     public Enemy(float x, float y, World world, Texture texture, BulletManager bulletManager, Vector2 playerPos, EnemyManager enemyManager) {
         super(texture);
@@ -151,5 +152,9 @@ public class Enemy extends Sprite {
 
     public void die() {
         enemyManager.removeEnemy(this);
+    }
+
+    public int getScoreValue() {
+        return scoreValue;
     }
 }
