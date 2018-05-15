@@ -18,11 +18,13 @@ public class Bullet extends Sprite {
     private Fixture fixture;
     private float damage;
     private BulletManager bm;
+    private boolean playerShot;
 
-    public Bullet (float xKust, float yKust, float xKuhu, float yKuhu, float damage, Texture texture, World world, BulletManager bm) {
+    public Bullet(float xKust, float yKust, float xKuhu, float yKuhu, float damage, Texture texture, World world, BulletManager bm, boolean playerShot) {
         super(texture);
         this.damage = damage;
         this.bm = bm;
+        this.playerShot = playerShot;
         setSize(
                 getTexture().getWidth() * GameInfo.SCALING,
                 getTexture().getHeight() * GameInfo.SCALING
@@ -71,5 +73,9 @@ public class Bullet extends Sprite {
 
     public float getDamage() {
         return damage;
+    }
+
+    public boolean isPlayerShot() {
+        return playerShot;
     }
 }

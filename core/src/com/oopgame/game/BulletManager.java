@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Array;
 
 public class BulletManager {
     private Texture bulletType1 = new Texture(Gdx.files.internal("test_bullet.png"));
+    private Texture bulletType2 = new Texture(Gdx.files.internal("test_bullet2.png"));
     private Batch batch;
     private World world;
     private Array<Bullet> lasud = new Array<Bullet>();
@@ -37,7 +38,11 @@ public class BulletManager {
     }
 
     public void enemyShoot(float xKust, float yKust, float xKuhu, float yKuhu, float damage) {
-        lasud.add(new Bullet(xKust, yKust, xKuhu, yKuhu , damage, bulletType1, world, this));
+        lasud.add(new Bullet(xKust, yKust, xKuhu, yKuhu , damage, bulletType1, world, this, false));
+    }
+
+    public void playerShoot(float xKust, float yKust, float xKuhu, float yKuhu, float damage) {
+        lasud.add(new Bullet(xKust, yKust, xKuhu, yKuhu, damage, bulletType2, world, this, true));
     }
 
     public void removeBullet(Bullet bullet) {
