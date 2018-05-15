@@ -64,4 +64,8 @@ public class Bullet extends Sprite {
         bm.removeBullet(this);
         dispose();
     }
+
+    public Body getBody() {
+        return body;
+    }
 }
