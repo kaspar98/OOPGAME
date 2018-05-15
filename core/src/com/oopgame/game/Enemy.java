@@ -20,6 +20,7 @@ public class Enemy extends Sprite {
     private Body body;
     private Fixture fixture;
     private BulletManager bulletManager;
+    private EnemyManager enemyManager;
     private Vector2 playerPos;
 
     private float health = 100;
@@ -32,10 +33,11 @@ public class Enemy extends Sprite {
     private float lasuDamage = 1;
     private float tulistamisKaugus = 55;
 
-    public Enemy(float x, float y, World world, Texture texture, BulletManager bulletManager, Vector2 playerPos) {
+    public Enemy(float x, float y, World world, Texture texture, BulletManager bulletManager, Vector2 playerPos, EnemyManager enemyManager) {
         super(texture);
         this.bulletManager = bulletManager;
         this.playerPos = playerPos;
+        this.enemyManager = enemyManager;
 
         setSize(
                 getTexture().getWidth() * GameInfo.SCALING,
@@ -145,5 +147,9 @@ public class Enemy extends Sprite {
 
     public void setShield(float shield) {
         this.shield = shield;
+    }
+
+    public void die() {
+        enemyManager.removeEnemy(this);
     }
 }
