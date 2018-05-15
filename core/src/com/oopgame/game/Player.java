@@ -201,6 +201,14 @@ public class Player extends Sprite {
         return shield;
     }
 
+    public void setHealth(float health) {
+        this.health = health;
+    }
+
+    public void setShield(float shield) {
+        this.shield = shield;
+    }
+
     public float getMaxShield() {
         return maxShield;
     }
