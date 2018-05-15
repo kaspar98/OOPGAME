@@ -4,8 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2D;
@@ -16,6 +18,7 @@ import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -54,6 +57,7 @@ public class GameScreen implements Screen, ContactListener {
     private TouchPad touchpad;
     private Stage stage;
     private int score = 0;
+    private Label currentScore;
 
     private UIManager uiManager;
 
@@ -116,6 +120,11 @@ public class GameScreen implements Screen, ContactListener {
         // loome lava, millele touchpadi paigutada + loome touchpadi inpute töötleva protsessori
         stage = new Stage(new FitViewport(800, 480), game.batch);
         stage.addActor(touchpad.getTouchpad());
+
+        currentScore = new Label(score+"", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
+        currentScore.setFontScale(2);
+        currentScore.setPosition(10, GameInfo.HEIGHT - 40);
+        stage.addActor(currentScore);
         Gdx.input.setInputProcessor(stage);
 
         // muusikaga jamamine
@@ -242,6 +251,7 @@ public class GameScreen implements Screen, ContactListener {
 
         uiManager.update();
         uiManager.render();
+        currentScore.setText(score+"");
 
         game.batch.end();
 
@@ -309,8 +319,7 @@ public class GameScreen implements Screen, ContactListener {
         tolm.dispose();
         enemyManager.dispose();
         bulletManager.dispose();
-
-        touchpad.dispose();
+        stage.dispose();
 
         uiManager.dispose();
 

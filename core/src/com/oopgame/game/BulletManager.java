@@ -26,7 +26,6 @@ public class BulletManager {
     }
 
     public void update(){
-        System.out.println(lasud.size);
         for (Bullet b:lasud) {
             b.update();
         }

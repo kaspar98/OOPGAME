@@ -14,6 +14,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 
 import helpers.GameInfo;
 
@@ -35,7 +36,7 @@ public class Player extends Sprite {
     private Vector2 forces;
     private int tippkiirus = 45;
     private BulletManager bulletManager;
-    private float bulletDamage = 10;
+    private float bulletDamage = 50;
 
     public Player(float x, float y, World world, BulletManager bulletManager) {
         super(new Texture(Gdx.files.internal("player_laev.png")));
@@ -90,9 +91,10 @@ public class Player extends Sprite {
     // testimiseks väga lambine inputi jägimine
     public void inputs(TouchPad touchpad) {
         // playeri tulistamine
-        float touchpadSuurus = touchpad.getTouchpad().getStyle().background.getMinWidth();
-        float lubatudX = touchpadSuurus;
-        float lubatudY = GameInfo.HEIGHT - touchpadSuurus;
+        float touchpadSuurus = touchpad.getTouchpad().getHeight();
+        System.out.println(touchpadSuurus);
+        float lubatudX = touchpad.getTouchpad().getWidth();
+        float lubatudY = GameInfo.HEIGHT - touchpad.getTouchpad().getHeight();
         if (Gdx.input.justTouched() && (Gdx.input.getX()>lubatudX || Gdx.input.getY()<lubatudY)) {
             float xKuhu = Gdx.input.getX() - GameInfo.WIDTH/2 + getX();
             float yKuhu = -(Gdx.input.getY() - GameInfo.HEIGHT/2) + getY();
