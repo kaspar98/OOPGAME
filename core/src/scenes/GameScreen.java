@@ -81,10 +81,12 @@ public class GameScreen implements Screen, ContactListener {
         viewport = new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT, camera);
 
         // loome Playeri tausta keskele
+        bulletManager = new BulletManager(game.batch, world);
         player = new Player(
                 /*GameInfo.W_WIDTH / 2f*//*GameInfo.W_WIDTH*/100,
                 /*GameInfo.W_WIDTH / 2f*//*GameInfo.W_HEIGHT*/100,
-                world
+                world,
+                bulletManager
         );
 
         uiManager = new UIManager(game.batch, camera, player);
@@ -102,7 +104,6 @@ public class GameScreen implements Screen, ContactListener {
         debugRenderer = new Box2DDebugRenderer();
 
         // tüüpi 1 vaenlaste jaoks
-        bulletManager = new BulletManager(game.batch, world);
         enemies = new EnemyManager(game.batch, player, world, uiManager, bulletManager);
         bulletsToKill = new HashSet<Bullet>();
 

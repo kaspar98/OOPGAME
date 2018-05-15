@@ -34,8 +34,9 @@ public class Player extends Sprite {
 
     private Vector2 forces;
     private int tippkiirus = 45;
+    private BulletManager bulletManager;
 
-    public Player(float x, float y, World world) {
+    public Player(float x, float y, World world, BulletManager bulletManager) {
         super(new Texture(Gdx.files.internal("player_laev.png")));
 
         setSize(
