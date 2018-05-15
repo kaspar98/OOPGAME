@@ -1,6 +1,4 @@
 package com.oopgame.game;
-
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -12,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,15 +19,22 @@ import helpers.GameInfo;
 public class Enemy extends Sprite {
     private Body body;
     private Fixture fixture;
+    private BulletManager bulletManager;
+    private Vector2 playerPos;
 
     private float health = 100;
     private float maxHealth = 100;
     private float shield = 100;
     private float maxShield = 100;
     private int tippkiirus = 25;
+    private float lasuCooldown = 2;
+    private float viimatiTulistatud = 3;
+    private float lasuDamage = 1;
 
-    public Enemy(float x, float y, World world, Texture texture) {
+    public Enemy(float x, float y, World world, Texture texture, BulletManager bulletManager, Vector2 playerPos) {
         super(texture);
+        this.bulletManager = bulletManager;
+        this.playerPos = playerPos;
 
         setSize(
                 getTexture().getWidth() * GameInfo.SCALING,
@@ -100,6 +106,14 @@ public class Enemy extends Sprite {
         if (body.getLinearVelocity().len()>tippkiirus) {
             body.setLinearVelocity(speedX*kordaja, speedY*kordaja);
         }
+
+        // tulistamise handlemine
+        double kaugus = playeriPoole.len();
+        if (kaugus < 45 && viimatiTulistatud>lasuCooldown) {
+            viimatiTulistatud = 0;
+            bulletManager.enemyShoot(body.getPosition().x, body.getPosition().y, playerPos.x, playerPos.y, lasuDamage);
+        }
+        viimatiTulistatud += 1/20.0;
     }
 
     public void dispose() {
@@ -115,4 +129,5 @@ public class Enemy extends Sprite {
     public float getDistance(float x, float y){
         return new Vector2(x-getX(), y-getY()).len();
     }
+
 }
