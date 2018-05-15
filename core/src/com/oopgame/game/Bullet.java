@@ -62,7 +62,6 @@ public class Bullet extends Sprite {
     }
     public void die() {
         bm.removeBullet(this);
-        dispose();
     }
 
     public Body getBody() {
