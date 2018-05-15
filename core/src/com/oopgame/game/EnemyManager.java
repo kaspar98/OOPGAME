@@ -58,5 +58,9 @@ public class EnemyManager {
 
         uiManager.addMarker(enemy.getBody().getPosition());
     }
+
+    public BulletManager getBulletManager() {
+        return bulletManager;
+    }
 }
 
