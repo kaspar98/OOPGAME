@@ -3,6 +3,7 @@ package com.oopgame.game;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -46,7 +47,7 @@ public class Bullet extends Sprite {
 
         body.applyForceToCenter(new Vector2((xKuhu-xKust)*GameInfo.FORCE_MULTIPLIER, (yKuhu-yKust)*GameInfo.FORCE_MULTIPLIER), true);
         setRotation(new Vector2(xKuhu-xKust, yKuhu-yKust).angle()+90);
-        body.setTransform(body.getPosition(), new Vector2(xKuhu-xKust, yKuhu-yKust).angle());
+        body.setTransform(body.getPosition(), (new Vector2(xKuhu-xKust, yKuhu-yKust).angle()+90)* MathUtils.degRad);
     }
 
     public void draw(Batch batch) {
