@@ -37,7 +37,10 @@ public class BulletManager {
     }
 
     public void enemyShoot(float xKust, float yKust, float xKuhu, float yKuhu, float damage) {
-        lasud.add(new Bullet(xKust, yKust, xKuhu, yKuhu , damage, bulletType1, world));
+        lasud.add(new Bullet(xKust, yKust, xKuhu, yKuhu , damage, bulletType1, world, this));
     }
 
+    public void removeBullet(Bullet bullet) {
+        lasud.removeValue(bullet, false);
+    }
 }
