@@ -1,5 +1,7 @@
 package com.oopgame.game;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
@@ -10,6 +12,7 @@ public class EnemyManager {
     private Array<Enemy> vaenlased = new Array<Enemy>();
     private Vector2 pos;
     private World world;
+    private Texture texture;
 
     private UIManager uiManager;
 
@@ -18,6 +21,7 @@ public class EnemyManager {
         this.pos = player.body.getPosition();
         this.world = world;
         this.uiManager = uiManager;
+        texture = new Texture(Gdx.files.internal("enemy_alien_fighter_1b_t.png"));
 
         addEnemy();
     }
@@ -43,7 +47,7 @@ public class EnemyManager {
     }
 
     public void addEnemy() {
-        Enemy enemy = new Enemy(10, 10, world);
+        Enemy enemy = new Enemy(10, 10, world, texture);
 
         vaenlased.add(enemy);
 
