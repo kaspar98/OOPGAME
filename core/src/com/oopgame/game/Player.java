@@ -89,14 +89,14 @@ public class Player extends Sprite {
     }
 
     // testimiseks väga lambine inputi jägimine
-    public void inputs(TouchPad touchpad) {
+    public void inputs(TouchPad touchpad, int laius, int pikkus) {
         // playeri tulistamine
         // TODO: SIIN PROBLEEM MÄNGU RESIZIMISEL
         float lubatudX = touchpad.getTouchpad().getWidth();
         float lubatudY = GameInfo.HEIGHT - touchpad.getTouchpad().getHeight();
         if (Gdx.input.justTouched() && (Gdx.input.getX()>lubatudX || Gdx.input.getY()<lubatudY)) {
-            float xKuhu = Gdx.input.getX() - GameInfo.WIDTH/2 + getX();
-            float yKuhu = -(Gdx.input.getY() - GameInfo.HEIGHT/2) + getY();
+            float xKuhu = Gdx.input.getX() - laius/2 + getX();
+            float yKuhu = -(Gdx.input.getY() - pikkus/2) + getY();
             bulletManager.playerShoot(body.getPosition().x, body.getPosition().y, xKuhu, yKuhu, bulletDamage);
         }
         // iseenesest me enam seda ei vaja, aga jätsin igaksjuhuks alles praegu, kui peaks tahtma

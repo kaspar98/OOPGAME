@@ -66,6 +66,10 @@ public class GameScreen implements Screen, ContactListener {
     private EnemyManager enemyManager;
     // et säilitada update tsükli lõpuni objekte
     private Set<Bullet> bulletsToKill;
+    // isendiväljad et anda trackida kui suur on ekraan (resizemine)
+    // vajalik et playeri tulistamine töötaks
+    private int laius = GameInfo.WIDTH;
+    private int pikkus = GameInfo.HEIGHT;
 
     private Music musicA;
     private Music musicB;
@@ -260,7 +264,7 @@ public class GameScreen implements Screen, ContactListener {
         debugRenderer.render(world, camera.combined);
 
         // input checks koos touchpadiga
-        player.inputs(touchpad);
+        player.inputs(touchpad, laius, pikkus);
 
         // stage loodud touchpadi jaoks
         stage.act(Gdx.graphics.getDeltaTime());
@@ -294,6 +298,8 @@ public class GameScreen implements Screen, ContactListener {
     public void resize(int width, int height) {
         viewport.update(width, height);
         stage.getViewport().update(width, height);
+        laius = width;
+        pikkus = height;
     }
 
     @Override
