@@ -30,6 +30,7 @@ public class Enemy extends Sprite {
     private float lasuCooldown = 2;
     private float viimatiTulistatud = 3;
     private float lasuDamage = 1;
+    private float tulistamisKaugus = 55;
 
     public Enemy(float x, float y, World world, Texture texture, BulletManager bulletManager, Vector2 playerPos) {
         super(texture);
@@ -109,7 +110,7 @@ public class Enemy extends Sprite {
 
         // tulistamise handlemine
         double kaugus = playeriPoole.len();
-        if (kaugus < 45 && viimatiTulistatud>lasuCooldown) {
+        if (kaugus < tulistamisKaugus && viimatiTulistatud>lasuCooldown) {
             viimatiTulistatud = 0;
             bulletManager.enemyShoot(body.getPosition().x, body.getPosition().y, playerPos.x, playerPos.y, lasuDamage);
         }
