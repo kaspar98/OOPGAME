@@ -36,6 +36,9 @@ public class EnemyManager {
         }
     }
 
+    public Array<Enemy> getVaenlased() {
+        return vaenlased;
+    }
 
     public void render() {
         bulletManager.render();
@@ -52,7 +55,7 @@ public class EnemyManager {
     }
 
     public void addEnemy() {
-        Enemy enemy = new Enemy(10, 10, world, texture, bulletManager, pos);
+        Enemy enemy = new Enemy(10, 10, world, texture, bulletManager, pos, this);
 
         vaenlased.add(enemy);
 
@@ -61,6 +64,11 @@ public class EnemyManager {
 
     public BulletManager getBulletManager() {
         return bulletManager;
+    }
+
+    public void removeEnemy(Enemy e) {
+        vaenlased.removeValue(e, false);
+        uiManager.removeMarker(e.getBody().getPosition());
     }
 }
 
