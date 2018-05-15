@@ -27,8 +27,8 @@ public class Enemy extends Sprite {
     private float maxShield = 100;
     private int tippkiirus = 25;
 
-    public Enemy(float x, float y, World world) {
-        super(new Texture(Gdx.files.internal("enemy_alien_fighter_1b_t.png")));
+    public Enemy(float x, float y, World world, Texture texture) {
+        super(texture);
 
         setSize(
                 getTexture().getWidth() * GameInfo.SCALING,
