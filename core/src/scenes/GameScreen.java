@@ -23,6 +23,7 @@ import com.oopgame.game.BackgroundManager;
 import com.oopgame.game.Bullet;
 import com.oopgame.game.BulletManager;
 import com.oopgame.game.DustParticleManager;
+import com.oopgame.game.Enemy;
 import com.oopgame.game.EnemyManager;
 import com.oopgame.game.OOPGame;
 import com.oopgame.game.Player;
@@ -315,33 +316,75 @@ public class GameScreen implements Screen, ContactListener {
         if (contact.getFixtureA().getUserData() instanceof Bullet) {
             if (contact.getFixtureB().getUserData() instanceof Player) {
                 Bullet lask = (Bullet) contact.getFixtureA().getUserData();
-                bulletsToKill.add(lask);
-                float damage = lask.getDamage();
-                if (player.getShield()>0) {
-                    float kilpi = player.getShield() - damage;
-                    player.setShield(kilpi);
-                    if (kilpi<0) {
-                        player.setHealth(player.getHealth() + kilpi);
-                    }
-                } else {
-                    player.setHealth(player.getHealth()- damage);
+                if (!lask.isPlayerShot()) {
+                    bulletsToKill.add(lask);
+                    float damage = lask.getDamage();
+                    if (player.getShield() > 0) {
+                        float kilpi = player.getShield() - damage;
+                        player.setShield(kilpi);
+                        if (kilpi < 0) {
+                            player.setHealth(player.getHealth() + kilpi);
+                        }
+                    } else {
+                        player.setHealth(player.getHealth() - damage);
 
+                    }
                 }
             }
         } else if (contact.getFixtureB().getUserData() instanceof Bullet) {
             if (contact.getFixtureA().getUserData() instanceof Player) {
                 Bullet lask = (Bullet) contact.getFixtureB().getUserData();
-                bulletsToKill.add(lask);
-                float damage = lask.getDamage();
-                if (player.getShield()>0) {
-                    float kilpi = player.getShield() - damage;
-                    player.setShield(kilpi);
-                    if (kilpi<0) {
-                        player.setHealth(player.getHealth() + kilpi);
-                    }
-                } else {
-                    player.setHealth(player.getHealth()- damage);
+                if (!lask.isPlayerShot()) {
+                    bulletsToKill.add(lask);
+                    float damage = lask.getDamage();
+                    if (player.getShield() > 0) {
+                        float kilpi = player.getShield() - damage;
+                        player.setShield(kilpi);
+                        if (kilpi < 0) {
+                            player.setHealth(player.getHealth() + kilpi);
+                        }
+                    } else {
+                        player.setHealth(player.getHealth() - damage);
 
+                    }
+                }
+            }
+        }
+        if (contact.getFixtureA().getUserData() instanceof Bullet) {
+            if (contact.getFixtureB().getUserData() instanceof Enemy) {
+                Bullet lask = (Bullet) contact.getFixtureA().getUserData();
+                Enemy enemy = (Enemy) contact.getFixtureB().getUserData();
+                if (lask.isPlayerShot()) {
+                    bulletsToKill.add(lask);
+                    float damage = lask.getDamage();
+                    if (enemy.getShield() > 0) {
+                        float kilpi = enemy.getShield() - damage;
+                        enemy.setShield(kilpi);
+                        if (kilpi < 0) {
+                            enemy.setHealth(enemy.getHealth() + kilpi);
+                        }
+                    } else {
+                        enemy.setHealth(enemy.getHealth() - damage);
+
+                    }
+                }
+            }
+        } else if (contact.getFixtureB().getUserData() instanceof Bullet) {
+            if (contact.getFixtureA().getUserData() instanceof Enemy) {
+                Bullet lask = (Bullet) contact.getFixtureB().getUserData();
+                Enemy enemy = (Enemy) contact.getFixtureB().getUserData();
+                if (lask.isPlayerShot()) {
+                    bulletsToKill.add(lask);
+                    float damage = lask.getDamage();
+                    if (enemy.getShield() > 0) {
+                        float kilpi = enemy.getShield() - damage;
+                        enemy.setShield(kilpi);
+                        if (kilpi < 0) {
+                            enemy.setHealth(enemy.getHealth() + kilpi);
+                        }
+                    } else {
+                        enemy.setHealth(enemy.getHealth() - damage);
+                    }
                 }
             }
         }
