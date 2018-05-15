@@ -131,4 +131,19 @@ public class Enemy extends Sprite {
         return new Vector2(x-getX(), y-getY()).len();
     }
 
+    public float getHealth() {
+        return health;
+    }
+
+    public void setHealth(float health) {
+        this.health = health;
+    }
+
+    public float getShield() {
+        return shield;
+    }
+
+    public void setShield(float shield) {
+        this.shield = shield;
+    }
 }
