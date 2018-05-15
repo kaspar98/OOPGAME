@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.BackgroundManager;
+import com.oopgame.game.Bullet;
 import com.oopgame.game.BulletManager;
 import com.oopgame.game.DustParticleManager;
 import com.oopgame.game.EnemyManager;
@@ -29,6 +30,9 @@ import com.oopgame.game.Sein;
 import com.oopgame.game.Seinad;
 import com.oopgame.game.TouchPad;
 import com.oopgame.game.UIManager;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import helpers.GameInfo;
 
@@ -54,6 +58,8 @@ public class GameScreen implements Screen, ContactListener {
     private DustParticleManager tolm;
     private BulletManager bulletManager;
     private EnemyManager enemies;
+    // et säilitada update tsükli lõpuni objekte
+    private Set<Bullet> bulletsToKill;
 
     private Music musicA;
     private Music musicB;
@@ -98,6 +104,7 @@ public class GameScreen implements Screen, ContactListener {
         // tüüpi 1 vaenlaste jaoks
         bulletManager = new BulletManager(game.batch, world);
         enemies = new EnemyManager(game.batch, player, world, uiManager, bulletManager);
+        bulletsToKill = new HashSet<Bullet>();
 
         // teeme touchpadi
         touchpad = new TouchPad();
@@ -243,6 +250,11 @@ public class GameScreen implements Screen, ContactListener {
         // stage loodud touchpadi jaoks
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
+        for (Bullet b : bulletsToKill) {
+            b.die();
+            world.destroyBody(b.getBody());
+        }
+        bulletsToKill.clear();
     }
 
     @Override
@@ -297,6 +309,17 @@ public class GameScreen implements Screen, ContactListener {
                 Sein sein = (Sein) contact.getFixtureB().getUserData();
 
                 player.addForce(sein.getForce());
+            }
+        }
+        if (contact.getFixtureA().getUserData() instanceof Bullet) {
+            if (contact.getFixtureB().getUserData() instanceof Player) {
+                Bullet lask = (Bullet) contact.getFixtureA().getUserData();
+                bulletsToKill.add(lask);
+            }
+        } else if (contact.getFixtureB().getUserData() instanceof Bullet) {
+            if (contact.getFixtureA().getUserData() instanceof Player) {
+                Bullet lask = (Bullet) contact.getFixtureB().getUserData();
+                bulletsToKill.add(lask);
             }
         }
     }
