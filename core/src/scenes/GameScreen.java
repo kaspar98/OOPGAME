@@ -31,6 +31,7 @@ import com.oopgame.game.Sein;
 import com.oopgame.game.Seinad;
 import com.oopgame.game.TouchPad;
 import com.oopgame.game.UIManager;
+import com.oopgame.game.UIMarker;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -252,9 +253,17 @@ public class GameScreen implements Screen, ContactListener {
         // stage loodud touchpadi jaoks
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
+
+        // iga ticki lõpus häväitame kõik objektid mida enam tarvis pole
         for (Bullet b : bulletsToKill) {
             b.die();
             world.destroyBody(b.getBody());
+        }
+        for (Enemy e:enemies.getVaenlased()) {
+            if (e.getHealth()<=0) {
+                e.die();
+                world.destroyBody(e.getBody());
+            }
         }
         bulletsToKill.clear();
     }
