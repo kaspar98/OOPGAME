@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.BackgroundManager;
+import com.oopgame.game.BulletManager;
 import com.oopgame.game.DustParticleManager;
 import com.oopgame.game.EnemyManager;
 import com.oopgame.game.OOPGame;
@@ -51,6 +52,7 @@ public class GameScreen implements Screen, ContactListener {
     private UIManager uiManager;
 
     private DustParticleManager tolm;
+    private BulletManager bulletManager;
     private EnemyManager enemies;
 
     private Music musicA;
@@ -94,7 +96,8 @@ public class GameScreen implements Screen, ContactListener {
         debugRenderer = new Box2DDebugRenderer();
 
         // tüüpi 1 vaenlaste jaoks
-        enemies = new EnemyManager(game.batch, player, world, uiManager);
+        bulletManager = new BulletManager(game.batch, player, world);
+        enemies = new EnemyManager(game.batch, player, world, uiManager, bulletManager);
 
         // teeme touchpadi
         touchpad = new TouchPad();
