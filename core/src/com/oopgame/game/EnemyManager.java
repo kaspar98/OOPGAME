@@ -13,20 +13,23 @@ public class EnemyManager {
     private Vector2 pos;
     private World world;
     private Texture texture;
+    private BulletManager bulletManager;
 
     private UIManager uiManager;
 
-    public EnemyManager(SpriteBatch batch, Player player, World world, UIManager uiManager) {
+    public EnemyManager(SpriteBatch batch, Player player, World world, UIManager uiManager, BulletManager bulletManager) {
         this.batch = batch;
         this.pos = player.body.getPosition();
         this.world = world;
         this.uiManager = uiManager;
+        this.bulletManager = bulletManager;
         texture = new Texture(Gdx.files.internal("enemy_alien_fighter_1b_t.png"));
 
         addEnemy();
     }
 
     public void update(Player player) {
+        bulletManager.update();
         pos = player.body.getPosition();
         for (Enemy e : vaenlased) {
             e.update(pos.x, pos.y);
@@ -35,6 +38,7 @@ public class EnemyManager {
 
 
     public void render() {
+        bulletManager.render();
         for (Enemy e : vaenlased) {
             e.draw(batch);
         }
@@ -44,10 +48,11 @@ public class EnemyManager {
         for (Enemy e : vaenlased) {
             e.dispose();
         }
+        bulletManager.dispose();
     }
 
     public void addEnemy() {
-        Enemy enemy = new Enemy(10, 10, world, texture);
+        Enemy enemy = new Enemy(10, 10, world, texture, bulletManager, pos);
 
         vaenlased.add(enemy);
 
