@@ -107,4 +107,13 @@ public class UIManager {
 
         return marker;
     }
+    
+    public void removeMarker(Vector2 keskkoht){
+        for (UIMarker u:compass_markers) {
+            if (u.getPoint().equals(keskkoht)) {
+                compass_markers.removeValue(u, false);
+                break;
+            }
+        }
+    }
 }
