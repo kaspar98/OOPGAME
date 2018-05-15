@@ -257,10 +257,19 @@ public class GameScreen implements Screen, ContactListener {
         stage.draw();
 
         // iga ticki lõpus häväitame kõik objektid mida enam tarvis pole
+        // bulletid mis on liiga kaugel playerist
+        for (Bullet b:bulletManager.getLasud()){
+            if (b.getDistance(player.getX(), player.getY()) > GameInfo.WIDTH) {
+                b.die();
+                world.destroyBody(b.getBody());
+            }
+        }
+        // bulletid mis collidisid
         for (Bullet b : bulletsToKill) {
             b.die();
             world.destroyBody(b.getBody());
         }
+        // vaenlased mis tapeti
         for (Enemy e: enemyManager.getVaenlased()) {
             if (e.getHealth()<=0) {
                 e.die();

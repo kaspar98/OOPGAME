@@ -26,6 +26,7 @@ public class BulletManager {
     }
 
     public void update(){
+        System.out.println(lasud.size);
         for (Bullet b:lasud) {
             b.update();
         }
@@ -47,5 +48,9 @@ public class BulletManager {
 
     public void removeBullet(Bullet bullet) {
         lasud.removeValue(bullet, false);
+    }
+
+    public Array<Bullet> getLasud() {
+        return lasud;
     }
 }

@@ -78,4 +78,9 @@ public class Bullet extends Sprite {
     public boolean isPlayerShot() {
         return playerShot;
     }
+
+    // tagastab distantsi etteantud punktist
+    public float getDistance(float x, float y){
+        return new Vector2(x-getX(), y-getY()).len();
+    }
 }
