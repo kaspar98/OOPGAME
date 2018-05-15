@@ -91,8 +91,7 @@ public class Player extends Sprite {
     // testimiseks väga lambine inputi jägimine
     public void inputs(TouchPad touchpad) {
         // playeri tulistamine
-        float touchpadSuurus = touchpad.getTouchpad().getHeight();
-        System.out.println(touchpadSuurus);
+        // TODO: SIIN PROBLEEM MÄNGU RESIZIMISEL
         float lubatudX = touchpad.getTouchpad().getWidth();
         float lubatudY = GameInfo.HEIGHT - touchpad.getTouchpad().getHeight();
         if (Gdx.input.justTouched() && (Gdx.input.getX()>lubatudX || Gdx.input.getY()<lubatudY)) {
