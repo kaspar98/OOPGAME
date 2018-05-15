@@ -315,11 +315,33 @@ public class GameScreen implements Screen, ContactListener {
             if (contact.getFixtureB().getUserData() instanceof Player) {
                 Bullet lask = (Bullet) contact.getFixtureA().getUserData();
                 bulletsToKill.add(lask);
+                float damage = lask.getDamage();
+                if (player.getShield()>0) {
+                    float kilpi = player.getShield() - damage;
+                    player.setShield(kilpi);
+                    if (kilpi<0) {
+                        player.setHealth(player.getHealth() + kilpi);
+                    }
+                } else {
+                    player.setHealth(player.getHealth()- damage);
+
+                }
             }
         } else if (contact.getFixtureB().getUserData() instanceof Bullet) {
             if (contact.getFixtureA().getUserData() instanceof Player) {
                 Bullet lask = (Bullet) contact.getFixtureB().getUserData();
                 bulletsToKill.add(lask);
+                float damage = lask.getDamage();
+                if (player.getShield()>0) {
+                    float kilpi = player.getShield() - damage;
+                    player.setShield(kilpi);
+                    if (kilpi<0) {
+                        player.setHealth(player.getHealth() + kilpi);
+                    }
+                } else {
+                    player.setHealth(player.getHealth()- damage);
+
+                }
             }
         }
     }
