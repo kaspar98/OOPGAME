@@ -35,9 +35,11 @@ public class Player extends Sprite {
     private Vector2 forces;
     private int tippkiirus = 45;
     private BulletManager bulletManager;
+    private float bulletDamage = 10;
 
     public Player(float x, float y, World world, BulletManager bulletManager) {
         super(new Texture(Gdx.files.internal("player_laev.png")));
+        this.bulletManager = bulletManager;
 
         setSize(
                 getTexture().getWidth() * GameInfo.SCALING,
@@ -85,8 +87,17 @@ public class Player extends Sprite {
         forces = new Vector2();
     }
 
-    // testimiseks väga lambine inputi jälgimine
+    // testimiseks väga lambine inputi jägimine
     public void inputs(TouchPad touchpad) {
+        // playeri tulistamine
+        float touchpadSuurus = touchpad.getTouchpad().getStyle().background.getMinWidth();
+        float lubatudX = touchpadSuurus;
+        float lubatudY = GameInfo.HEIGHT - touchpadSuurus;
+        if (Gdx.input.justTouched() && (Gdx.input.getX()>lubatudX || Gdx.input.getY()<lubatudY)) {
+            float xKuhu = Gdx.input.getX() - GameInfo.WIDTH/2 + getX();
+            float yKuhu = -(Gdx.input.getY() - GameInfo.HEIGHT/2) + getY();
+            bulletManager.playerShoot(body.getPosition().x, body.getPosition().y, xKuhu, yKuhu, bulletDamage);
+        }
         // iseenesest me enam seda ei vaja, aga jätsin igaksjuhuks alles praegu, kui peaks tahtma
         // kusaltki meelde tuletada, kuidas me tegime input key polli
         /*if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
