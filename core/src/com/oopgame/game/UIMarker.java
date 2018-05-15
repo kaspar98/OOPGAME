@@ -33,12 +33,15 @@ public class UIMarker extends Sprite {
                 point.x - camera.position.x,
                 point.y - camera.position.y
         ).angle();
-
         setOriginBasedPosition(
                 camera.position.x + MathUtils.cosDeg(angle) * radius,
                 camera.position.y + MathUtils.sinDeg(angle) * radius);
 
         setRotation(angle);
+    }
+
+    public Vector2 getPoint() {
+        return point;
     }
 
     public void dispose() {
