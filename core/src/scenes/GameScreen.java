@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -57,6 +58,7 @@ public class GameScreen implements Screen, ContactListener {
     private TouchPad touchpad;
     private Stage stage;
     private int score = 0;
+    private int highscore;
     private Label currentScore;
 
     private UIManager uiManager;
@@ -74,8 +76,9 @@ public class GameScreen implements Screen, ContactListener {
     private Music musicA;
     private Music musicB;
 
-    public GameScreen(final OOPGame game) {
+    public GameScreen(final OOPGame game, int highscore) {
         this.game = game;
+        this.highscore = highscore;
 
         Box2D.init();
 
@@ -292,6 +295,15 @@ public class GameScreen implements Screen, ContactListener {
             }
         }
         bulletsToKill.clear();
+        if (player.getHealth() <= 0) {
+            if (score>highscore) {
+                highscore=score;
+                FileHandle handle = Gdx.files.local("highscore.txt");
+                handle.writeString(highscore+"", false);
+            }
+            game.setScreen(new MainMenuScreen(game, highscore));
+            dispose();
+        }
     }
 
     @Override

@@ -11,11 +11,12 @@ import helpers.GameInfo;
 public class MainMenuScreen implements Screen {
     final OOPGame game;
 
+    private int highscore;
     private OrthographicCamera camera;
 
-    public MainMenuScreen(final OOPGame game) {
+    public MainMenuScreen(final OOPGame game, int highscore) {
         this.game = game;
-
+        this.highscore = highscore;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, GameInfo.WIDTH, GameInfo.HEIGHT);
     }
@@ -35,10 +36,11 @@ public class MainMenuScreen implements Screen {
         game.batch.begin();
         game.font.draw(game.batch, "Welcome to OOPGame!!! ", 100, 150);
         game.font.draw(game.batch, "Tap anywhere to begin!", 100, 100);
+        game.font.draw(game.batch, "Highscore: " + highscore, 100, 300);
         game.batch.end();
 
         if (Gdx.input.isTouched()) {
-            game.setScreen(new GameScreen(game));
+            game.setScreen(new GameScreen(game, highscore));
             dispose();
         }
     }

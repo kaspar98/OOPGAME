@@ -30,7 +30,7 @@ public class Enemy extends Sprite {
     private int tippkiirus = 25;
     private float lasuCooldown = 2;
     private float viimatiTulistatud = 3;
-    private float lasuDamage = 1;
+    private float lasuDamage = 25;
     private float tulistamisKaugus = 55;
     private int scoreValue = 10;
 
