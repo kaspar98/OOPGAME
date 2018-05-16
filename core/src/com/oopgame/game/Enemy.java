@@ -68,7 +68,7 @@ public class Enemy extends Sprite {
         fixtureDef.restitution = 0.1f;
 
         fixture = body.createFixture(fixtureDef);
-        fixture.setSensor(true);
+        fixture.setSensor(false);
         fixture.setUserData(this);
 
         circle.dispose();
@@ -79,13 +79,17 @@ public class Enemy extends Sprite {
 
     // muutujad x ja y on Playeri keskpunkti koordinaadid
     public void update(float x, float y) {
-        // võtame 4 punkti playeri ümbert ning leiame neist vaenlase keskpunktile lähima mille poole vaenlane liigub
+        // võtame 8 punkti playeri ümbert ning leiame neist vaenlase keskpunktile lähima mille poole vaenlane liigub
         // vaenlase liikumist saaks oluliselt parandada kui punkte võtta rohkem (või teha teine süsteem liikumiseks)
         Vector2 punkt1 = new Vector2(x+35-getX(), y+12-getY());
         Vector2 punkt2 = new Vector2(x+35-getX(), y-12-getY());
         Vector2 punkt3 = new Vector2(x-35-getX(), y+12-getY());
         Vector2 punkt4 = new Vector2(x-35-getX(), y-12-getY());
-        List<Vector2> punktid = Arrays.asList(punkt1, punkt2, punkt3, punkt4);
+        Vector2 punkt5 = new Vector2(x+22-getX(), y+22-getY());
+        Vector2 punkt6 = new Vector2(x+22-getX(), y-22-getY());
+        Vector2 punkt7 = new Vector2(x-22-getX(), y+22-getY());
+        Vector2 punkt8 = new Vector2(x-22-getX(), y-22-getY());
+        List<Vector2> punktid = Arrays.asList(punkt1, punkt2, punkt3, punkt4, punkt5, punkt6 ,punkt7 ,punkt8);
         Vector2 vähim = punkt1;
         for (Vector2 p:punktid) {
             if (Float.compare(vähim.len(), p.len())>0) vähim = p;
