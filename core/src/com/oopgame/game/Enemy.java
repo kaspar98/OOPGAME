@@ -25,7 +25,7 @@ public class Enemy extends Sprite {
 
     private float health = 100;
     private float maxHealth = 100;
-    private float shield = 100;
+    private float shield = 0;
     private float maxShield = 100;
     private int tippkiirus = 25;
     private float lasuCooldown = 2;
