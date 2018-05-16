@@ -95,8 +95,8 @@ public class Player extends Sprite {
         float lubatudX = touchpad.getTouchpad().getWidth();
         float lubatudY = GameInfo.HEIGHT - touchpad.getTouchpad().getHeight();
         if (Gdx.input.justTouched() && (Gdx.input.getX()>lubatudX || Gdx.input.getY()<lubatudY)) {
-            float xKuhu = Gdx.input.getX() - laius/2 + getX();
-            float yKuhu = -(Gdx.input.getY() - pikkus/2) + getY();
+            float xKuhu = Gdx.input.getX() - laius/2 + body.getPosition().x;
+            float yKuhu = -(Gdx.input.getY() - pikkus/2) + body.getPosition().y;;
             bulletManager.playerShoot(body.getPosition().x, body.getPosition().y, xKuhu, yKuhu, bulletDamage);
         }
         // iseenesest me enam seda ei vaja, aga jätsin igaksjuhuks alles praegu, kui peaks tahtma

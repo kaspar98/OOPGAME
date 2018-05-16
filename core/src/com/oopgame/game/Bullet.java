@@ -81,6 +81,6 @@ public class Bullet extends Sprite {
 
     // tagastab distantsi etteantud punktist
     public float getDistance(float x, float y){
-        return new Vector2(x-getX(), y-getY()).len();
+        return new Vector2(x-body.getPosition().x, y-body.getPosition().y).len();
     }
 }

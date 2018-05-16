@@ -7,6 +7,10 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 
+import java.util.Random;
+
+import helpers.GameInfo;
+
 public class EnemyManager {
     private SpriteBatch batch;
     private Array<Enemy> vaenlased = new Array<Enemy>();
@@ -14,6 +18,8 @@ public class EnemyManager {
     private World world;
     private Texture texture;
     private BulletManager bulletManager;
+    // asukohtade genereerimiseks
+    private Random r = new Random();
 
     private UIManager uiManager;
 
@@ -52,7 +58,15 @@ public class EnemyManager {
     }
 
     public void addEnemy() {
-        Enemy enemy = new Enemy(10, 10, world, texture, bulletManager, pos, this);
+        float xKoord=-20;
+        float yKoord=-20;
+        if (r.nextInt(2) == 0) {
+            xKoord = GameInfo.W_WIDTH +20;
+        }
+        if (r.nextInt(2) == 0) {
+            yKoord = GameInfo.W_HEIGHT + 20;
+        }
+        Enemy enemy = new Enemy(xKoord* (float) Math.random(), yKoord* (float) Math.random(), world, texture, bulletManager, pos, this);
 
         vaenlased.add(enemy);
 
