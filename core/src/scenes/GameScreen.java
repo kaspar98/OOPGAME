@@ -101,8 +101,8 @@ public class GameScreen implements Screen, ContactListener {
         // loome Playeri tausta keskele
         bulletManager = new BulletManager(game.batch, world);
         player = new Player(
-                /*GameInfo.W_WIDTH / 2f*//*GameInfo.W_WIDTH*/100,
-                /*GameInfo.W_WIDTH / 2f*//*GameInfo.W_HEIGHT*/100,
+                GameInfo.W_WIDTH / 2f,
+                GameInfo.W_HEIGHT / 2f,
                 world,
                 bulletManager
         );
