@@ -22,9 +22,9 @@ public class Player extends Sprite {
     Body body;
     private Fixture fixture;
 
-    private float health = 90;
+    private float health = 100;
     private float maxHealth = 100;
-    private float shield = 2;
+    private float shield = 100;
     private float maxShield = 100;
 
     private Sprite thruster;
@@ -36,7 +36,7 @@ public class Player extends Sprite {
     private Vector2 forces;
     private int tippkiirus = 45;
     private BulletManager bulletManager;
-    private float bulletDamage = 50;
+    private float bulletDamage = 100;
 
     public Player(float x, float y, World world, BulletManager bulletManager) {
         super(new Texture(Gdx.files.internal("player_laev.png")));
@@ -158,6 +158,8 @@ public class Player extends Sprite {
         setCenter(body.getPosition().x, body.getPosition().y);
 
         updateBooster();
+        // väike shield regen
+        if (shield<maxShield) shield += 1/30.0;
     }
 
     public void dispose() {
