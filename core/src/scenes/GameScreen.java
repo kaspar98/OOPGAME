@@ -430,7 +430,7 @@ public class GameScreen implements Screen, ContactListener {
                 Bullet lask = (Bullet) contact.getFixtureA().getUserData();
                 Enemy enemy = (Enemy) contact.getFixtureB().getUserData();
                 if (lask.isPlayerShot()) {
-                    hitmarker.play();
+                    hitmarker.play(0.5f);
                     bulletsToKill.add(lask);
                     float damage = lask.getDamage();
                     if (enemy.getShield() > 0) {
@@ -450,7 +450,7 @@ public class GameScreen implements Screen, ContactListener {
                 Bullet lask = (Bullet) contact.getFixtureB().getUserData();
                 Enemy enemy = (Enemy) contact.getFixtureB().getUserData();
                 if (lask.isPlayerShot()) {
-                    hitmarker.play();
+                    hitmarker.play(0.5f);
                     bulletsToKill.add(lask);
                     float damage = lask.getDamage();
                     if (enemy.getShield() > 0) {

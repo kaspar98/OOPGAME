@@ -37,6 +37,7 @@ public class Player extends Sprite {
     private int tippkiirus = 45;
     private BulletManager bulletManager;
     private float bulletDamage = 100;
+    private Sound lask;
 
     public Player(float x, float y, World world, BulletManager bulletManager) {
         super(new Texture(Gdx.files.internal("player_laev.png")));
@@ -86,6 +87,7 @@ public class Player extends Sprite {
         thrusterSound.setLooping(thrusterSoundId, true);
 
         forces = new Vector2();
+        lask = Gdx.audio.newSound(Gdx.files.internal("lask.wav"));
     }
 
     // testimiseks väga lambine inputi jägimine
@@ -97,6 +99,7 @@ public class Player extends Sprite {
         if (Gdx.input.justTouched() && (Gdx.input.getX()>lubatudX || Gdx.input.getY()<lubatudY)) {
             float xKuhu = Gdx.input.getX() - laius/2 + body.getPosition().x;
             float yKuhu = -(Gdx.input.getY() - pikkus/2) + body.getPosition().y;;
+            lask.play(0.35f);
             bulletManager.playerShoot(body.getPosition().x, body.getPosition().y, xKuhu, yKuhu, bulletDamage);
         }
         // iseenesest me enam seda ei vaja, aga jätsin igaksjuhuks alles praegu, kui peaks tahtma
@@ -167,6 +170,7 @@ public class Player extends Sprite {
         thruster.getTexture().dispose();
         getTexture().dispose();
         thrusterSound.dispose();
+        lask.dispose();
     }
 
     public void updateCam(OrthographicCamera camera) {
