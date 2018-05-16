@@ -60,6 +60,11 @@ public class GameScreen implements Screen, ContactListener {
     private int score = 0;
     private int highscore;
     private Label currentScore;
+    private Label wave;
+    // muutuja mida suurendame iga update ühe võrra et arvutada hetke millal uut wave vaenlaseid teha
+    private int enemyTicker = 0;
+    // kaunter et lugeda palju vaenlaseid antud waves;
+    private int enemyAmount = 0;
 
     private UIManager uiManager;
 
@@ -131,7 +136,13 @@ public class GameScreen implements Screen, ContactListener {
         currentScore = new Label(score+"", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         currentScore.setFontScale(2);
         currentScore.setPosition(10, GameInfo.HEIGHT - 40);
+
+        wave = new Label("WAVE " + enemyAmount, new Label.LabelStyle(new BitmapFont(), Color.WHITE));
+        wave.setFontScale(2);
+        wave.setPosition(GameInfo.WIDTH/2 - wave.getWidth(), GameInfo.HEIGHT - 40);
+
         stage.addActor(currentScore);
+        stage.addActor(wave);
         Gdx.input.setInputProcessor(stage);
 
         // muusikaga jamamine
@@ -177,6 +188,15 @@ public class GameScreen implements Screen, ContactListener {
 
     @Override
     public void render(float delta) {
+        enemyTicker++;
+        if (enemyTicker > 600) {
+            enemyTicker = 0;
+            enemyAmount++;
+            score += enemyAmount;
+            for (int i=0; i<enemyAmount;i++) {
+                enemyManager.addEnemy();
+            }
+        }
         // TODO: eraldi muusika manageri klass, kuhu saab teada anda, kui valju muusika olema peaks ja millist osa muusikast mängida
         // sellega saab testida muusika üleminekut:
         float volume = musicA.getVolume();
@@ -259,6 +279,7 @@ public class GameScreen implements Screen, ContactListener {
         uiManager.update();
         uiManager.render();
         currentScore.setText(score+"");
+        wave.setText("WAVE " + enemyAmount);
 
         game.batch.end();
 
