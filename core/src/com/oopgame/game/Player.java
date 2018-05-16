@@ -92,8 +92,8 @@ public class Player extends Sprite {
     public void inputs(TouchPad touchpad, int laius, int pikkus) {
         // playeri tulistamine
         // TODO: SIIN PROBLEEM MÄNGU RESIZIMISEL
-        float lubatudX = touchpad.getTouchpad().getWidth();
-        float lubatudY = GameInfo.HEIGHT - touchpad.getTouchpad().getHeight();
+        float lubatudX = 210*laius/GameInfo.WIDTH;
+        float lubatudY = pikkus - 210*pikkus/GameInfo.HEIGHT;
         if (Gdx.input.justTouched() && (Gdx.input.getX()>lubatudX || Gdx.input.getY()<lubatudY)) {
             float xKuhu = Gdx.input.getX() - laius/2 + body.getPosition().x;
             float yKuhu = -(Gdx.input.getY() - pikkus/2) + body.getPosition().y;;
