@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -80,6 +81,7 @@ public class GameScreen implements Screen, ContactListener {
 
     private Music musicA;
     private Music musicB;
+    private Sound hitmarker;
 
     public GameScreen(final OOPGame game, int highscore) {
         this.game = game;
@@ -130,7 +132,7 @@ public class GameScreen implements Screen, ContactListener {
         // ja määrame selle asukoha
         touchpad.getTouchpad().setBounds(15, 15, 200, 200);
         // loome lava, millele touchpadi paigutada + loome touchpadi inpute töötleva protsessori
-        stage = new Stage(new FitViewport(800, 480), game.batch);
+        stage = new Stage(new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT), game.batch);
         stage.addActor(touchpad.getTouchpad());
 
         currentScore = new Label(score+"", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
@@ -179,6 +181,8 @@ public class GameScreen implements Screen, ContactListener {
                 musicB.play();
             }
         });
+
+        hitmarker = Gdx.audio.newSound(Gdx.files.internal("hitmarker.wav"));
     }
 
     @Override
@@ -364,6 +368,7 @@ public class GameScreen implements Screen, ContactListener {
 
         musicA.dispose();
         musicB.dispose();
+        hitmarker.dispose();
     }
 
     @Override
@@ -425,6 +430,7 @@ public class GameScreen implements Screen, ContactListener {
                 Bullet lask = (Bullet) contact.getFixtureA().getUserData();
                 Enemy enemy = (Enemy) contact.getFixtureB().getUserData();
                 if (lask.isPlayerShot()) {
+                    hitmarker.play();
                     bulletsToKill.add(lask);
                     float damage = lask.getDamage();
                     if (enemy.getShield() > 0) {
@@ -444,6 +450,7 @@ public class GameScreen implements Screen, ContactListener {
                 Bullet lask = (Bullet) contact.getFixtureB().getUserData();
                 Enemy enemy = (Enemy) contact.getFixtureB().getUserData();
                 if (lask.isPlayerShot()) {
+                    hitmarker.play();
                     bulletsToKill.add(lask);
                     float damage = lask.getDamage();
                     if (enemy.getShield() > 0) {
