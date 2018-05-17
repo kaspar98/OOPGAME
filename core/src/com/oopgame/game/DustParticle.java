@@ -9,7 +9,7 @@ import helpers.GameInfo;
 public class DustParticle extends Sprite {
     public DustParticle(Texture texture, Vector2 asukoht) {
         super(texture);
-        setSize(0, GameInfo.SCALING);
+        setSize(0, GameInfo.CAM_SCALING);
 
         setOrigin(getWidth(), getHeight() / 2f);
 
