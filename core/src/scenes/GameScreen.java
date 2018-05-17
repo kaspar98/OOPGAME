@@ -3,7 +3,6 @@ package scenes;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
@@ -48,19 +47,16 @@ public class GameScreen implements Screen, ContactListener {
 
     private Viewport viewport;
     private OrthographicCamera camera;
+    private Stage stage;
 
     private Player player;
-
-    private BackgroundManager bgManager;
 
     private World world;
     private Box2DDebugRenderer debugRenderer;
 
-    private Seinad walls;
-    private TouchPad touchpad;
-    private Stage stage;
     private int score = 0;
     private int highscore;
+
     private Label currentScore;
     private Label wave;
     // muutuja mida suurendame iga update ühe võrra et arvutada hetke millal uut wave vaenlaseid teha
@@ -70,11 +66,14 @@ public class GameScreen implements Screen, ContactListener {
 
     private UIManager uiManager;
 
+    private Seinad walls;
+    private BackgroundManager bgManager;
     private DustParticleManager tolm;
     private BulletManager bulletManager;
     private EnemyManager enemyManager;
     // et säilitada update tsükli lõpuni objekte
     private Set<Bullet> bulletsToKill;
+
     // isendiväljad et anda trackida kui suur on ekraan (resizemine)
     // vajalik et playeri tulistamine töötaks
     private int laius = GameInfo.WIDTH;
@@ -100,42 +99,37 @@ public class GameScreen implements Screen, ContactListener {
         // https://youtu.be/D7u5B2Oh9r0?list=PLZm85UZQLd2SXQzsF-a0-pPF6IWDDdrXt&t=420
         viewport = new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT, camera);
 
-        // loome Playeri tausta keskele
+        // loome lava, millele touchpadi paigutada + loome touchpadi inpute töötleva protsessori
+        stage = new Stage(new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT), game.batch);
+
         bulletManager = new BulletManager(game.batch, world);
+
+        // loome Playeri mänguvälja keskele
         player = new Player(
                 GameInfo.W_WIDTH / 2f,
                 GameInfo.W_HEIGHT / 2f,
                 world,
-                bulletManager
-        );
+                stage,
+                bulletManager);
 
         uiManager = new UIManager(game.batch, camera, player);
 
+        // taustamuusika jaoks MusicManager()
         musicManager = new MusicManager();
-
-        // tolmuefekti jaoks DustParticleManager
-        tolm = new DustParticleManager(game.batch, player);
 
         // tausta jaoks BackgroundManageri:
         bgManager = new BackgroundManager(game.batch, camera);
 
-        // seinad mänguvälja ümber
-        walls = new Seinad(world);
-
-        // debug renderer
-        debugRenderer = new Box2DDebugRenderer();
+        // tolmuefekti jaoks DustParticleManager
+        tolm = new DustParticleManager(game.batch, player);
 
         // tüüpi 1 vaenlaste jaoks
         enemyManager = new EnemyManager(game.batch, player, world, uiManager, bulletManager, musicManager);
         bulletsToKill = new HashSet<Bullet>();
 
-        // teeme touchpadi
-        touchpad = new TouchPad();
-        // ja määrame selle asukoha
-        touchpad.getTouchpad().setBounds(15, 15, 200, 200);
-        // loome lava, millele touchpadi paigutada + loome touchpadi inpute töötleva protsessori
-        stage = new Stage(new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT), game.batch);
-        stage.addActor(touchpad.getTouchpad());
+        // seinad mänguvälja ümber
+        walls = new Seinad(world);
+
 
         currentScore = new Label(score + "", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         currentScore.setFontScale(2);
@@ -150,6 +144,9 @@ public class GameScreen implements Screen, ContactListener {
         Gdx.input.setInputProcessor(stage);
 
         hitmarker = Gdx.audio.newSound(Gdx.files.internal("hitmarker.wav"));
+
+        // debug renderer
+        debugRenderer = new Box2DDebugRenderer();
     }
 
     @Override
@@ -253,7 +250,7 @@ public class GameScreen implements Screen, ContactListener {
         debugRenderer.render(world, camera.combined);
 
         // input checks koos touchpadiga
-        player.inputs(touchpad, laius, pikkus);
+        player.inputs(laius, pikkus);
 
         // stage loodud touchpadi jaoks
         stage.act(Gdx.graphics.getDeltaTime());
@@ -274,11 +271,9 @@ public class GameScreen implements Screen, ContactListener {
         }
         // vaenlased mis tapeti
         for (Enemy e : enemyManager.getVaenlased()) {
-            if (e.getHealth() <= 0) {
-                e.die();
+            if (e.isKill())
                 score += e.getScoreValue();
-                world.destroyBody(e.getBody());
-            }
+            /*world.destroyBody(e.getBody());*/
         }
         bulletsToKill.clear();
         if (player.getHealth() <= 0) {
@@ -431,14 +426,12 @@ public class GameScreen implements Screen, ContactListener {
     public void endContact(Contact contact) {
         if (contact.getFixtureA().getUserData() instanceof Sein) {
             if (contact.getFixtureB().getUserData() instanceof Player) {
-                /*Player player = (Player) contact.getFixtureB().getUserData();*/
                 Sein sein = (Sein) contact.getFixtureA().getUserData();
 
                 player.subForce(sein.getForce());
             }
         } else if (contact.getFixtureB().getUserData() instanceof Sein) {
             if (contact.getFixtureA().getUserData() instanceof Player) {
-                /*Player player = (Player) contact.getFixtureA().getUserData();*/
                 Sein sein = (Sein) contact.getFixtureB().getUserData();
 
                 player.subForce(sein.getForce());
