@@ -30,6 +30,7 @@ import com.oopgame.game.BulletManager;
 import com.oopgame.game.DustParticleManager;
 import com.oopgame.game.Enemy;
 import com.oopgame.game.EnemyManager;
+import com.oopgame.game.MusicManager;
 import com.oopgame.game.OOPGame;
 import com.oopgame.game.Player;
 import com.oopgame.game.Sein;
@@ -79,8 +80,7 @@ public class GameScreen implements Screen, ContactListener {
     private int laius = GameInfo.WIDTH;
     private int pikkus = GameInfo.HEIGHT;
 
-    private Music musicA;
-    private Music musicB;
+    private MusicManager musicManager;
     private Sound hitmarker;
 
     public GameScreen(final OOPGame game, int highscore) {
@@ -111,6 +111,8 @@ public class GameScreen implements Screen, ContactListener {
 
         uiManager = new UIManager(game.batch, camera, player);
 
+        musicManager = new MusicManager();
+
         // tolmuefekti jaoks DustParticleManager
         tolm = new DustParticleManager(game.batch, player);
 
@@ -124,7 +126,7 @@ public class GameScreen implements Screen, ContactListener {
         debugRenderer = new Box2DDebugRenderer();
 
         // tüüpi 1 vaenlaste jaoks
-        enemyManager = new EnemyManager(game.batch, player, world, uiManager, bulletManager);
+        enemyManager = new EnemyManager(game.batch, player, world, uiManager, bulletManager, musicManager);
         bulletsToKill = new HashSet<Bullet>();
 
         // teeme touchpadi
@@ -135,52 +137,17 @@ public class GameScreen implements Screen, ContactListener {
         stage = new Stage(new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT), game.batch);
         stage.addActor(touchpad.getTouchpad());
 
-        currentScore = new Label(score+"", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
+        currentScore = new Label(score + "", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         currentScore.setFontScale(2);
         currentScore.setPosition(10, GameInfo.HEIGHT - 40);
 
         wave = new Label("WAVE " + enemyAmount, new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         wave.setFontScale(2);
-        wave.setPosition(GameInfo.WIDTH/2 - wave.getWidth(), GameInfo.HEIGHT - 40);
+        wave.setPosition(GameInfo.WIDTH / 2 - wave.getWidth(), GameInfo.HEIGHT - 40);
 
         stage.addActor(currentScore);
         stage.addActor(wave);
         Gdx.input.setInputProcessor(stage);
-
-        // muusikaga jamamine
-        // musicA on veits intense'im versioon b-st
-        // idee oleks seda valjumaks keerata, kui mingi vastased lähedal
-        // numbriga 1 on intro
-        // numbriga 2 oleks nö tavaline soundtrack
-        // numbriga 3 (seda veel hetkel pole valmis kompileerinud) oleks mingi boss leveli versioon, või kui vastaseid väga palju, või kui elusid vähe on
-        musicA = Gdx.audio.newMusic(Gdx.files.internal("tha_mcis_a1.mp3"));
-        musicA.setVolume(0.1f);
-        musicA.play();
-        musicA.setLooping(false);
-        musicA.setOnCompletionListener(new Music.OnCompletionListener() {
-            @Override
-            public void onCompletion(Music music) {
-                float volume = musicB.getVolume();
-                musicA = Gdx.audio.newMusic(Gdx.files.internal("tha_mcis_a2.mp3"));
-                musicA.setVolume(volume);
-                musicA.setLooping(true);
-                musicA.play();
-            }
-        });
-
-        musicB = Gdx.audio.newMusic(Gdx.files.internal("tha_mcis_b1.mp3"));
-        musicB.play();
-        musicB.setLooping(false);
-        musicB.setOnCompletionListener(new Music.OnCompletionListener() {
-            @Override
-            public void onCompletion(Music music) {
-                float volume = musicB.getVolume();
-                musicB = Gdx.audio.newMusic(Gdx.files.internal("tha_mcis_b2.mp3"));
-                musicB.setVolume(volume);
-                musicB.setLooping(true);
-                musicB.play();
-            }
-        });
 
         hitmarker = Gdx.audio.newSound(Gdx.files.internal("hitmarker.wav"));
     }
@@ -197,22 +164,16 @@ public class GameScreen implements Screen, ContactListener {
             enemyTicker = 0;
             enemyAmount++;
             score += enemyAmount;
-            for (int i=0; i<enemyAmount;i++) {
+            for (int i = 0; i < enemyAmount; i++) {
                 enemyManager.addEnemy();
             }
         }
-        // TODO: eraldi muusika manageri klass, kuhu saab teada anda, kui valju muusika olema peaks ja millist osa muusikast mängida
         // sellega saab testida muusika üleminekut:
-        float volume = musicA.getVolume();
+        float volume = musicManager.getActionVolume();
         if (Gdx.input.isKeyPressed(Input.Keys.UP))
             volume += 0.01f;
         else if (Gdx.input.isKeyPressed(Input.Keys.DOWN))
             volume -= 0.01f;
-
-        if (volume > 1)
-            volume = 1;
-        else if (volume < 0)
-            volume = 0;
 
         // lihtsalt testimiseks
         /*if (Gdx.input.isKeyPressed(Input.Keys.R))
@@ -222,7 +183,7 @@ public class GameScreen implements Screen, ContactListener {
         else if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
             camera.zoom -= camera.zoom * GameInfo.CAM_SCALING;*/
 
-        musicA.setVolume(volume);
+        musicManager.setActionVolume(volume);
 
         // box2d world steps
         world.step(1 / 60f, 6, 2);
@@ -255,7 +216,7 @@ public class GameScreen implements Screen, ContactListener {
 
         tolm.update();
 
-        enemyManager.update(player);
+        enemyManager.update();
         bulletManager.update();
         // liigutab kaamerat playeri positsiooni järgi
         player.updateCam(camera);
@@ -282,7 +243,7 @@ public class GameScreen implements Screen, ContactListener {
 
         uiManager.update();
         uiManager.render();
-        currentScore.setText(score+"");
+        currentScore.setText(score + "");
         wave.setText("WAVE " + enemyAmount);
 
         game.batch.end();
@@ -300,7 +261,7 @@ public class GameScreen implements Screen, ContactListener {
 
         // iga ticki lõpus häväitame kõik objektid mida enam tarvis pole
         // bulletid mis on liiga kaugel playerist
-        for (Bullet b:bulletManager.getLasud()){
+        for (Bullet b : bulletManager.getLasud()) {
             if (b.getDistance(player.getX(), player.getY()) > GameInfo.WIDTH) {
                 b.die();
                 world.destroyBody(b.getBody());
@@ -312,8 +273,8 @@ public class GameScreen implements Screen, ContactListener {
             world.destroyBody(b.getBody());
         }
         // vaenlased mis tapeti
-        for (Enemy e: enemyManager.getVaenlased()) {
-            if (e.getHealth()<=0) {
+        for (Enemy e : enemyManager.getVaenlased()) {
+            if (e.getHealth() <= 0) {
                 e.die();
                 score += e.getScoreValue();
                 world.destroyBody(e.getBody());
@@ -321,10 +282,10 @@ public class GameScreen implements Screen, ContactListener {
         }
         bulletsToKill.clear();
         if (player.getHealth() <= 0) {
-            if (score>highscore) {
-                highscore=score;
+            if (score > highscore) {
+                highscore = score;
                 FileHandle handle = Gdx.files.local("highscore.txt");
-                handle.writeString(highscore+"", false);
+                handle.writeString(highscore + "", false);
             }
             game.setScreen(new MainMenuScreen(game, highscore));
             dispose();
@@ -366,8 +327,7 @@ public class GameScreen implements Screen, ContactListener {
 
         uiManager.dispose();
 
-        musicA.dispose();
-        musicB.dispose();
+        musicManager.dispose();
         hitmarker.dispose();
     }
 
