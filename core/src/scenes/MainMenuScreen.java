@@ -5,13 +5,14 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.OOPGame;
-
 
 
 import helpers.GameInfo;
@@ -21,6 +22,7 @@ public class MainMenuScreen implements Screen {
 
     private int highscore;
     private OrthographicCamera camera;
+    private Sprite title;
     private Label info;
     private Stage stage;
     private Viewport viewport;
@@ -28,16 +30,23 @@ public class MainMenuScreen implements Screen {
     public MainMenuScreen(final OOPGame game, int highscore) {
         this.game = game;
         this.highscore = highscore;
+
         camera = new OrthographicCamera();
         camera.setToOrtho(false, GameInfo.WIDTH, GameInfo.HEIGHT);
         viewport = new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT, camera);
 
         stage = new Stage(new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT), game.batch);
-        info = new Label("OOPGAME \n" +
+
+        title = new Sprite(new Texture(Gdx.files.internal("title_OOPGame.png")));
+        title.setCenter(GameInfo.WIDTH * 0.5f, GameInfo.HEIGHT * 0.75f);
+
+        info = new Label(
                 "Highscore " + highscore + "\n" +
-                "TAP ANYWHERE TO BEGIN", new Label.LabelStyle(new BitmapFont(), Color.ORANGE));
+                        "TAP ANYWHERE TO BEGIN", new Label.LabelStyle(new BitmapFont(), Color.ORANGE));
+
         info.setFontScale(2);
-        info.setPosition(200, 200);
+        info.setPosition(GameInfo.WIDTH * 0.25f, GameInfo.HEIGHT * 0.3f);
+
         stage.addActor(info);
         Gdx.input.setInputProcessor(stage);
 
@@ -55,9 +64,7 @@ public class MainMenuScreen implements Screen {
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
-//        game.font.draw(game.batch, "OOPGAME ", 350, 300);
-//        game.font.draw(game.batch, "Tap anywhere to begin!", 350, 200);
-//        game.font.draw(game.batch, "Highscore: " + highscore, 350, 240);
+        title.draw(game.batch);
         game.batch.end();
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
@@ -70,7 +77,7 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width,height);
+        viewport.update(width, height);
         stage.getViewport().update(width, height);
     }
 
@@ -89,5 +96,6 @@ public class MainMenuScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
+        title.getTexture().dispose();
     }
 }
