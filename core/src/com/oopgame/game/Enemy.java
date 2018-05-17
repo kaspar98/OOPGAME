@@ -150,23 +150,12 @@ public class Enemy extends Sprite {
         return vaheVektor.len();
     }
 
-    // tegelikult meil pole seda vaja, võib ära kustutada
-    /*public void dispose() {
-        // võtab spraidiga seotud assetid mälust maha
-        getTexture().dispose();
-    }*/
-
     private Vector2 vektorPlayerist() {
         return new Vector2(body.getPosition().x - playerPos.x, body.getPosition().y - playerPos.y);
     }
 
     public Body getBody() {
         return body;
-    }
-
-    // tagastab distantsi etteantud punktist
-    public float getDistance(float x, float y) {
-        return new Vector2(x - getX(), y - getY()).len();
     }
 
     public float getHealth() {
