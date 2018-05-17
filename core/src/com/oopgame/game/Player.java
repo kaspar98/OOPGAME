@@ -98,19 +98,10 @@ public class Player extends Sprite {
         float lubatudY = pikkus - 210*pikkus/GameInfo.HEIGHT;
         if (Gdx.input.justTouched() && (Gdx.input.getX()>lubatudX || Gdx.input.getY()<lubatudY)) {
             float xKuhu = Gdx.input.getX() - laius/2 + body.getPosition().x;
-            float yKuhu = -(Gdx.input.getY() - pikkus/2) + body.getPosition().y;;
+            float yKuhu = -(Gdx.input.getY() - pikkus/2) + body.getPosition().y;
             lask.play(0.35f);
             bulletManager.playerShoot(body.getPosition().x, body.getPosition().y, xKuhu, yKuhu, bulletDamage);
         }
-        // iseenesest me enam seda ei vaja, aga jätsin igaksjuhuks alles praegu, kui peaks tahtma
-        // kusaltki meelde tuletada, kuidas me tegime input key polli
-        /*if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
-            body.applyForceToCenter(
-                    10 * GameInfo.FORCE_MULTIPLIER,
-                    0.0f,
-                    true
-            );
-        }*/
 
         // touchpadi inputist saadud info põhjalt paneme playeri vastava vektori suunas liikuma
         Vector2 touchpadVector = new Vector2(
