@@ -33,12 +33,12 @@ public class UIManager {
         this.camera = camera;
         this.player = player;
 
-        compass = new Sprite(new Texture("ui1_compass1_t.png"));
+        compass = new Sprite(new Texture("ui1_compass2_t.png"));
         compass.setSize(
                 compass.getWidth() * GameInfo.CAM_SCALING,
                 compass.getHeight() * GameInfo.CAM_SCALING);
 
-        compass_marker_texture = new Texture(Gdx.files.internal("ui1_compass_marker1_t.png"));
+        compass_marker_texture = new Texture(Gdx.files.internal("ui1_compass_marker2_t.png"));
 
         health = new UIBar(new Texture("ui1_health1_t.png"),
                 player.getMaxHealth(), -dx, 0, camera);
@@ -107,9 +107,9 @@ public class UIManager {
 
         return marker;
     }
-    
-    public void removeMarker(Vector2 keskkoht){
-        for (UIMarker u:compass_markers) {
+
+    public void removeMarker(Vector2 keskkoht) {
+        for (UIMarker u : compass_markers) {
             if (u.getPoint().equals(keskkoht)) {
                 compass_markers.removeValue(u, false);
                 break;
