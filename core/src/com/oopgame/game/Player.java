@@ -92,41 +92,44 @@ public class Player extends Sprite {
 
     // testimiseks väga lambine inputi jägimine
     public void inputs(TouchPad touchpad, int laius, int pikkus) {
-        // playeri tulistamine
-        // TODO: SIIN PROBLEEM MÄNGU RESIZIMISEL
-        float lubatudX = 210*laius/GameInfo.WIDTH;
-        float lubatudY = pikkus - 210*pikkus/GameInfo.HEIGHT;
-        if (Gdx.input.justTouched() && (Gdx.input.getX()>lubatudX || Gdx.input.getY()<lubatudY)) {
-            float xKuhu = Gdx.input.getX() - laius/2 + body.getPosition().x;
-            float yKuhu = -(Gdx.input.getY() - pikkus/2) + body.getPosition().y;
-            lask.play(0.35f);
-            bulletManager.playerShoot(body.getPosition().x, body.getPosition().y, xKuhu, yKuhu, bulletDamage);
-        }
+        for (int i = 0; i < 2; i++) {
+            if (!Gdx.input.isTouched(i)) continue;
 
-        // touchpadi inputist saadud info põhjalt paneme playeri vastava vektori suunas liikuma
-        Vector2 touchpadVector = new Vector2(
-                touchpad.getTouchpad().getKnobPercentX(),
-                touchpad.getTouchpad().getKnobPercentY()
-        );
-        body.applyForceToCenter(
-                touchpadVector.x * GameInfo.FORCE_MULTIPLIER,
-                touchpadVector.y * GameInfo.FORCE_MULTIPLIER,
-                true
-        );
+            // playeri tulistamine
+            float lubatudX = 210 * laius / GameInfo.WIDTH;
+            float lubatudY = pikkus - 210 * pikkus / GameInfo.HEIGHT;
+            if (Gdx.input.justTouched() && (Gdx.input.getX(i) > lubatudX || Gdx.input.getY(i) < lubatudY)) {
+                float xKuhu = Gdx.input.getX(i) - laius / 2 + body.getPosition().x;
+                float yKuhu = -(Gdx.input.getY(i) - pikkus / 2) + body.getPosition().y;
+                lask.play(0.35f);
+                bulletManager.playerShoot(body.getPosition().x, body.getPosition().y, xKuhu, yKuhu, bulletDamage);
+            }
 
-        setBoosterPower(touchpadVector.len());
-
-        if (touchpadVector.len() > 0) {
-            setRotation(touchpadVector.angle() - 90);
-
-            // paneb Playeri kehale ka uuesti suuna
-            body.setTransform(
-                    body.getPosition(),
-                    (touchpadVector.angle() - 90) * MathUtils.degRad
+            // touchpadi inputist saadud info põhjalt paneme playeri vastava vektori suunas liikuma
+            Vector2 touchpadVector = new Vector2(
+                    touchpad.getTouchpad().getKnobPercentX(),
+                    touchpad.getTouchpad().getKnobPercentY()
             );
-        }
+            body.applyForceToCenter(
+                    touchpadVector.x * GameInfo.FORCE_MULTIPLIER,
+                    touchpadVector.y * GameInfo.FORCE_MULTIPLIER,
+                    true
+            );
 
-        /*System.out.println(body.getLinearVelocity().len());*/
+            setBoosterPower(touchpadVector.len());
+
+            if (touchpadVector.len() > 0) {
+                setRotation(touchpadVector.angle() - 90);
+
+                // paneb Playeri kehale ka uuesti suuna
+                body.setTransform(
+                        body.getPosition(),
+                        (touchpadVector.angle() - 90) * MathUtils.degRad
+                );
+            }
+
+            /*System.out.println(body.getLinearVelocity().len());*/
+        }
     }
 
     @Override
@@ -142,10 +145,10 @@ public class Player extends Sprite {
         // kui sõidab siis alandab kiirust
         float speedX = body.getLinearVelocity().x;
         float speedY = body.getLinearVelocity().y;
-        float kordaja = tippkiirus*tippkiirus/(speedX*speedX+speedY*speedY);
+        float kordaja = tippkiirus * tippkiirus / (speedX * speedX + speedY * speedY);
 
-        if (body.getLinearVelocity().len()>tippkiirus) {
-            body.setLinearVelocity(speedX*kordaja, speedY*kordaja);
+        if (body.getLinearVelocity().len() > tippkiirus) {
+            body.setLinearVelocity(speedX * kordaja, speedY * kordaja);
         }
         // muudab sprite'i keskpunkti asukoht vastavalt keha asukohale
         body.setAngularVelocity(0);
@@ -153,7 +156,7 @@ public class Player extends Sprite {
 
         updateBooster();
         // väike shield regen
-        if (shield<maxShield) shield += 1/30.0;
+        if (shield < maxShield) shield += 1 / 30.0;
     }
 
     public void dispose() {
