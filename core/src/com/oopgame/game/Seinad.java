@@ -11,7 +11,6 @@ public class Seinad {
 
     public Seinad(World world) {
         float seinaPaksusPool = 120;
-        float seinaPikkusPool = GameInfo.W_WIDTH / 2f + seinaPaksusPool * 2;
 
         float[][] coords = new float[][]{
                 {GameInfo.W_WIDTH / 2f, -seinaPaksusPool},
@@ -20,26 +19,12 @@ public class Seinad {
                 {GameInfo.W_WIDTH + seinaPaksusPool, GameInfo.W_HEIGHT / 2f}
         };
 
-        // praegu lükkasin seinad nii paika, et 0,0 koordinaadis saaks ka liikuda,
-        // aga lõpuks võiks selle koodi natuke lihtsamaks teha ja optimiseerida
-        // lõpuks võiks nii äkki teha:
-
-        /*float seinaPaksusPool = 120;
-        float seinaPikkusPool = GameInfo.W_WIDTH / 2f + seinaPaksusPool;
-
-        float[][] coords = new float[][]{
-                {GameInfo.W_WIDTH / 2f, 0},
-                {GameInfo.W_WIDTH / 2f, GameInfo.W_HEIGHT},
-                {0, GameInfo.W_HEIGHT / 2f},
-                {GameInfo.W_WIDTH, GameInfo.W_HEIGHT / 2f}
-        };*/
-
         float[][] suurused = new float[][]{
                 {GameInfo.W_WIDTH / 2f + seinaPaksusPool * 2, seinaPaksusPool},
                 {seinaPaksusPool, GameInfo.W_HEIGHT / 2f + seinaPaksusPool * 2}
         };
 
-        float lüke = 1.5f * GameInfo.FORCE_MULTIPLIER;
+        float lüke = 1.25f * GameInfo.FORCE_MULTIPLIER;
 
         Vector2[] lükked = new Vector2[]{
                 new Vector2(0, lüke),
