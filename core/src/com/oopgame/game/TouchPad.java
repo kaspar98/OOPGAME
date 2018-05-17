@@ -13,11 +13,11 @@ public class TouchPad {
     private Drawable touchBackground;
     private Drawable touchKnob;
 
-    public TouchPad() {
+    public TouchPad(Texture bg, Texture knob) {
         // touchpadi tekstuurid
         touchpadSkin = new Skin();
-        touchpadSkin.add("touchBackground", new Texture("ui1_touchpad2_t.png"));
-        touchpadSkin.add("touchKnob", new Texture("ui1_touchpad1_stick1_t.png"));
+        touchpadSkin.add("touchBackground", bg);
+        touchpadSkin.add("touchKnob", knob);
 
         // joonistatav osa
         touchpadStyle = new Touchpad.TouchpadStyle();
