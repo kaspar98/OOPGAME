@@ -16,7 +16,7 @@ public class TouchPad {
     public TouchPad() {
         // touchpadi tekstuurid
         touchpadSkin = new Skin();
-        touchpadSkin.add("touchBackground", new Texture("ui1_touchpad1_t.png"));
+        touchpadSkin.add("touchBackground", new Texture("ui1_touchpad2_t.png"));
         touchpadSkin.add("touchKnob", new Texture("ui1_touchpad1_stick1_t.png"));
 
         // joonistatav osa
