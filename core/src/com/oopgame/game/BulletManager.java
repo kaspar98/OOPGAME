@@ -4,14 +4,15 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 
 public class BulletManager {
     private Texture bulletType1 = new Texture(
-            Gdx.files.internal("laser_red.png"/*"test_bullet.png"*/));
+            Gdx.files.internal("laser_red.png"));
     private Texture bulletType2 = new Texture(
-            Gdx.files.internal("laser_blue.png"/*"test_bullet2.png"*/));
+            Gdx.files.internal("laser_blue.png"));
 
     private Batch batch;
     private World world;
@@ -36,26 +37,24 @@ public class BulletManager {
     }
 
     public void dispose() {
-        for (Bullet b : lasud) {
-            b.dispose();
-        }
+        bulletType1.dispose();
+        bulletType2.dispose();
     }
 
-    public void enemyShoot(float xKust, float yKust,
-                           float xKuhu, float yKuhu,
+    public void enemyShoot(Vector2 algpunkt,
+                           Vector2 vektor,
                            float damage) {
         lasud.add(new Bullet(
-                xKust, yKust,
-                xKuhu, yKuhu,
+                algpunkt,
+                new Vector2(vektor.x - algpunkt.x, vektor.y - algpunkt.y),
                 damage, bulletType1, world, this, false));
     }
 
-    public void playerShoot(float xKust, float yKust,
-                            float xKuhu, float yKuhu,
+    public void playerShoot(Vector2 algpunkt,
+                            Vector2 vektor,
                             float damage) {
         lasud.add(new Bullet(
-                xKust, yKust,
-                xKuhu, yKuhu,
+                algpunkt, vektor,
                 damage, bulletType2, world, this, true));
     }
 
