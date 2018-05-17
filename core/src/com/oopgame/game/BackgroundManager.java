@@ -14,7 +14,6 @@ public class BackgroundManager {
 
     private Array<Background> backgrounds = new Array<Background>();
 
-    // TODO: planeedid tuleb veel ära sorteerida parallaxConstandi järgi!!!
     private Array<Planet> planets = new Array<Planet>();
 
     public BackgroundManager(SpriteBatch batch, OrthographicCamera camera) {
@@ -41,7 +40,7 @@ public class BackgroundManager {
                 GameInfo.HEIGHT / 2f * GameInfo.SCALING));*/
 
         for (int i = 1; i < 8; i++)
-            planets.add(new Planet("planet_a" + i + "_t.png"));
+            planets.add(new Planet("planet_" + i + "b_t.png"));
     }
 
     public void update() {
