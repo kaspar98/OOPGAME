@@ -52,16 +52,16 @@ public class Bullet extends Sprite {
 
         box.dispose();
 
-        body.applyForceToCenter(new Vector2(
-                        (xKuhu - xKust) * GameInfo.FORCE_MULTIPLIER,
-                        (yKuhu - yKust) * GameInfo.FORCE_MULTIPLIER),
-                true);
-        setRotation(new Vector2(xKuhu - xKust, yKuhu - yKust).angle() + 90);
+        Vector2 vektor = new Vector2(
+                (xKuhu - xKust) * GameInfo.FORCE_MULTIPLIER,
+                (yKuhu - yKust) * GameInfo.FORCE_MULTIPLIER);
+
+        body.applyForceToCenter(vektor, true);
+
+        setRotation(vektor.angle() + 90);
         body.setTransform(
                 body.getPosition(),
-                (new Vector2(
-                        xKuhu - xKust,
-                        yKuhu - yKust).angle() + 90
+                (getRotation()
                 ) * MathUtils.degRad);
     }
 
