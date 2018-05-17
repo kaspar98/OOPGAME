@@ -3,6 +3,7 @@ package com.oopgame.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
@@ -80,8 +81,8 @@ public class EnemyManager {
             yKoord = GameInfo.W_HEIGHT + 20;
 
         Enemy enemy = new Enemy(
-                xKoord * (float) Math.random(),
-                yKoord * (float) Math.random(),
+                MathUtils.random(xKoord),
+                MathUtils.random(yKoord),
                 world,
                 texture,
                 playerPos,
