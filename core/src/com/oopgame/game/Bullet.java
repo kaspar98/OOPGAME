@@ -22,30 +22,29 @@ public class Bullet extends Sprite {
 
     private boolean playerShot;
 
-    public Bullet(float xKust, float yKust,
-                  float xKuhu, float yKuhu,
-                  float damage,
+    public Bullet(Vector2 kust, Vector2 suunaVektor, float damage,
                   Texture texture, World world, BulletManager bm, boolean playerShot) {
         super(texture);
         this.damage = damage;
         this.bm = bm;
         this.playerShot = playerShot;
+
         setSize(
                 getTexture().getWidth() * GameInfo.SCALING * 1.5f,
-                getTexture().getHeight() * GameInfo.SCALING * 2f
-        );
+                getTexture().getHeight() * GameInfo.SCALING * 2f);
+
         setOrigin(getWidth() / 2f, getHeight() / 2f);
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(xKust, yKust);
+        bodyDef.position.set(kust);
 
         // loome bulletile keha
         body = world.createBody(bodyDef);
         body.setUserData(this);
         body.setBullet(true);
         PolygonShape box = new PolygonShape();
-        box.setAsBox(getWidth(), getHeight());
+        box.setAsBox(getWidth() * 0.5f, getHeight() * 0.5f);
         fixture = body.createFixture(box, 0);
         fixture.setSensor(true);
         fixture.setUserData(this);
@@ -53,8 +52,8 @@ public class Bullet extends Sprite {
         box.dispose();
 
         Vector2 vektor = new Vector2(
-                (xKuhu - xKust) * GameInfo.FORCE_MULTIPLIER,
-                (yKuhu - yKust) * GameInfo.FORCE_MULTIPLIER);
+                suunaVektor.x * GameInfo.FORCE_MULTIPLIER * 1000,
+                suunaVektor.y * GameInfo.FORCE_MULTIPLIER * 1000);
 
         body.applyForceToCenter(vektor, true);
 
@@ -71,10 +70,6 @@ public class Bullet extends Sprite {
 
     public void update() {
         setCenter(body.getPosition().x, body.getPosition().y);
-    }
-
-    public void dispose() {
-        getTexture().dispose();
     }
 
     public void die() {
