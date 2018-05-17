@@ -15,6 +15,10 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.Timer;
 
 import helpers.GameInfo;
 
@@ -33,13 +37,23 @@ public class Player extends Sprite {
     private Sound thrusterSound;
     private long thrusterSoundId;
 
+    private Array<TouchPad> touchPads = new Array<TouchPad>();
+    private Texture touchpadTextureBg;
+    private Texture touchpadTextureKnob;
+    private Touchpad touchpadL;
+    private Touchpad touchpadR;
+
     private Vector2 forces;
     private int tippkiirus = 45;
+
     private BulletManager bulletManager;
     private float bulletDamage = 100;
+    private long shootDelay = 200;
+    private long lastShot = 0;
     private Sound lask;
 
-    public Player(float x, float y, World world, BulletManager bulletManager) {
+
+    public Player(float x, float y, World world, Stage stage, BulletManager bulletManager) {
         super(new Texture(Gdx.files.internal("player_laev.png")));
         this.bulletManager = bulletManager;
 
@@ -77,8 +91,8 @@ public class Player extends Sprite {
 
         thruster = new Sprite(new Texture("player_ship_1b_booster1_t.png"));
         thruster.setSize(
-                getWidth() * GameInfo.SCALING * 4,
-                0);
+                0,
+                getHeight() * GameInfo.SCALING * 4);
         thrusterRadius = getHeight() / 2f - 10 * GameInfo.SCALING;
         updateBooster();
 
@@ -88,33 +102,51 @@ public class Player extends Sprite {
 
         forces = new Vector2();
         lask = Gdx.audio.newSound(Gdx.files.internal("lask.wav"));
+
+        touchpadTextureBg = new Texture(Gdx.files.internal("ui1_touchpad2_t.png"));
+        touchpadTextureKnob = new Texture(Gdx.files.internal("ui1_touchpad1_stick1_t.png"));
+
+        // teeme Playeri jaoks touchpadid
+        // vasak - liikumine
+        TouchPad touchpad = new TouchPad(touchpadTextureBg, touchpadTextureKnob);
+        touchPads.add(touchpad);
+        touchpadL = touchpad.getTouchpad();
+        touchpadL.setSize(200, 200);
+        touchpadL.setOrigin(
+                touchpadL.getWidth() * 0.5f,
+                touchpadL.getHeight() * 0.5f);
+        touchpadL.setPosition(15, 15);
+        stage.addActor(touchpadL);
+
+        // parem - tulistamine
+        touchpad = new TouchPad(touchpadTextureBg, touchpadTextureKnob);
+        touchPads.add(touchpad);
+        touchpadR = touchpad.getTouchpad();
+        touchpadR.setSize(200, 200);
+        touchpadR.setOrigin(
+                touchpadR.getWidth() * 0.5f,
+                touchpadR.getHeight() * 0.5f);
+        touchpadR.setPosition(
+                GameInfo.WIDTH - touchpadR.getWidth() - 15,
+                15);
+        stage.addActor(touchpadR);
     }
 
     // testimiseks väga lambine inputi jägimine
-    public void inputs(TouchPad touchpad, int laius, int pikkus) {
+    public void inputs(int laius, int pikkus) {
+        setBoosterPower(0);
+
         for (int i = 0; i < 2; i++) {
             if (!Gdx.input.isTouched(i)) continue;
-
-            // playeri tulistamine
-            float lubatudX = 210 * laius / GameInfo.WIDTH;
-            float lubatudY = pikkus - 210 * pikkus / GameInfo.HEIGHT;
-            if (Gdx.input.justTouched() && (Gdx.input.getX(i) > lubatudX || Gdx.input.getY(i) < lubatudY)) {
-                float xKuhu = Gdx.input.getX(i) - laius / 2 + body.getPosition().x;
-                float yKuhu = -(Gdx.input.getY(i) - pikkus / 2) + body.getPosition().y;
-                lask.play(0.35f);
-                bulletManager.playerShoot(body.getPosition().x, body.getPosition().y, xKuhu, yKuhu, bulletDamage);
-            }
-
             // touchpadi inputist saadud info põhjalt paneme playeri vastava vektori suunas liikuma
             Vector2 touchpadVector = new Vector2(
-                    touchpad.getTouchpad().getKnobPercentX(),
-                    touchpad.getTouchpad().getKnobPercentY()
-            );
+                    touchpadL.getKnobPercentX(),
+                    touchpadL.getKnobPercentY());
+
             body.applyForceToCenter(
-                    touchpadVector.x * GameInfo.FORCE_MULTIPLIER,
-                    touchpadVector.y * GameInfo.FORCE_MULTIPLIER,
-                    true
-            );
+                    touchpadVector.x * GameInfo.FORCE_MULTIPLIER * 0.5f,
+                    touchpadVector.y * GameInfo.FORCE_MULTIPLIER * 0.5f,
+                    true);
 
             setBoosterPower(touchpadVector.len());
 
@@ -124,11 +156,23 @@ public class Player extends Sprite {
                 // paneb Playeri kehale ka uuesti suuna
                 body.setTransform(
                         body.getPosition(),
-                        (touchpadVector.angle() - 90) * MathUtils.degRad
-                );
+                        (touchpadVector.angle() - 90) * MathUtils.degRad);
             }
 
-            /*System.out.println(body.getLinearVelocity().len());*/
+            // playeri tulistamine
+            touchpadVector = new Vector2(
+                    touchpadR.getKnobPercentX(),
+                    touchpadR.getKnobPercentY());
+
+            long time = TimeUtils.nanosToMillis(TimeUtils.nanoTime());
+
+            if (touchpadVector.len() > 0 && time - shootDelay > lastShot) {
+                lastShot = time;
+
+                bulletManager.playerShoot(body.getPosition(), touchpadVector, bulletDamage);
+
+                lask.play(0.35f);
+            }
         }
     }
 
@@ -141,20 +185,16 @@ public class Player extends Sprite {
     public void update() {
         body.applyForceToCenter(forces, true);
 
-        // kontrollib kas player sõidab lubatust kiiremini
-        // kui sõidab siis alandab kiirust
-        float speedX = body.getLinearVelocity().x;
-        float speedY = body.getLinearVelocity().y;
-        float kordaja = tippkiirus * tippkiirus / (speedX * speedX + speedY * speedY);
+        // kontrollib kas player sõidab lubatust kiiremini, kui sõidab siis alandab kiirust
+        if (body.getLinearVelocity().len() > tippkiirus)
+            body.setLinearVelocity(new Vector2(body.getLinearVelocity().setLength(tippkiirus)));
 
-        if (body.getLinearVelocity().len() > tippkiirus) {
-            body.setLinearVelocity(speedX * kordaja, speedY * kordaja);
-        }
         // muudab sprite'i keskpunkti asukoht vastavalt keha asukohale
         body.setAngularVelocity(0);
         setCenter(body.getPosition().x, body.getPosition().y);
 
         updateBooster();
+
         // väike shield regen
         if (shield < maxShield) shield += 1 / 30.0;
     }
@@ -165,6 +205,9 @@ public class Player extends Sprite {
         getTexture().dispose();
         thrusterSound.dispose();
         lask.dispose();
+
+        for (TouchPad touchPad : touchPads)
+            touchPad.dispose();
     }
 
     public void updateCam(OrthographicCamera camera) {
@@ -178,20 +221,20 @@ public class Player extends Sprite {
     private void setBoosterPower(float value) {
         thrusterSound.setVolume(thrusterSoundId, value * 0.3f);
         thruster.setSize(
-                thruster.getWidth(),
-                10 * value + MathUtils.random(-1, 1));
+                10 * value + MathUtils.random(-1, 1),
+                thruster.getHeight());
     }
 
     private void updateBooster() {
         thruster.setOrigin(
-                thruster.getWidth() / 2f,
-                thruster.getHeight());
+                thruster.getWidth(),
+                thruster.getHeight() * 0.5f);
 
         thruster.setOriginBasedPosition(
                 body.getPosition().x - MathUtils.cosDeg(this.getRotation() + 90) * thrusterRadius,
                 body.getPosition().y - MathUtils.sinDeg(this.getRotation() + 90) * thrusterRadius);
 
-        thruster.setRotation(this.getRotation());
+        thruster.setRotation(this.getRotation() + 90);
     }
 
     public void addForce(Vector2 force) {
