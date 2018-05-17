@@ -13,32 +13,43 @@ import helpers.GameInfo;
 
 public class EnemyManager {
     private SpriteBatch batch;
+
     private Array<Enemy> vaenlased = new Array<Enemy>();
-    private Vector2 pos;
+    private Vector2 playerPos;
     private World world;
     private Texture texture;
-    private BulletManager bulletManager;
     // asukohtade genereerimiseks
     private Random r = new Random();
 
     private UIManager uiManager;
+    private BulletManager bulletManager;
+    private MusicManager musicManager;
 
-    public EnemyManager(SpriteBatch batch, Player player, World world, UIManager uiManager, BulletManager bulletManager) {
+    public EnemyManager(
+            SpriteBatch batch, Player player, World world,
+            UIManager uiManager, BulletManager bulletManager, MusicManager musicManager) {
         this.batch = batch;
-        this.pos = player.body.getPosition();
+        this.playerPos = player.body.getPosition();
         this.world = world;
         this.uiManager = uiManager;
         this.bulletManager = bulletManager;
+        this.musicManager = musicManager;
+
         texture = new Texture(Gdx.files.internal("enemy_alien_fighter_1b_t.png"));
 
         addEnemy();
     }
 
-    public void update(Player player) {
-        pos = player.body.getPosition();
+    public void update() {
+        float lähimKaugus = -1;
+
         for (Enemy e : vaenlased) {
-            e.update(pos.x, pos.y);
+            float kaugus = e.update();
+            if (kaugus < lähimKaugus || lähimKaugus == -1)
+                lähimKaugus = kaugus;
         }
+
+        musicManager.setClosestEnemyDistance(lähimKaugus);
     }
 
     public Array<Enemy> getVaenlased() {
@@ -52,21 +63,30 @@ public class EnemyManager {
     }
 
     public void dispose() {
-        for (Enemy e : vaenlased) {
-            e.dispose();
-        }
+        texture.dispose();
+
+        for (Enemy e : vaenlased)
+            e.die();
     }
 
     public void addEnemy() {
-        float xKoord=-20;
-        float yKoord=-20;
-        if (r.nextInt(2) == 0) {
-            xKoord = GameInfo.W_WIDTH +20;
-        }
-        if (r.nextInt(2) == 0) {
+        float xKoord = -20;
+        float yKoord = -20;
+
+        if (r.nextInt(2) == 0)
+            xKoord = GameInfo.W_WIDTH + 20;
+
+        if (r.nextInt(2) == 0)
             yKoord = GameInfo.W_HEIGHT + 20;
-        }
-        Enemy enemy = new Enemy(xKoord* (float) Math.random(), yKoord* (float) Math.random(), world, texture, bulletManager, pos, this);
+
+        Enemy enemy = new Enemy(
+                xKoord * (float) Math.random(),
+                yKoord * (float) Math.random(),
+                world,
+                texture,
+                playerPos,
+                bulletManager,
+                this);
 
         vaenlased.add(enemy);
 
