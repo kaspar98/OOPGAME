@@ -17,10 +17,10 @@ public class Planet extends Sprite {
         super(new Texture(Gdx.files.internal(textureName)));
 
         float resizeXY = (
-                parallaxConstant = getTexture().getWidth() * MathUtils.random(0.05f, 0.1f)
+                parallaxConstant = getTexture().getWidth() * MathUtils.random(0.5f, 0.9f)
         ) * GameInfo.CAM_SCALING;
 
-        parallaxConstant = 1 - 1f / (getTexture().getWidth() * 0.13f - parallaxConstant) * 2f;
+        parallaxConstant = 1 - 1f / (getTexture().getWidth() - parallaxConstant) * 2f;
 
         setSize(resizeXY, resizeXY);
 
