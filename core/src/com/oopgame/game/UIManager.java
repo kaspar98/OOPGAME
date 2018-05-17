@@ -58,8 +58,6 @@ public class UIManager {
                 health_back.getWidth(),
                 health_back.getHeight());
         shield_back.setFlip(true, false);
-
-        addMarker(new Vector2(0, 0));
     }
 
     public void update() {
