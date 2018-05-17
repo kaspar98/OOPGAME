@@ -14,17 +14,21 @@ public class UIBar extends Sprite {
     private float maxValue;
     private float maxSize = 0;
 
-    public UIBar(Texture texture, float maxValue, float dx, float dy, OrthographicCamera camera) {
+    public UIBar(Texture texture, float maxValue, float dx, OrthographicCamera camera) {
         super(texture);
 
         this.maxValue = maxValue;
         this.dx = dx;
-        this.dy = dy;
+        this.dy = getHeight() * 0.5f * GameInfo.CAM_SCALING;
         this.camera = camera;
 
         setSize(
                 getWidth() * GameInfo.CAM_SCALING,
                 getHeight() * GameInfo.CAM_SCALING);
+
+        setCenter(
+                camera.position.x + dx,
+                camera.position.y + dy);
 
         maxSize = getTexture().getHeight();
     }
@@ -40,9 +44,11 @@ public class UIBar extends Sprite {
         setRegionY((int) (maxSize - height));
         setSize(getWidth(), height * GameInfo.CAM_SCALING);
 
-        setCenter(
+        setOrigin(getWidth() * 0.5f, 0);
+
+        setOriginBasedPosition(
                 camera.position.x + dx,
-                camera.position.y + dy - (maxSize - height) * 0.5f * GameInfo.CAM_SCALING);
+                camera.position.y - dy);
     }
 
     public void dispose() {
