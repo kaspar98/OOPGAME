@@ -16,18 +16,23 @@ import helpers.GameInfo;
 public class Bullet extends Sprite {
     private Body body;
     private Fixture fixture;
+
     private float damage;
     private BulletManager bm;
+
     private boolean playerShot;
 
-    public Bullet(float xKust, float yKust, float xKuhu, float yKuhu, float damage, Texture texture, World world, BulletManager bm, boolean playerShot) {
+    public Bullet(float xKust, float yKust,
+                  float xKuhu, float yKuhu,
+                  float damage,
+                  Texture texture, World world, BulletManager bm, boolean playerShot) {
         super(texture);
         this.damage = damage;
         this.bm = bm;
         this.playerShot = playerShot;
         setSize(
-                getTexture().getWidth() * GameInfo.SCALING,
-                getTexture().getHeight() * GameInfo.SCALING
+                getTexture().getWidth() * GameInfo.SCALING * 1.5f,
+                getTexture().getHeight() * GameInfo.SCALING * 2f
         );
         setOrigin(getWidth() / 2f, getHeight() / 2f);
 
@@ -47,9 +52,17 @@ public class Bullet extends Sprite {
 
         box.dispose();
 
-        body.applyForceToCenter(new Vector2((xKuhu-xKust)*GameInfo.FORCE_MULTIPLIER, (yKuhu-yKust)*GameInfo.FORCE_MULTIPLIER), true);
-        setRotation(new Vector2(xKuhu-xKust, yKuhu-yKust).angle()+90);
-        body.setTransform(body.getPosition(), (new Vector2(xKuhu-xKust, yKuhu-yKust).angle()+90)* MathUtils.degRad);
+        body.applyForceToCenter(new Vector2(
+                        (xKuhu - xKust) * GameInfo.FORCE_MULTIPLIER,
+                        (yKuhu - yKust) * GameInfo.FORCE_MULTIPLIER),
+                true);
+        setRotation(new Vector2(xKuhu - xKust, yKuhu - yKust).angle() + 90);
+        body.setTransform(
+                body.getPosition(),
+                (new Vector2(
+                        xKuhu - xKust,
+                        yKuhu - yKust).angle() + 90
+                ) * MathUtils.degRad);
     }
 
     public void draw(Batch batch) {
@@ -63,6 +76,7 @@ public class Bullet extends Sprite {
     public void dispose() {
         getTexture().dispose();
     }
+
     public void die() {
         bm.removeBullet(this);
     }
@@ -80,7 +94,7 @@ public class Bullet extends Sprite {
     }
 
     // tagastab distantsi etteantud punktist
-    public float getDistance(float x, float y){
-        return new Vector2(x-body.getPosition().x, y-body.getPosition().y).len();
+    public float getDistance(float x, float y) {
+        return new Vector2(x - body.getPosition().x, y - body.getPosition().y).len();
     }
 }
