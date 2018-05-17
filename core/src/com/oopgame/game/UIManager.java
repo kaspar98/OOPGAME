@@ -40,11 +40,11 @@ public class UIManager {
 
         compass_marker_texture = new Texture(Gdx.files.internal("ui1_compass_marker2_t.png"));
 
-        health = new UIBar(new Texture("ui1_health1_t.png"),
-                player.getMaxHealth(), -dx, 0, camera);
+        health = new UIBar(new Texture("ui1_health1b_t.png"),
+                player.getMaxHealth(), -dx, camera);
 
-        shield = new UIBar(new Texture("ui1_shield1_t.png"),
-                player.getMaxShield(), dx, 0, camera);
+        shield = new UIBar(new Texture("ui1_shield1b_t.png"),
+                player.getMaxShield(), dx, camera);
 
         back = new Texture(Gdx.files.internal("ui1_health1_back_t.png"));
 
