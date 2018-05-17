@@ -1,4 +1,5 @@
 package com.oopgame.game;
+
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -19,22 +20,29 @@ import helpers.GameInfo;
 public class Enemy extends Sprite {
     private Body body;
     private Fixture fixture;
+
     private BulletManager bulletManager;
     private EnemyManager enemyManager;
+
     private Vector2 playerPos;
 
     private float health = 100;
-    private float maxHealth = 100;
     private float shield = 0;
-    private float maxShield = 100;
+
     private int tippkiirus = 25;
+
     private float lasuCooldown = 2;
     private float viimatiTulistatud = 3;
     private float lasuDamage = 25;
     private float tulistamisKaugus = 55;
+
     private int scoreValue = 10;
 
-    public Enemy(float x, float y, World world, Texture texture, BulletManager bulletManager, Vector2 playerPos, EnemyManager enemyManager) {
+    public Enemy(float x, float y,
+                 World world, Texture texture,
+                 Vector2 playerPos,
+                 BulletManager bulletManager,
+                 EnemyManager enemyManager) {
         super(texture);
         this.bulletManager = bulletManager;
         this.playerPos = playerPos;
@@ -59,7 +67,7 @@ public class Enemy extends Sprite {
         body.setUserData(this);
 
         CircleShape circle = new CircleShape();
-        circle.setRadius(getHeight()/2f);
+        circle.setRadius(getHeight() / 2f);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = circle;
@@ -73,60 +81,83 @@ public class Enemy extends Sprite {
 
         circle.dispose();
     }
+
     public void draw(Batch batch) {
         super.draw(batch);
     }
 
     // muutujad x ja y on Playeri keskpunkti koordinaadid
-    public void update(float x, float y) {
+    public float update() {
+        float x = playerPos.x;
+        float y = playerPos.y;
+
+        float optKaugus = 150 * GameInfo.SCALING;
+
+        Vector2 vaheVektor = vektorPlayerist();
+
+        if (optKaugus < vaheVektor.len()) {
+            // jõud mida rakendada, et tagasi õigele kaugusele jõuda,
+            // kuidagi arvutada nii, et ta ei pea jääma edasi tagasi liikuma
+        } else if (optKaugus > vaheVektor.len()) {
+            // jõud mida rakendada, et liikuda playerile lähemale
+        }
+
         // võtame 8 punkti playeri ümbert ning leiame neist vaenlase keskpunktile lähima mille poole vaenlane liigub
         // vaenlase liikumist saaks oluliselt parandada kui punkte võtta rohkem (või teha teine süsteem liikumiseks)
-        Vector2 punkt1 = new Vector2(x+35-getX(), y+12-getY());
-        Vector2 punkt2 = new Vector2(x+35-getX(), y-12-getY());
-        Vector2 punkt3 = new Vector2(x-35-getX(), y+12-getY());
-        Vector2 punkt4 = new Vector2(x-35-getX(), y-12-getY());
-        Vector2 punkt5 = new Vector2(x+22-getX(), y+22-getY());
-        Vector2 punkt6 = new Vector2(x+22-getX(), y-22-getY());
-        Vector2 punkt7 = new Vector2(x-22-getX(), y+22-getY());
-        Vector2 punkt8 = new Vector2(x-22-getX(), y-22-getY());
-        List<Vector2> punktid = Arrays.asList(punkt1, punkt2, punkt3, punkt4, punkt5, punkt6 ,punkt7 ,punkt8);
+        Vector2 punkt1 = new Vector2(x + 35 - getX(), y + 12 - getY());
+        Vector2 punkt2 = new Vector2(x + 35 - getX(), y - 12 - getY());
+        Vector2 punkt3 = new Vector2(x - 35 - getX(), y + 12 - getY());
+        Vector2 punkt4 = new Vector2(x - 35 - getX(), y - 12 - getY());
+        Vector2 punkt5 = new Vector2(x + 22 - getX(), y + 22 - getY());
+        Vector2 punkt6 = new Vector2(x + 22 - getX(), y - 22 - getY());
+        Vector2 punkt7 = new Vector2(x - 22 - getX(), y + 22 - getY());
+        Vector2 punkt8 = new Vector2(x - 22 - getX(), y - 22 - getY());
+        List<Vector2> punktid = Arrays.asList(punkt1, punkt2, punkt3, punkt4, punkt5, punkt6, punkt7, punkt8);
         Vector2 vähim = punkt1;
-        for (Vector2 p:punktid) {
-            if (Float.compare(vähim.len(), p.len())>0) vähim = p;
+        for (Vector2 p : punktid) {
+            if (Float.compare(vähim.len(), p.len()) > 0) vähim = p;
         }
-        vähim = new Vector2(vähim.x * GameInfo.FORCE_MULTIPLIER/3, vähim.y * GameInfo.FORCE_MULTIPLIER/3);
+        vähim = new Vector2(vähim.x * GameInfo.FORCE_MULTIPLIER / 3, vähim.y * GameInfo.FORCE_MULTIPLIER / 3);
 
         body.applyForceToCenter(vähim, true);
 
         // leiame vektori playeri poole et panna vaenlast õigele poole vaatama
-        Vector2 playeriPoole = new Vector2(x-getX(), y-getY());
+        Vector2 playeriPoole = new Vector2(x - getX(), y - getY());
 
         // muudab sprite'i keskpunkti asukoht vastavalt keha asukohale
         body.setAngularVelocity(0);
         setCenter(body.getPosition().x, body.getPosition().y);
-        setRotation(playeriPoole.angle()+90);
+        setRotation(playeriPoole.angle() + 90);
 
         // kontrollib kas enemy sõidab lubatust kiiremini
         // kui sõidab siis alandab kiirust
         float speedX = body.getLinearVelocity().x;
         float speedY = body.getLinearVelocity().y;
-        float kordaja = tippkiirus*tippkiirus/(speedX*speedX+speedY*speedY);
-        if (body.getLinearVelocity().len()>tippkiirus) {
-            body.setLinearVelocity(speedX*kordaja, speedY*kordaja);
+        float kordaja = tippkiirus * tippkiirus / (speedX * speedX + speedY * speedY);
+        if (body.getLinearVelocity().len() > tippkiirus) {
+            /*body.setLinearVelocity(speedX * kordaja, speedY * kordaja);*/
+            body.setLinearVelocity(body.getLinearVelocity().setLength(tippkiirus));
         }
 
         // tulistamise handlemine
         double kaugus = playeriPoole.len();
-        if (kaugus < tulistamisKaugus && viimatiTulistatud>lasuCooldown) {
+        if (kaugus < tulistamisKaugus && viimatiTulistatud > lasuCooldown) {
             viimatiTulistatud = 0;
             bulletManager.enemyShoot(body.getPosition().x, body.getPosition().y, playerPos.x, playerPos.y, lasuDamage);
         }
-        viimatiTulistatud += 1/20.0;
+        viimatiTulistatud += 1 / 20.0;
+
+        return vaheVektor.len();
     }
 
-    public void dispose() {
+    // tegelikult meil pole seda vaja, võib ära kustutada
+    /*public void dispose() {
         // võtab spraidiga seotud assetid mälust maha
         getTexture().dispose();
+    }*/
+
+    private Vector2 vektorPlayerist() {
+        return new Vector2(body.getPosition().x - playerPos.x, body.getPosition().y - playerPos.y);
     }
 
     public Body getBody() {
@@ -134,8 +165,8 @@ public class Enemy extends Sprite {
     }
 
     // tagastab distantsi etteantud punktist
-    public float getDistance(float x, float y){
-        return new Vector2(x-getX(), y-getY()).len();
+    public float getDistance(float x, float y) {
+        return new Vector2(x - getX(), y - getY()).len();
     }
 
     public float getHealth() {
