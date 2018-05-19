@@ -1,6 +1,5 @@
 package com.oopgame.game;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
@@ -11,10 +10,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
-
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
+import com.badlogic.gdx.utils.TimeUtils;
 
 import helpers.GameInfo;
 
@@ -29,41 +25,40 @@ public class Enemy extends Sprite {
     private Vector2 playerPos;
     private Vector2 playerVektor;
 
+    private UIMarker uiMarker;
+
     private float health = 100;
     private float shield = 0;
 
     private int tippkiirus = 25;
 
-    private float lasuCooldown = 2;
-    private float viimatiTulistatud = 3;
+    private long shootDelay = 1000;
+    private long lastShot = 0;
+
     private float lasuDamage = 25;
     private float tulistamisKaugus = 55;
 
     private int scoreValue = 10;
 
-    public Enemy(float x, float y,
-                 World world, Texture texture,
+    public Enemy(Vector2 start,
+                 World world, Sprite appearance,
                  Vector2 playerPos, Vector2 playerVektor,
+                 UIManager uiManager,
                  BulletManager bulletManager,
                  EnemyManager enemyManager) {
-        super(texture);
+        super(appearance);
+
         this.world = world;
         this.bulletManager = bulletManager;
         this.playerPos = playerPos;
         this.playerVektor = playerVektor;
         this.enemyManager = enemyManager;
 
-        setSize(
-                getTexture().getWidth() * GameInfo.SCALING,
-                getTexture().getHeight() * GameInfo.SCALING);
-
-        setOrigin(getWidth() / 2f, getHeight() / 2f);
-
-        setCenter(x, y);
+        setCenter(start.x, start.y);
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(x, y);
+        bodyDef.position.set(start.x, start.y);
 
         // loome Enemy'le keha
         body = world.createBody(bodyDef);
@@ -83,6 +78,8 @@ public class Enemy extends Sprite {
         fixture.setUserData(this);
 
         circle.dispose();
+
+        uiMarker = uiManager.addMarker(body.getPosition());
     }
 
     public void draw(Batch batch) {
@@ -90,8 +87,7 @@ public class Enemy extends Sprite {
     }
 
     public float update() {
-        float optKaugus = GameInfo.INNER_RADIUS * GameInfo.SCALING * 0.5f;
-
+        float optKaugus = GameInfo.INNER_RADIUS * GameInfo.SCALING * 0.75f;
 
         // leiame vektori playeri poole et panna vaenlast õigele poole vaatama
         Vector2 playeriPoole = vektorPlayerist().scl(-1);
@@ -101,31 +97,11 @@ public class Enemy extends Sprite {
             // jõud mida rakendada, et liikuda playerile lähemale
             body.applyForceToCenter(
                     playeriPoole.cpy().setLength(GameInfo.FORCE_MULTIPLIER), true);
-        } else if (optKaugus - 5 > playeriPoole.len()) {
-            // jõud mida rakendada, et tagasi õigele kaugusele jõuda,
+        } else if (optKaugus > playeriPoole.len()) {
+            // jõud mida rakendada, kui playerile on piisavalt lähedal
             body.applyForceToCenter(
-                    playeriPoole.cpy().setLength(GameInfo.FORCE_MULTIPLIER).scl(-1), true);
+                    playerVektor.cpy().setLength(GameInfo.FORCE_MULTIPLIER * 0.9f), true);
         }
-
-        /*// võtame 8 punkti playeri ümbert ning leiame neist vaenlase keskpunktile lähima mille poole vaenlane liigub
-        // vaenlase liikumist saaks oluliselt parandada kui punkte võtta rohkem (või teha teine süsteem liikumiseks)
-        float x, y = playerPos.x + playerVektor.x, playerPos.y + playerVektor.y;
-        Vector2 punkt1 = new Vector2(x + 35 - getX(), y + 12 - getY());
-        Vector2 punkt2 = new Vector2(x + 35 - getX(), y - 12 - getY());
-        Vector2 punkt3 = new Vector2(x - 35 - getX(), y + 12 - getY());
-        Vector2 punkt4 = new Vector2(x - 35 - getX(), y - 12 - getY());
-        Vector2 punkt5 = new Vector2(x + 22 - getX(), y + 22 - getY());
-        Vector2 punkt6 = new Vector2(x + 22 - getX(), y - 22 - getY());
-        Vector2 punkt7 = new Vector2(x - 22 - getX(), y + 22 - getY());
-        Vector2 punkt8 = new Vector2(x - 22 - getX(), y - 22 - getY());
-        List<Vector2> punktid = Arrays.asList(punkt1, punkt2, punkt3, punkt4, punkt5, punkt6, punkt7, punkt8);
-        Vector2 vähim = punkt1;
-        for (Vector2 p : punktid) {
-            if (Float.compare(vähim.len(), p.len()) > 0) vähim = p;
-        }
-        vähim = new Vector2(vähim.x * GameInfo.FORCE_MULTIPLIER / 3f, vähim.y * GameInfo.FORCE_MULTIPLIER / 3f);
-
-        body.applyForceToCenter(vähim, true);*/
 
         // muudab sprite'i keskpunkti asukoht vastavalt keha asukohale
         body.setAngularVelocity(0);
@@ -138,17 +114,20 @@ public class Enemy extends Sprite {
         }
 
         // tulistamise handlemine
-        double kaugus = playeriPoole.len();
-        if (kaugus < tulistamisKaugus && viimatiTulistatud > lasuCooldown) {
-            viimatiTulistatud = 0;
-            bulletManager.enemyShoot(
-                    body.getPosition(),
-                    new Vector2(
-                            playerPos.x + playerVektor.x * 0.5f,
-                            playerPos.y + playerVektor.y * 0.5f),
-                    lasuDamage);
+        long time = TimeUtils.millis();
+
+        if (time > lastShot + shootDelay && playeriPoole.len() < tulistamisKaugus) {
+            if (playeriPoole.len() < tulistamisKaugus * 0.25f) {
+                bulletManager.enemyShoot(
+                        body.getPosition(), playeriPoole, lasuDamage);
+            } else {
+                bulletManager.enemyShoot(
+                        body.getPosition(),
+                        playeriPoole.cpy().add(playerVektor.cpy().scl(1f - 1 / playeriPoole.len())),
+                        lasuDamage);
+            }
+            lastShot = time;
         }
-        viimatiTulistatud += 1 / 20.0;
 
         return vaheVektor.len();
     }
@@ -159,49 +138,27 @@ public class Enemy extends Sprite {
                 body.getPosition().y - playerPos.y);
     }
 
-    public Body getBody() {
-        return body;
+    public void kill() {
+        enemyManager.removeEnemy(this, body.getPosition().x, body.getPosition().y);
+        body.setLinearVelocity(0, 0);
+        body.setTransform(-GameInfo.W_WIDTH, 0, 0);
+        body.setActive(false);
     }
 
-    public float getHealth() {
-        return health;
+    public void revive() {
+        Vector2 suvaline = uusAsukoht();
+        health = 100;
+        body.setActive(true);
+        body.setTransform(suvaline, 0);
     }
 
-    public void setHealth(float health) {
-        this.health = health;
-    }
-
-    public float getShield() {
-        return shield;
-    }
-
-    public void setShield(float shield) {
-        this.shield = shield;
-    }
-
-    public void die() {
-        enemyManager.removeEnemy(this);
-    }
-
-    public void ärata(Vector2 pos) {
-        setHealth(100);
-        setShield(100);
-        setCenter(pos.x, pos.y);
-    }
-
-    public static Vector2 suvalineAsukoht() {
-        float xKoord = -20;
-        float yKoord = -20;
-
-        if (MathUtils.random(2) == 0)
-            xKoord = GameInfo.W_WIDTH + 20;
-
-        if (MathUtils.random(2) == 0)
-            yKoord = GameInfo.W_HEIGHT + 20;
+    public static Vector2 uusAsukoht() {
+        float radius = new Vector2(GameInfo.W_WIDTH, GameInfo.W_HEIGHT).len() * 0.5f;
+        float angle = MathUtils.random(360f);
 
         return new Vector2(
-                MathUtils.random(xKoord),
-                MathUtils.random(yKoord));
+                GameInfo.W_WIDTH * 0.5f + MathUtils.cosDeg(angle) * radius,
+                GameInfo.W_HEIGHT * 0.5f + MathUtils.sinDeg(angle) * radius);
     }
 
     public int getScoreValue() {
@@ -210,11 +167,28 @@ public class Enemy extends Sprite {
 
     public boolean isKill() {
         if (health <= 0) {
-            body.setLinearVelocity(0,0);
-            body.setTransform(-GameInfo.W_WIDTH, 0, 0);
-            die();
+            kill();
             return true;
         }
         return false;
+    }
+
+    public UIMarker getMarker() {
+        return uiMarker;
+    }
+
+    public void damage(float damage) {
+        if (shield < damage) {
+            float overflow = damage - shield;
+
+            shield = 0;
+            health -= overflow;
+
+            if (health <= 0) {
+                enemyManager.getCorpses().add(this);
+            }
+        } else {
+            shield -= damage;
+        }
     }
 }
