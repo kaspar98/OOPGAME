@@ -16,10 +16,10 @@ public class UIManager {
     private Player player;
 
     private Sprite compass;
-    private Texture compass_marker_texture;
+    private Sprite compass_marker_appearance;
     private Array<UIMarker> compass_markers = new Array<UIMarker>();
 
-    private float dx = 117 * GameInfo.CAM_SCALING;
+    private float dx = 105 * GameInfo.CAM_SCALING;
 
     private Texture back;
 
@@ -33,26 +33,42 @@ public class UIManager {
         this.camera = camera;
         this.player = player;
 
+        // compassi elemendi loomine
         compass = new Sprite(new Texture("ui1_compass2_t.png"));
         compass.setSize(
                 compass.getWidth() * GameInfo.CAM_SCALING,
                 compass.getHeight() * GameInfo.CAM_SCALING);
 
-        compass_marker_texture = new Texture(Gdx.files.internal("ui1_compass_marker2_t.png"));
+        // compassil olevate markerite tekstuuri lugemine
+        compass_marker_appearance = new Sprite(
+                new Texture(Gdx.files.internal("ui1_compass_marker2_t.png")));
 
-        health = new UIBar(new Texture("ui1_health1b_t.png"),
+        compass_marker_appearance.setSize(
+                compass_marker_appearance.getWidth() * GameInfo.CAM_SCALING,
+                compass_marker_appearance.getHeight() * GameInfo.CAM_SCALING);
+
+        compass_marker_appearance.setOrigin(
+                compass_marker_appearance.getWidth(),
+                compass_marker_appearance.getHeight() * 0.5f);
+
+        // health bari loomine
+        health = new UIBar(new Texture("ui1_health2a_t.png"),
                 player.getMaxHealth(), -dx, camera);
 
-        shield = new UIBar(new Texture("ui1_shield1b_t.png"),
+        // shield bari loomine
+        shield = new UIBar(new Texture("ui1_shield2a_t.png"),
                 player.getMaxShield(), dx, camera);
 
+        // baride tausta tekstuuri lugemine
         back = new Texture(Gdx.files.internal("ui1_health1_back_t.png"));
 
+        // health bari taust
         health_back = new Sprite(back);
         health_back.setSize(
                 health_back.getWidth() * GameInfo.CAM_SCALING,
                 health_back.getHeight() * GameInfo.CAM_SCALING);
 
+        // shield bari taust
         shield_back = new Sprite(back);
         shield_back.setSize(
                 health_back.getWidth(),
@@ -71,7 +87,9 @@ public class UIManager {
         health.update(player.getHealth());
         health_back.setPosition(health.getX(), health.getY());
         shield.update(player.getShield());
-        shield_back.setPosition(shield.getX(), shield.getY());
+        shield_back.setPosition(
+                shield.getX() + shield.getWidth() - shield_back.getWidth(),
+                shield.getY());
     }
 
     public void render() {
@@ -86,32 +104,31 @@ public class UIManager {
 
     public void dispose() {
         compass.getTexture().dispose();
+        compass_marker_appearance.getTexture().dispose();
+
         health.getTexture().dispose();
         shield.getTexture().dispose();
         back.dispose();
+    }
 
-        for (UIMarker marker : compass_markers)
-            marker.dispose();
+    public void reviveMarker(UIMarker marker) {
+        compass_markers.add(marker);
     }
 
     public UIMarker addMarker(Vector2 point) {
-        UIMarker marker = new UIMarker(
-                compass_marker_texture,
+        UIMarker marker;
+
+        marker = new UIMarker(
+                compass_marker_appearance,
                 camera, compass.getWidth() * 0.5f,
-                point
-        );
+                point);
 
         compass_markers.add(marker);
 
         return marker;
     }
 
-    public void removeMarker(Vector2 keskkoht) {
-        for (UIMarker u : compass_markers) {
-            if (u.getPoint().equals(keskkoht)) {
-                compass_markers.removeValue(u, false);
-                break;
-            }
-        }
+    public void removeMarker(UIMarker uiMarker) {
+        compass_markers.removeValue(uiMarker, false);
     }
 }
