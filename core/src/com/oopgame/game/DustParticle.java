@@ -18,12 +18,16 @@ public class DustParticle extends Sprite {
 
     public void update(Vector2 vel) {
         setPosition(
-                getX() - vel.x / 120,
-                getY() - vel.y / 120
+                getX() - vel.x / GameInfo.PLAYER_MAXSPEED * 2f,
+                getY() - vel.y / GameInfo.PLAYER_MAXSPEED * 2f
         );
 
         setSize(vel.len() / 12, getHeight());
         setRotation(vel.angle());
+    }
+
+    public Vector2 getPosition() {
+        return new Vector2(getX(), getY());
     }
 
     public void setPosition(Vector2 asukoht) {
