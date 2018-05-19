@@ -12,7 +12,7 @@ public class UIBar extends Sprite {
     private float dx;
     private float dy;
     private float maxValue;
-    private float maxSize = 0;
+    private float maxSize;
 
     public UIBar(Texture texture, float maxValue, float dx, OrthographicCamera camera) {
         super(texture);
