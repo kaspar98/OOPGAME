@@ -1,7 +1,6 @@
 package scenes;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
@@ -9,8 +8,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.Contact;
@@ -20,7 +19,7 @@ import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.BackgroundManager;
@@ -29,21 +28,19 @@ import com.oopgame.game.BulletManager;
 import com.oopgame.game.DustParticleManager;
 import com.oopgame.game.Enemy;
 import com.oopgame.game.EnemyManager;
+import com.oopgame.game.ExplosionManager;
 import com.oopgame.game.MusicManager;
 import com.oopgame.game.OOPGame;
 import com.oopgame.game.Player;
 import com.oopgame.game.Sein;
-import com.oopgame.game.Seinad;
-import com.oopgame.game.TouchPad;
 import com.oopgame.game.UIManager;
-
-import java.util.HashSet;
-import java.util.Set;
+import com.oopgame.game.WaveManager;
 
 import helpers.GameInfo;
 
 public class GameScreen implements Screen, ContactListener {
     private final OOPGame game;
+    private SpriteBatch batch;
 
     private Viewport viewport;
     private OrthographicCamera camera;
@@ -54,37 +51,25 @@ public class GameScreen implements Screen, ContactListener {
     private World world;
     private Box2DDebugRenderer debugRenderer;
 
-    private int score = 0;
-    private int highscore;
-
+    private BitmapFont font;
     private Label currentScore;
     private Label wave;
-    // muutuja mida suurendame iga update ühe võrra et arvutada hetke millal uut wave vaenlaseid teha
-    private int enemyTicker = 0;
-    // kaunter et lugeda palju vaenlaseid antud waves;
-    private int enemyAmount = 0;
 
     private UIManager uiManager;
 
-    private Seinad walls;
     private BackgroundManager bgManager;
     private DustParticleManager tolm;
-    private BulletManager bulletManager;
+    private ExplosionManager explosionManager;
     private EnemyManager enemyManager;
-    // et säilitada update tsükli lõpuni objekte
-    private Set<Bullet> bulletsToKill;
-
-    // isendiväljad et anda trackida kui suur on ekraan (resizemine)
-    // vajalik et playeri tulistamine töötaks
-    private int laius = GameInfo.WIDTH;
-    private int pikkus = GameInfo.HEIGHT;
+    private BulletManager bulletManager;
+    private WaveManager waveManager;
 
     private MusicManager musicManager;
     private Sound hitmarker;
 
-    public GameScreen(final OOPGame game, int highscore) {
+    public GameScreen(final OOPGame game) {
         this.game = game;
-        this.highscore = highscore;
+        this.batch = game.batch;
 
         Box2D.init();
 
@@ -100,44 +85,53 @@ public class GameScreen implements Screen, ContactListener {
         viewport = new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT, camera);
 
         // loome lava, millele touchpadi paigutada + loome touchpadi inpute töötleva protsessori
-        stage = new Stage(new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT), game.batch);
+        stage = new Stage(new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT), batch);
 
-        bulletManager = new BulletManager(game.batch, world);
+        bulletManager = new BulletManager(batch, world);
 
         // loome Playeri mänguvälja keskele
         player = new Player(
-                GameInfo.W_WIDTH / 2f,
-                GameInfo.W_HEIGHT / 2f,
+                GameInfo.W_WIDTH * 0.5f,
+                GameInfo.W_HEIGHT * 0.5f,
                 world,
                 stage,
                 bulletManager);
 
-        uiManager = new UIManager(game.batch, camera, player);
+        uiManager = new UIManager(batch, camera, player);
 
         // taustamuusika jaoks MusicManager()
         musicManager = new MusicManager();
 
         // tausta jaoks BackgroundManageri:
-        bgManager = new BackgroundManager(game.batch, camera);
+        bgManager = new BackgroundManager(batch, camera);
 
         // tolmuefekti jaoks DustParticleManager
-        tolm = new DustParticleManager(game.batch, player);
+        tolm = new DustParticleManager(batch, player);
+
+        explosionManager = new ExplosionManager(batch);
 
         // tüüpi 1 vaenlaste jaoks
-        enemyManager = new EnemyManager(game.batch, player, world, uiManager, bulletManager, musicManager);
-        bulletsToKill = new HashSet<Bullet>();
+        enemyManager = new EnemyManager(batch, player, world,
+                uiManager, bulletManager, musicManager, explosionManager);
 
         // seinad mänguvälja ümber
-        walls = new Seinad(world);
+        looSeinad();
 
+        waveManager = new WaveManager(enemyManager);
 
-        currentScore = new Label(score + "", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
+        font = new BitmapFont();
+        font.getData().setScale(2);
+
+        currentScore = new Label(waveManager.getScoreInfo(),
+                new Label.LabelStyle(font, Color.WHITE));
         currentScore.setFontScale(2);
-        currentScore.setPosition(10, GameInfo.HEIGHT - 40);
+        currentScore.setAlignment(Align.topLeft);
 
-        wave = new Label("WAVE " + enemyAmount, new Label.LabelStyle(new BitmapFont(), Color.WHITE));
+
+        wave = new Label(waveManager.getWaveInfo(),
+                new Label.LabelStyle(font, Color.WHITE));
         wave.setFontScale(2);
-        wave.setPosition(GameInfo.WIDTH / 2 - wave.getWidth(), GameInfo.HEIGHT - 40);
+        wave.setAlignment(Align.center);
 
         stage.addActor(currentScore);
         stage.addActor(wave);
@@ -156,76 +150,29 @@ public class GameScreen implements Screen, ContactListener {
 
     @Override
     public void render(float delta) {
-        enemyTicker++;
-        if (enemyTicker > 600) {
-            enemyTicker = 0;
-            enemyAmount++;
-            score += enemyAmount;
-            for (int i = 0; i < enemyAmount; i++) {
-                enemyManager.addEnemy();
-            }
-        }
-        // sellega saab testida muusika üleminekut:
-        float volume = musicManager.getActionVolume();
-        if (Gdx.input.isKeyPressed(Input.Keys.UP))
-            volume += 0.01f;
-        else if (Gdx.input.isKeyPressed(Input.Keys.DOWN))
-            volume -= 0.01f;
+        waveManager.update();
 
-        // lihtsalt testimiseks
-        /*if (Gdx.input.isKeyPressed(Input.Keys.R))
-            camera.zoom = GameInfo.CAM_SCALING;
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
-            camera.zoom += camera.zoom * GameInfo.CAM_SCALING;
-        else if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
-            camera.zoom -= camera.zoom * GameInfo.CAM_SCALING;*/
-
-        musicManager.setActionVolume(volume);
-
-        // box2d world steps
         world.step(1 / 60f, 6, 2);
 
-        // clear the screen with a dark blue color. The
-        // arguments to glClearColor are the red, green
-        // blue and alpha component in the range [0,1]
-        // of the color to be used to clear the screen.
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-
-        // see osa on väga temporary, see katab hetkel ainult Playeri keha värskendamist,
-        // teistel objektidel võivad olla hoopis teised asjad, mide värskendada.
-        // Variant oleks teha igale värskendatavale objektile enda meetod, mille alusel
-        // ta ennast värskendab
-        Array<Body> bodies = new Array<Body>();
-        world.getBodies(bodies);
-
         player.update();
-        // käib for-iga läbi need värskendatavad kehad
-        /*for (Body b : bodies) {
-            BodiedSprite e = (BodiedSprite) b.getUserData();
-
-            if (e != null) {
-                // siia paneks hoopis mingi meetodi kutse
-                e.bodyUpdate();
-            }
-        }*/
 
         tolm.update();
 
         enemyManager.update();
         bulletManager.update();
+        explosionManager.update();
+        waveManager.update();
+
         // liigutab kaamerat playeri positsiooni järgi
         player.updateCam(camera);
-
-        // tell the camera to update its matrices.
         camera.update();
 
-        // tell the SpriteBatch to render in the
-        // coordinate system specified by the camera.
-        game.batch.setProjectionMatrix(camera.combined);
+        batch.setProjectionMatrix(camera.combined);
 
-        game.batch.begin();
+        batch.begin();
 
         // tausta lisamine
         bgManager.update();
@@ -236,52 +183,56 @@ public class GameScreen implements Screen, ContactListener {
         enemyManager.render();
 
         // kutsub Playeris playeri renderimise välja
-        player.draw(game.batch);
+        player.draw(batch);
+
+        explosionManager.render();
 
         uiManager.update();
         uiManager.render();
-        currentScore.setText(score + "");
-        wave.setText("WAVE " + enemyAmount);
 
-        game.batch.end();
+        currentScore.setPosition(10, GameInfo.HEIGHT - 40);
+        currentScore.setText(waveManager.getScoreInfo());
+
+        wave.setText(waveManager.getWaveInfo());
+        wave.setPosition(
+                GameInfo.WIDTH * 0.5f - wave.getWidth() * 0.5f,
+                GameInfo.HEIGHT - 40);
+
+        batch.end();
 
 
         // debug camera render
         debugRenderer.render(world, camera.combined);
 
         // input checks koos touchpadiga
-        player.inputs(laius, pikkus);
+        player.inputs();
 
         // stage loodud touchpadi jaoks
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
 
-        // iga ticki lõpus häväitame kõik objektid mida enam tarvis pole
-        // bulletid mis on liiga kaugel playerist
-        for (Bullet b : bulletManager.getLasud()) {
-            if (b.getDistance(player.getX(), player.getY()) > GameInfo.WIDTH) {
-                b.die();
-                world.destroyBody(b.getBody());
-            }
-        }
+
         // bulletid mis collidisid
-        for (Bullet b : bulletsToKill) {
-            b.die();
-            world.destroyBody(b.getBody());
-        }
+        for (Bullet b : bulletManager.getCorpses())
+            b.kill();
+        bulletManager.getCorpses().clear();
+
         // vaenlased mis tapeti
-        for (Enemy e : enemyManager.getVaenlased()) {
+        for (Enemy e : enemyManager.getCorpses())
             if (e.isKill())
-                score += e.getScoreValue();
-            /*world.destroyBody(e.getBody());*/
-        }
-        bulletsToKill.clear();
+                waveManager.addScore(e.getScoreValue());
+        enemyManager.getCorpses().clear();
+
         if (player.getHealth() <= 0) {
-            if (score > highscore) {
-                highscore = score;
-                FileHandle handle = Gdx.files.local("highscore.txt");
-                handle.writeString(highscore + "", false);
-            }
+            int score = waveManager.getScore();
+            // loeb igakord uuesti sisse failis oleva highscore'i, sest muidu äkki sama ajal kui
+            // mäng lahti on, kirjutab teine sama mängu instance faili kõrgema highscore'i
+            FileHandle handle = Gdx.files.local("highscore.txt");
+            int highscore = Integer.parseInt(handle.readString("UTF-8"));
+
+            if (score > highscore)
+                handle.writeString("" + score, false, "UTF-8");
+
             game.setScreen(new MainMenuScreen(game, highscore));
             dispose();
         }
@@ -291,8 +242,6 @@ public class GameScreen implements Screen, ContactListener {
     public void resize(int width, int height) {
         viewport.update(width, height);
         stage.getViewport().update(width, height);
-        laius = width;
-        pikkus = height;
     }
 
     @Override
@@ -312,127 +261,65 @@ public class GameScreen implements Screen, ContactListener {
 
     @Override
     public void dispose() {
-        // võtame playeri tekstuuri ja tausta maha mälust
         player.dispose();
+
         bgManager.dispose();
         tolm.dispose();
-        enemyManager.dispose();
+        explosionManager.dispose();
         bulletManager.dispose();
-        stage.dispose();
-
+        enemyManager.dispose();
         uiManager.dispose();
 
         musicManager.dispose();
         hitmarker.dispose();
+
+        font.dispose();
+
+        stage.dispose();
     }
 
     @Override
     public void beginContact(Contact contact) {
-        if (contact.getFixtureA().getUserData() instanceof Sein) {
-            if (contact.getFixtureB().getUserData() instanceof Player) {
-                Player player = (Player) contact.getFixtureB().getUserData();
-                Sein sein = (Sein) contact.getFixtureA().getUserData();
+        Object first = contact.getFixtureA().getUserData();
+        Object second = contact.getFixtureB().getUserData();
+
+        if (first instanceof Sein) {
+            if (second instanceof Player) {
+                Player player = (Player) second;
+                Sein sein = (Sein) first;
 
                 player.addForce(sein.getForce());
             }
-        } else if (contact.getFixtureB().getUserData() instanceof Sein) {
-            if (contact.getFixtureA().getUserData() instanceof Player) {
-                Player player = (Player) contact.getFixtureA().getUserData();
-                Sein sein = (Sein) contact.getFixtureB().getUserData();
+        } else if (second instanceof Sein) {
+            if (first instanceof Player) {
+                Player player = (Player) first;
+                Sein sein = (Sein) second;
 
                 player.addForce(sein.getForce());
             }
         }
-        if (contact.getFixtureA().getUserData() instanceof Bullet) {
-            if (contact.getFixtureB().getUserData() instanceof Player) {
-                Bullet lask = (Bullet) contact.getFixtureA().getUserData();
-                if (!lask.isPlayerShot()) {
-                    bulletsToKill.add(lask);
-                    float damage = lask.getDamage();
-                    if (player.getShield() > 0) {
-                        float kilpi = player.getShield() - damage;
-                        player.setShield(kilpi);
-                        if (kilpi < 0) {
-                            player.setHealth(player.getHealth() + kilpi);
-                        }
-                    } else {
-                        player.setHealth(player.getHealth() - damage);
 
-                    }
-                }
-            }
-        } else if (contact.getFixtureB().getUserData() instanceof Bullet) {
-            if (contact.getFixtureA().getUserData() instanceof Player) {
-                Bullet lask = (Bullet) contact.getFixtureB().getUserData();
-                if (!lask.isPlayerShot()) {
-                    bulletsToKill.add(lask);
-                    float damage = lask.getDamage();
-                    if (player.getShield() > 0) {
-                        float kilpi = player.getShield() - damage;
-                        player.setShield(kilpi);
-                        if (kilpi < 0) {
-                            player.setHealth(player.getHealth() + kilpi);
-                        }
-                    } else {
-                        player.setHealth(player.getHealth() - damage);
-
-                    }
-                }
-            }
-        }
-        if (contact.getFixtureA().getUserData() instanceof Bullet) {
-            if (contact.getFixtureB().getUserData() instanceof Enemy) {
-                Bullet lask = (Bullet) contact.getFixtureA().getUserData();
-                Enemy enemy = (Enemy) contact.getFixtureB().getUserData();
-                if (lask.isPlayerShot()) {
-                    hitmarker.play(0.5f);
-                    bulletsToKill.add(lask);
-                    float damage = lask.getDamage();
-                    if (enemy.getShield() > 0) {
-                        float kilpi = enemy.getShield() - damage;
-                        enemy.setShield(kilpi);
-                        if (kilpi < 0) {
-                            enemy.setHealth(enemy.getHealth() + kilpi);
-                        }
-                    } else {
-                        enemy.setHealth(enemy.getHealth() - damage);
-
-                    }
-                }
-            }
-        } else if (contact.getFixtureB().getUserData() instanceof Bullet) {
-            if (contact.getFixtureA().getUserData() instanceof Enemy) {
-                Bullet lask = (Bullet) contact.getFixtureB().getUserData();
-                Enemy enemy = (Enemy) contact.getFixtureB().getUserData();
-                if (lask.isPlayerShot()) {
-                    hitmarker.play(0.5f);
-                    bulletsToKill.add(lask);
-                    float damage = lask.getDamage();
-                    if (enemy.getShield() > 0) {
-                        float kilpi = enemy.getShield() - damage;
-                        enemy.setShield(kilpi);
-                        if (kilpi < 0) {
-                            enemy.setHealth(enemy.getHealth() + kilpi);
-                        }
-                    } else {
-                        enemy.setHealth(enemy.getHealth() - damage);
-                    }
-                }
-            }
-        }
+        if (first instanceof Bullet)
+            bulletCheck(first, second);
+        else if (second instanceof Bullet)
+            bulletCheck(second, first);
     }
+
 
     @Override
     public void endContact(Contact contact) {
-        if (contact.getFixtureA().getUserData() instanceof Sein) {
-            if (contact.getFixtureB().getUserData() instanceof Player) {
-                Sein sein = (Sein) contact.getFixtureA().getUserData();
+        Object first = contact.getFixtureA().getUserData();
+        Object second = contact.getFixtureB().getUserData();
+
+        if (first instanceof Sein) {
+            if (second instanceof Player) {
+                Sein sein = (Sein) first;
 
                 player.subForce(sein.getForce());
             }
-        } else if (contact.getFixtureB().getUserData() instanceof Sein) {
-            if (contact.getFixtureA().getUserData() instanceof Player) {
-                Sein sein = (Sein) contact.getFixtureB().getUserData();
+        } else if (second instanceof Sein) {
+            if (first instanceof Player) {
+                Sein sein = (Sein) second;
 
                 player.subForce(sein.getForce());
             }
@@ -447,5 +334,58 @@ public class GameScreen implements Screen, ContactListener {
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {
 
+    }
+
+    private void bulletCheck(Object bulletObject, Object object) {
+        Bullet bullet = (Bullet) bulletObject;
+
+        if (object instanceof Player && !bullet.isPlayerShot()) {
+            bulletManager.getCorpses().add(bullet);
+
+            player.damage(bullet.getDamage());
+        } else if (object instanceof Enemy && bullet.isPlayerShot()) {
+            Enemy enemy = (Enemy) object;
+
+            hitmarker.play(0.5f);
+
+            bulletManager.getCorpses().add(bullet);
+
+            enemy.damage(bullet.getDamage());
+        }
+    }
+
+    private void looSeinad() {
+        float seinaPaksusPool = 120;
+
+        float[][] coords = new float[][]{
+                {GameInfo.W_WIDTH / 2f, -seinaPaksusPool},
+                {GameInfo.W_WIDTH / 2f, GameInfo.W_HEIGHT + seinaPaksusPool},
+                {-seinaPaksusPool, GameInfo.W_HEIGHT / 2f},
+                {GameInfo.W_WIDTH + seinaPaksusPool, GameInfo.W_HEIGHT / 2f}
+        };
+
+        float[][] suurused = new float[][]{
+                {GameInfo.W_WIDTH / 2f + seinaPaksusPool * 2, seinaPaksusPool},
+                {seinaPaksusPool, GameInfo.W_HEIGHT / 2f + seinaPaksusPool * 2}
+        };
+
+        float lüke = GameInfo.PLAYER_ACCELERATION * 1.15f * GameInfo.FORCE_MULTIPLIER;
+
+        Vector2[] lükked = new Vector2[]{
+                new Vector2(0, lüke),
+                new Vector2(0, -lüke),
+                new Vector2(lüke, 0),
+                new Vector2(-lüke, 0)
+        };
+
+        for (int i = 0; i < 4; i++)
+            new Sein(
+                    world,
+                    coords[i][0],
+                    coords[i][1],
+                    suurused[i / 2][0],
+                    suurused[i / 2][1],
+                    lükked[i]
+            );
     }
 }
