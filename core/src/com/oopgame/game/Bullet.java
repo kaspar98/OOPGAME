@@ -1,15 +1,14 @@
 package com.oopgame.game;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.TimeUtils;
 
 import helpers.GameInfo;
 
@@ -22,18 +21,15 @@ public class Bullet extends Sprite {
 
     private boolean playerShot;
 
+    private long startTime;
+    private long length = 10000;
+
     public Bullet(Vector2 kust, Vector2 suunaVektor, float damage,
-                  Texture texture, World world, BulletManager bm, boolean playerShot) {
-        super(texture);
+                  Sprite appearance, World world, BulletManager bm, boolean playerShot) {
+        super(appearance);
         this.damage = damage;
         this.bm = bm;
         this.playerShot = playerShot;
-
-        setSize(
-                getTexture().getWidth() * GameInfo.SCALING * 1.5f,
-                getTexture().getHeight() * GameInfo.SCALING * 2f);
-
-        setOrigin(getWidth() / 2f, getHeight() / 2f);
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -43,25 +39,22 @@ public class Bullet extends Sprite {
         body = world.createBody(bodyDef);
         body.setUserData(this);
         body.setBullet(true);
+
         PolygonShape box = new PolygonShape();
         box.setAsBox(getWidth() * 0.5f, getHeight() * 0.5f);
+
         fixture = body.createFixture(box, 0);
         fixture.setSensor(true);
         fixture.setUserData(this);
 
         box.dispose();
 
-        Vector2 vektor = new Vector2(
-                suunaVektor.x * GameInfo.FORCE_MULTIPLIER * 1000,
-                suunaVektor.y * GameInfo.FORCE_MULTIPLIER * 1000);
+        body.setLinearVelocity(suunaVektor.cpy().setLength(GameInfo.FORCE_MULTIPLIER * 1000));
 
-        body.applyForceToCenter(vektor, true);
+        setRotation(suunaVektor.angle());
+        body.setTransform(body.getPosition(), suunaVektor.angleRad());
 
-        setRotation(vektor.angle() + 90);
-        body.setTransform(
-                body.getPosition(),
-                (getRotation()
-                ) * MathUtils.degRad);
+        startTime = TimeUtils.millis();
     }
 
     public void draw(Batch batch) {
@@ -70,10 +63,34 @@ public class Bullet extends Sprite {
 
     public void update() {
         setCenter(body.getPosition().x, body.getPosition().y);
+
+        long time = TimeUtils.millis();
+        if (startTime + length < time) {
+            kill();
+        }
     }
 
-    public void die() {
+    public void kill() {
         bm.removeBullet(this);
+        body.setLinearVelocity(0, 0);
+        body.setTransform(-GameInfo.W_WIDTH, 0, 0);
+        body.setActive(false);
+    }
+
+    public void revive(Vector2 pos, Vector2 suunaVektor, float damage, Sprite appearance, boolean playerShot) {
+        this.set(appearance);
+
+        this.damage = damage;
+        this.playerShot = playerShot;
+        startTime = TimeUtils.millis();
+
+        setRotation(suunaVektor.angle());
+
+        body.setTransform(pos, suunaVektor.angleRad());
+
+        body.setLinearVelocity(suunaVektor.cpy().setLength(GameInfo.FORCE_MULTIPLIER * 1000));
+
+        body.setActive(true);
     }
 
     public Body getBody() {
