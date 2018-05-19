@@ -202,7 +202,7 @@ public class GameScreen implements Screen, ContactListener {
 
 
         // debug camera render
-        debugRenderer.render(world, camera.combined);
+        /*debugRenderer.render(world, camera.combined);*/
 
         // input checks koos touchpadiga
         player.inputs();
