@@ -18,14 +18,18 @@ import com.oopgame.game.OOPGame;
 import helpers.GameInfo;
 
 public class MainMenuScreen implements Screen {
-    final OOPGame game;
-
-    private int highscore;
+    private OOPGame game;
     private OrthographicCamera camera;
-    private Sprite title;
-    private Label info;
     private Stage stage;
+
     private Viewport viewport;
+
+    private Sprite title;
+    private int highscore;
+
+    private Label info;
+
+    private Sprite background;
 
     public MainMenuScreen(final OOPGame game, int highscore) {
         this.game = game;
@@ -42,7 +46,8 @@ public class MainMenuScreen implements Screen {
 
         info = new Label(
                 "Highscore " + highscore + "\n" +
-                        "TAP ANYWHERE TO BEGIN", new Label.LabelStyle(new BitmapFont(), Color.ORANGE));
+                        "TAP ANYWHERE TO BEGIN",
+                new Label.LabelStyle(new BitmapFont(), Color.ORANGE));
 
         info.setFontScale(2);
         info.setPosition(GameInfo.WIDTH * 0.25f, GameInfo.HEIGHT * 0.3f);
@@ -50,6 +55,10 @@ public class MainMenuScreen implements Screen {
         stage.addActor(info);
         Gdx.input.setInputProcessor(stage);
 
+        background = new Sprite(new Texture(Gdx.files.internal("title_space.png")));
+        background.setCenter(
+                GameInfo.WIDTH * 0.5f,
+                GameInfo.HEIGHT * 0.5f);
     }
 
     @Override
@@ -58,19 +67,29 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0.2f, 1);
+        Gdx.gl.glClearColor(0, 0, 0f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        background.setCenter(
+                GameInfo.WIDTH * 0.5f + -Gdx.input.getAccelerometerY() * 10f,
+                GameInfo.HEIGHT * 0.5f + -Gdx.input.getAccelerometerX() * 10f);
+
         camera.update();
+
         game.batch.setProjectionMatrix(camera.combined);
+
+
         game.batch.begin();
+
+        background.draw(game.batch);
         title.draw(game.batch);
         game.batch.end();
         stage.act(Gdx.graphics.getDeltaTime());
+
         stage.draw();
 
         if (Gdx.input.isTouched()) {
-            game.setScreen(new GameScreen(game, highscore));
+            game.setScreen(new GameScreen(game));
             dispose();
         }
     }
@@ -97,5 +116,6 @@ public class MainMenuScreen implements Screen {
     public void dispose() {
         stage.dispose();
         title.getTexture().dispose();
+        background.getTexture().dispose();
     }
 }
