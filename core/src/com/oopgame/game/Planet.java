@@ -4,17 +4,22 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
 
 import helpers.GameInfo;
 
 public class Planet extends Sprite {
+    private Vector3 camPos;
+
     private float parallaxConstant;
 
     private float dx;
     private float dy;
 
-    public Planet(String textureName) {
+    public Planet(String textureName, Vector3 camPos) {
         super(new Texture(Gdx.files.internal(textureName)));
+
+        this.camPos = camPos;
 
         float resizeXY = (
                 parallaxConstant = getTexture().getWidth() * MathUtils.random(0.5f, 0.9f)
@@ -31,10 +36,10 @@ public class Planet extends Sprite {
         dy = MathUtils.random(-rangeMin, rangeMax);
     }
 
-    public void update(float x, float y) {
+    public void update() {
         setCenter(
-                x * parallaxConstant + dx,
-                y * parallaxConstant + dy
+                camPos.x * parallaxConstant + dx,
+                camPos.y * parallaxConstant + dy
         );
     }
 
