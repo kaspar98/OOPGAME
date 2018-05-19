@@ -3,10 +3,13 @@ package com.oopgame.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Vector3;
 
 import helpers.GameInfo;
 
 public class Background extends Sprite {
+    private Vector3 camPos;
+
     private float dx = 0;
     private float dy = 0;
 
@@ -15,35 +18,31 @@ public class Background extends Sprite {
 
     private float parallaxConstantXY;
 
-    public Background(String textureName, float cropXY) {
-        this(textureName, cropXY, cropXY);
-    }
-
-    public Background(String textureName, float cropX, float cropY) {
+    public Background(String textureName, float cropX, float cropY, Vector3 camPos) {
         super(new Texture(Gdx.files.internal(textureName)));
+
+        this.camPos = camPos;
 
         setSize(
                 getWidth() * GameInfo.CAM_SCALING,
                 getHeight() * GameInfo.CAM_SCALING
         );
 
-        setOrigin(getWidth() / 2f, getHeight() / 2f);
+        setOrigin(getWidth() * 0.5f, getHeight() * 0.5f);
 
         this.cropX = cropX;
         this.cropY = cropY;
 
         parallaxConstantXY =
                 1 - (
-                        getWidth() - 2 * (
-                                this.cropX > this.cropY ? this.cropX : this.cropY
-                        )
+                        getWidth() - 2 * (this.cropX > this.cropY ? this.cropX : this.cropY)
                 ) / (GameInfo.W_WIDTH > GameInfo.W_HEIGHT ? GameInfo.W_WIDTH : GameInfo.W_HEIGHT);
     }
 
-    public void update(float x, float y) {
+    public void update() {
         setPosition(
-                dx + x * parallaxConstantXY - cropX,
-                dy + y * parallaxConstantXY - cropY
+                dx + camPos.x * parallaxConstantXY - cropX,
+                dy + camPos.y * parallaxConstantXY - cropY
         );
     }
 
