@@ -20,8 +20,8 @@ public class Background extends Sprite {
 
     public Background(String textureName, float cropX, float cropY, Vector3 camPos) {
         super(new Texture(Gdx.files.internal(textureName)));
-
         this.camPos = camPos;
+
 
         setSize(
                 getWidth() * GameInfo.CAM_SCALING,
