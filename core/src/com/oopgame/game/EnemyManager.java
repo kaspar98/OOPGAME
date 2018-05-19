@@ -2,23 +2,22 @@ package com.oopgame.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
-
-import java.util.Random;
 
 import helpers.GameInfo;
 
 public class EnemyManager {
     private SpriteBatch batch;
     private World world;
-    private Texture texture;
+    private Sprite appearance;
 
-    private Array<Enemy> vaenlased = new Array<Enemy>();
-    private Array<Enemy> surnuaed = new Array<Enemy>();
+    private Array<Enemy> enemies = new Array<Enemy>();
+    private Array<Enemy> corpses = new Array<Enemy>();
+    private Array<Enemy> graveyard = new Array<Enemy>();
 
     private Vector2 playerPos;
     private Vector2 playerVektor;
@@ -26,27 +25,41 @@ public class EnemyManager {
     private UIManager uiManager;
     private BulletManager bulletManager;
     private MusicManager musicManager;
+    private ExplosionManager explosionManager;
 
     public EnemyManager(
             SpriteBatch batch, Player player, World world,
-            UIManager uiManager, BulletManager bulletManager, MusicManager musicManager) {
+            UIManager uiManager, BulletManager bulletManager,
+            MusicManager musicManager, ExplosionManager explosionManager) {
         this.batch = batch;
-        this.playerPos = player.body.getPosition();
-        this.playerVektor = player.body.getLinearVelocity();
+        this.playerPos = player.getPosition();
+        this.playerVektor = player.getVector();
         this.world = world;
         this.uiManager = uiManager;
         this.bulletManager = bulletManager;
         this.musicManager = musicManager;
+        this.explosionManager = explosionManager;
 
-        texture = new Texture(Gdx.files.internal("enemy_alien_fighter_1b_t.png"));
+        Texture texture = new Texture(
+                Gdx.files.internal("enemy_alien_fighter_1b_t.png"));
 
-        /*addEnemy();*/
+        appearance = new Sprite(texture);
+
+        appearance.setSize(
+                texture.getWidth() * GameInfo.SCALING,
+                texture.getHeight() * GameInfo.SCALING);
+
+        appearance.setOrigin(
+                appearance.getWidth() * 0.5f,
+                appearance.getHeight() * 0.5f);
+
+
     }
 
     public void update() {
         float lähimKaugus = -1;
 
-        for (Enemy e : vaenlased) {
+        for (Enemy e : enemies) {
             float kaugus = e.update();
             if (kaugus < lähimKaugus || lähimKaugus == -1)
                 lähimKaugus = kaugus;
@@ -55,53 +68,55 @@ public class EnemyManager {
         musicManager.setClosestEnemyDistance(lähimKaugus);
     }
 
-    public Array<Enemy> getVaenlased() {
-        return vaenlased;
+    public Array<Enemy> getCorpses() {
+        return corpses;
     }
 
     public void render() {
-        for (Enemy e : vaenlased) {
+        for (Enemy e : enemies) {
             e.draw(batch);
         }
     }
 
     public void dispose() {
-        for (Enemy e : vaenlased)
-            e.die();
+        for (Enemy e : enemies)
+            e.kill();
 
-        texture.dispose();
+        appearance.getTexture().dispose();
     }
 
     public void addEnemy() {
-        Vector2 suvaline = Enemy.suvalineAsukoht();
         Enemy enemy;
 
-        if (surnuaed.size > 0) {
-            enemy = surnuaed.pop();
-            enemy.ärata(suvaline);
-            vaenlased.add(enemy);
+        if (graveyard.size > 0) {
+            enemy = graveyard.pop();
+
+            enemy.revive();
+
+            uiManager.reviveMarker(enemy.getMarker());
         } else {
+            Vector2 suvaline = Enemy.uusAsukoht();
+
             enemy = new Enemy(
-                    suvaline.x, suvaline.y,
-                    world, texture,
+                    suvaline,
+                    world, appearance,
                     playerPos, playerVektor,
-                    bulletManager,
-                    this);
-
-            vaenlased.add(enemy);
+                    uiManager,
+                    bulletManager, this);
         }
-
-        uiManager.addMarker(enemy.getBody().getPosition());
+        enemies.add(enemy);
     }
 
-    public BulletManager getBulletManager() {
-        return bulletManager;
+    public void removeEnemy(Enemy e, float x, float y) {
+        enemies.removeValue(e, false);
+        graveyard.add(e);
+        explosionManager.addExplosion(x, y);
+        uiManager.removeMarker(e.getMarker());
     }
 
-    public void removeEnemy(Enemy e) {
-        vaenlased.removeValue(e, false);
-        surnuaed.add(e);
-        uiManager.removeMarker(e.getBody().getPosition());
+    public int getEnemyCount() {
+        // waveManager kasutab seda.
+        return enemies.size;
     }
 }
 
