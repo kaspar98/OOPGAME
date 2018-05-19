@@ -36,7 +36,8 @@ public class Enemy extends Sprite {
     private long lastShot = 0;
 
     private float lasuDamage = 25;
-    private float tulistamisKaugus = 55;
+    private float optKaugus = GameInfo.INNER_RADIUS * GameInfo.SCALING * 0.75f;
+    private float tulistamisKaugus = optKaugus;
 
     private int scoreValue = 10;
 
@@ -87,8 +88,6 @@ public class Enemy extends Sprite {
     }
 
     public float update() {
-        float optKaugus = GameInfo.INNER_RADIUS * GameInfo.SCALING * 0.75f;
-
         // leiame vektori playeri poole et panna vaenlast õigele poole vaatama
         Vector2 playeriPoole = vektorPlayerist().scl(-1);
         Vector2 vaheVektor = vektorPlayerist().add(playerVektor);
