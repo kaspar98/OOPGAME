@@ -32,6 +32,7 @@ public class OOPGame extends Game {
     }
 
     public void dispose() {
+        getScreen().dispose();
         batch.dispose();
         font.dispose();
     }
