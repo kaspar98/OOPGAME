@@ -51,7 +51,7 @@ public class Player extends Sprite {
     private float tippkiirus = GameInfo.PLAYER_MAXSPEED;
 
     private BulletManager bulletManager;
-    private float bulletDamage = 100;
+    private float bulletDamage = 25;
     private long shootDelay = 200;
     private long lastShot = 0;
 
@@ -94,7 +94,8 @@ public class Player extends Sprite {
         forces = new Vector2();
 
 
-        thruster = new Sprite(new Texture("player_ship_1b_booster1_t.png"));
+        thruster = new Sprite(
+                new Texture(Gdx.files.internal("player_ship_1b_booster1_t.png")));
         thruster.setSize(
                 0,
                 getHeight() * GameInfo.SCALING * 4);
@@ -272,8 +273,7 @@ public class Player extends Sprite {
     }
 
     public void damage(float damage) {
-        long time = TimeUtils.millis();
-        damagedTime = time;
+        damagedTime = TimeUtils.millis();
         damaged = true;
 
         if (shield < damage) {

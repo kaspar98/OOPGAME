@@ -22,7 +22,7 @@ public class Bullet extends Sprite {
     private boolean playerShot;
 
     private long startTime;
-    private long length = 10000;
+    private long length = 2500;
 
     public Bullet(Vector2 kust, Vector2 suunaVektor, float damage,
                   Sprite appearance, World world, BulletManager bm, boolean playerShot) {
