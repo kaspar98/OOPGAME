@@ -18,4 +18,6 @@ public class GameInfo {
 
     public static final float W_WIDTH = 2048;
     public static final float W_HEIGHT = 2048;
+
+    public static final long GIBS_DURATION = 5000;
 }
