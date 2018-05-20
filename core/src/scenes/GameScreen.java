@@ -166,6 +166,7 @@ public class GameScreen implements Screen, ContactListener {
         tolm.update();
 
         enemyManager.update();
+        musicManager.update(delta);
         bulletManager.update();
         explosionManager.update();
         waveManager.update();
