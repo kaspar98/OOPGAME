@@ -11,6 +11,9 @@ public class MusicManager {
 
     private float actionDistance = GameInfo.CAM_SCALING * GameInfo.OUTER_RADIUS;
     private float calmDistance = actionDistance * 3;
+    private float targetVolume = 0;
+    // kui palju heli tugevust muuta sekundis;
+    private float fadeTime = 1f;
 
     public MusicManager() {
         // action
@@ -45,24 +48,35 @@ public class MusicManager {
         });
     }
 
-    public float getActionVolume() {
-        return musicA.getVolume();
+    public void update(float delta) {
+        if (musicA.getVolume() > targetVolume) {
+            float change = fadeTime * delta;
+
+            if (musicA.getVolume() - targetVolume > change)
+                musicA.setVolume(musicA.getVolume() - change);
+            else
+                musicA.setVolume(targetVolume);
+
+        } else {
+            musicA.setVolume(targetVolume);
+        }
     }
 
-    public void setActionVolume(float volume) {
+    private void setActionVolume(float volume) {
         if (volume > 1f)
             volume = 1f;
         else if (volume < 0)
             volume = 0;
 
-        musicA.setVolume(volume);
+        targetVolume = volume;
     }
 
     public void setClosestEnemyDistance(float distance) {
-        if (distance < actionDistance)
+        System.out.println(distance);
+        if (distance == -1 || distance > calmDistance)
+            setActionVolume(0);
+        else if (distance < actionDistance)
             setActionVolume(1f);
-        else if (distance > calmDistance)
-            setActionVolume(0f);
         else
             setActionVolume((calmDistance - distance) / (calmDistance - actionDistance));
     }
