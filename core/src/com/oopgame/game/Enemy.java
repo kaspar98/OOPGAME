@@ -1,5 +1,6 @@
 package com.oopgame.game;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -30,7 +31,11 @@ public class Enemy extends Sprite {
     private UIMarker uiMarker;
 
     private float health = 100;
-    private float shield = 0;
+    private float shield = 25;
+
+    private boolean damaged = false;
+    private long damagedTime;
+    private long damagedDelay = 200;
 
     private int tippkiirus = 25;
 
@@ -100,7 +105,7 @@ public class Enemy extends Sprite {
         float visibleTime = GameInfo.GIBS_DURATION * 0.5f;
 
         float alpha = (time - gibsStart > visibleTime ?
-                1f - (time - gibsStart - visibleTime) / (GameInfo.GIBS_DURATION - visibleTime):
+                1f - (time - gibsStart - visibleTime) / (GameInfo.GIBS_DURATION - visibleTime) :
                 1);
 
         for (Gibs gib : gibs)
@@ -146,6 +151,11 @@ public class Enemy extends Sprite {
                         lasuDamage);
             }
             lastShot = time;
+        }
+
+        if (damaged && damagedTime + damagedDelay < time) {
+            setColor(Color.WHITE);
+            damaged = false;
         }
 
         return vaheVektor.len();
@@ -226,7 +236,12 @@ public class Enemy extends Sprite {
     }
 
     public void damage(float damage) {
+        damagedTime = TimeUtils.millis();
+        damaged = true;
+
         if (shield < damage) {
+            setColor(Color.RED);
+
             float overflow = damage - shield;
 
             shield = 0;
@@ -236,6 +251,7 @@ public class Enemy extends Sprite {
                 enemyManager.getCorpses().add(this);
             }
         } else {
+            setColor(Color.YELLOW);
             shield -= damage;
         }
     }
