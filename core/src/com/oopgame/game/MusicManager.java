@@ -24,7 +24,7 @@ public class MusicManager {
         musicA.setOnCompletionListener(new Music.OnCompletionListener() {
             @Override
             public void onCompletion(Music music) {
-                float volume = musicB.getVolume();
+                float volume = musicA.getVolume();
                 musicA = Gdx.audio.newMusic(Gdx.files.internal("tha_mcis_a2.mp3"));
                 musicA.setVolume(volume);
                 musicA.setLooping(true);
