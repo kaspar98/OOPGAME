@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.TimeUtils;
 
 import helpers.GameInfo;
 
@@ -17,6 +18,7 @@ public class EnemyManager {
 
     private Array<Enemy> enemies = new Array<Enemy>();
     private Array<Enemy> corpses = new Array<Enemy>();
+    private Array<Enemy> killed = new Array<Enemy>();
     private Array<Enemy> graveyard = new Array<Enemy>();
 
     private Vector2 playerPos;
@@ -26,11 +28,12 @@ public class EnemyManager {
     private BulletManager bulletManager;
     private MusicManager musicManager;
     private ExplosionManager explosionManager;
+    private GibsManager gibsManager;
 
     public EnemyManager(
             SpriteBatch batch, Player player, World world,
-            UIManager uiManager, BulletManager bulletManager,
-            MusicManager musicManager, ExplosionManager explosionManager) {
+            UIManager uiManager, BulletManager bulletManager, MusicManager musicManager,
+            ExplosionManager explosionManager, GibsManager gibsManager) {
         this.batch = batch;
         this.playerPos = player.getPosition();
         this.playerVektor = player.getVector();
@@ -39,6 +42,7 @@ public class EnemyManager {
         this.bulletManager = bulletManager;
         this.musicManager = musicManager;
         this.explosionManager = explosionManager;
+        this.gibsManager = gibsManager;
 
         Texture texture = new Texture(
                 Gdx.files.internal("enemy_alien_fighter_1b_t.png"));
@@ -52,8 +56,6 @@ public class EnemyManager {
         appearance.setOrigin(
                 appearance.getWidth() * 0.5f,
                 appearance.getHeight() * 0.5f);
-
-
     }
 
     public void update() {
@@ -61,11 +63,15 @@ public class EnemyManager {
 
         for (Enemy e : enemies) {
             float kaugus = e.update();
-            if (kaugus < lähimKaugus || lähimKaugus == -1)
+
+            if (kaugus != -1 && (kaugus < lähimKaugus || lähimKaugus == -1))
                 lähimKaugus = kaugus;
         }
 
         musicManager.setClosestEnemyDistance(lähimKaugus);
+
+        for (Enemy e : killed)
+            e.updateGibs();
     }
 
     public Array<Enemy> getCorpses() {
@@ -73,9 +79,11 @@ public class EnemyManager {
     }
 
     public void render() {
-        for (Enemy e : enemies) {
+        for (Enemy e : enemies)
             e.draw(batch);
-        }
+
+        for (Enemy e : killed)
+            e.drawGibs(batch);
     }
 
     public void dispose() {
@@ -101,17 +109,24 @@ public class EnemyManager {
                     suvaline,
                     world, appearance,
                     playerPos, playerVektor,
-                    uiManager,
+                    gibsManager.createGibs("enemy_alien_fighter_1b"), uiManager,
                     bulletManager, this);
         }
         enemies.add(enemy);
     }
 
-    public void removeEnemy(Enemy e, float x, float y) {
-        enemies.removeValue(e, false);
+    public void removeEnemy(Enemy e) {
+        killed.removeValue(e, false);
         graveyard.add(e);
+    }
+
+    public void killEnemy(Enemy e, float x, float y) {
         explosionManager.addExplosion(x, y);
+
         uiManager.removeMarker(e.getMarker());
+
+        enemies.removeValue(e, false);
+        killed.add(e);
     }
 
     public int getEnemyCount() {

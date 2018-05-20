@@ -29,6 +29,7 @@ import com.oopgame.game.DustParticleManager;
 import com.oopgame.game.Enemy;
 import com.oopgame.game.EnemyManager;
 import com.oopgame.game.ExplosionManager;
+import com.oopgame.game.GibsManager;
 import com.oopgame.game.MusicManager;
 import com.oopgame.game.OOPGame;
 import com.oopgame.game.Player;
@@ -63,6 +64,7 @@ public class GameScreen implements Screen, ContactListener {
     private EnemyManager enemyManager;
     private BulletManager bulletManager;
     private WaveManager waveManager;
+    private GibsManager gibsManager;
 
     private MusicManager musicManager;
     private Sound hitmarker;
@@ -97,6 +99,8 @@ public class GameScreen implements Screen, ContactListener {
                 stage,
                 bulletManager);
 
+        gibsManager = new GibsManager(world);
+
         uiManager = new UIManager(batch, camera, player);
 
         // taustamuusika jaoks MusicManager()
@@ -112,7 +116,7 @@ public class GameScreen implements Screen, ContactListener {
 
         // tüüpi 1 vaenlaste jaoks
         enemyManager = new EnemyManager(batch, player, world,
-                uiManager, bulletManager, musicManager, explosionManager);
+                uiManager, bulletManager, musicManager, explosionManager, gibsManager);
 
         // seinad mänguvälja ümber
         looSeinad();
@@ -202,7 +206,7 @@ public class GameScreen implements Screen, ContactListener {
 
 
         // debug camera render
-        /*debugRenderer.render(world, camera.combined);*/
+        //debugRenderer.render(world, camera.combined);
 
         // input checks koos touchpadiga
         player.inputs();
