@@ -54,8 +54,6 @@ public class Player extends Sprite {
     private float bulletDamage = 100;
     private long shootDelay = 200;
     private long lastShot = 0;
-    private Sound laserSound;
-
 
     public Player(float x, float y, World world, Stage stage, BulletManager bulletManager) {
         super(new Texture(Gdx.files.internal("player_laev_t.png")));
@@ -106,9 +104,6 @@ public class Player extends Sprite {
         thrusterSound = Gdx.audio.newSound(Gdx.files.internal("thruster.mp3"));
         thrusterSoundId = thrusterSound.play(0);
         thrusterSound.setLooping(thrusterSoundId, true);
-
-        laserSound = Gdx.audio.newSound(Gdx.files.internal("lask.wav"));
-
 
         // teeme Playeri jaoks touchpadid
         touchpadTextureBg = new Texture(Gdx.files.internal("ui1_touchpad2_t.png"));
@@ -181,8 +176,6 @@ public class Player extends Sprite {
                 lastShot = time;
 
                 bulletManager.playerShoot(body.getPosition(), touchpadVector, bulletDamage);
-
-                laserSound.play(0.35f);
             }
         }
     }
@@ -221,7 +214,6 @@ public class Player extends Sprite {
         thruster.getTexture().dispose();
         getTexture().dispose();
         thrusterSound.dispose();
-        laserSound.dispose();
 
         for (TouchPad touchPad : touchPads)
             touchPad.dispose();

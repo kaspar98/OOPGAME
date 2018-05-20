@@ -1,6 +1,7 @@
 package com.oopgame.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -22,6 +23,9 @@ public class BulletManager {
     private Array<Bullet> corpses = new Array<Bullet>();
     private Array<Bullet> surnuaed = new Array<Bullet>();
 
+    private Sound laserSound;
+
+
     public BulletManager(SpriteBatch batch, World world) {
         this.batch = batch;
         this.world = world;
@@ -39,6 +43,7 @@ public class BulletManager {
 
 
         bulletSprite2 = new Sprite(new Texture(Gdx.files.internal("laser_blue.png")));
+        laserSound = Gdx.audio.newSound(Gdx.files.internal("lask.wav"));
 
         bulletSprite2.setSize(
                 bulletSprite2.getTexture().getWidth() * GameInfo.SCALING * 1.5f,
@@ -70,6 +75,7 @@ public class BulletManager {
 
         bulletSprite1.getTexture().dispose();
         bulletSprite2.getTexture().dispose();
+        laserSound.dispose();
     }
 
     public void enemyShoot(Vector2 algpunkt, Vector2 vektor, float damage) {
@@ -92,6 +98,7 @@ public class BulletManager {
             bullets.add(new Bullet(algpunkt, vektor,
                     damage, bulletSprite2, world, this, true));
         }
+        laserSound.play(0.35f);
     }
 
     public void removeBullet(Bullet bullet) {
