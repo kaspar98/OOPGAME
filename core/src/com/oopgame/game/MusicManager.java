@@ -72,7 +72,6 @@ public class MusicManager {
     }
 
     public void setClosestEnemyDistance(float distance) {
-        System.out.println(distance);
         if (distance == -1 || distance > calmDistance)
             setActionVolume(0);
         else if (distance < actionDistance)
