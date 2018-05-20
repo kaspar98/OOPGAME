@@ -2,6 +2,7 @@ package com.oopgame.game;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -10,6 +11,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 
 import helpers.GameInfo;
@@ -41,10 +43,14 @@ public class Enemy extends Sprite {
 
     private int scoreValue = 10;
 
+    private boolean gibsMode = false;
+    private long gibsStart;
+    private Array<Gibs> gibs;
+
     public Enemy(Vector2 start,
                  World world, Sprite appearance,
                  Vector2 playerPos, Vector2 playerVektor,
-                 UIManager uiManager,
+                 Array<Gibs> gibs, UIManager uiManager,
                  BulletManager bulletManager,
                  EnemyManager enemyManager) {
         super(appearance);
@@ -81,13 +87,30 @@ public class Enemy extends Sprite {
         circle.dispose();
 
         uiMarker = uiManager.addMarker(body.getPosition());
+        this.gibs = gibs;
     }
 
     public void draw(Batch batch) {
         super.draw(batch);
     }
 
+    public void drawGibs(SpriteBatch batch) {
+        long time = TimeUtils.millis();
+
+        float visibleTime = GameInfo.GIBS_DURATION * 0.5f;
+
+        float alpha = (time - gibsStart > visibleTime ?
+                1f - (time - gibsStart - visibleTime) / (GameInfo.GIBS_DURATION - visibleTime):
+                1);
+
+        for (Gibs gib : gibs)
+            gib.draw(batch, alpha);
+    }
+
     public float update() {
+        // tulistamise handlemine
+        long time = TimeUtils.millis();
+
         // leiame vektori playeri poole et panna vaenlast õigele poole vaatama
         Vector2 playeriPoole = vektorPlayerist().scl(-1);
         Vector2 vaheVektor = vektorPlayerist().add(playerVektor);
@@ -112,9 +135,6 @@ public class Enemy extends Sprite {
             body.setLinearVelocity(body.getLinearVelocity().setLength(tippkiirus));
         }
 
-        // tulistamise handlemine
-        long time = TimeUtils.millis();
-
         if (time > lastShot + shootDelay && playeriPoole.len() < tulistamisKaugus) {
             if (playeriPoole.len() < tulistamisKaugus * 0.25f) {
                 bulletManager.enemyShoot(
@@ -131,6 +151,22 @@ public class Enemy extends Sprite {
         return vaheVektor.len();
     }
 
+    public void updateGibs() {
+        long time = TimeUtils.millis();
+
+        // kui enemy surma saab, siis hakatakse hoopis gibs'e uuendama
+        for (Gibs gib : gibs)
+            gib.update();
+
+        // kui gibside aeg otsa saab, siis lõpetatakse enemy uuendamine
+        if (gibsStart + GameInfo.GIBS_DURATION < time) {
+            for (Gibs gib : gibs)
+                gib.stop();
+
+            remove();
+        }
+    }
+
     private Vector2 vektorPlayerist() {
         return new Vector2(
                 body.getPosition().x - playerPos.x,
@@ -138,10 +174,23 @@ public class Enemy extends Sprite {
     }
 
     public void kill() {
-        enemyManager.removeEnemy(this, body.getPosition().x, body.getPosition().y);
+        float x = body.getPosition().x;
+        float y = body.getPosition().y;
+
+        for (Gibs gib : gibs)
+            gib.start(x, y, body.getLinearVelocity());
+
+        gibsStart = TimeUtils.millis();
+        gibsMode = true;
+
+        enemyManager.killEnemy(this, x, y);
         body.setLinearVelocity(0, 0);
         body.setTransform(-GameInfo.W_WIDTH, 0, 0);
         body.setActive(false);
+    }
+
+    private void remove() {
+        enemyManager.removeEnemy(this);
     }
 
     public void revive() {
