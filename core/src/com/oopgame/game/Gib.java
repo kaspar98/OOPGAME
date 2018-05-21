@@ -28,7 +28,7 @@ public class Gib extends Sprite {
         body = world.createBody(bodyDef);
 
         PolygonShape box = new PolygonShape();
-        box.setAsBox(getWidth() * 0.5f, getHeight() * 0.5f);
+        box.setAsBox(1, 1);
 
         Fixture fixture = body.createFixture(box, 0);
         fixture.setSensor(true);
@@ -43,7 +43,7 @@ public class Gib extends Sprite {
     }
 
     private float suvalinePööre() {
-        return MathUtils.random(0f, 2f);
+        return MathUtils.random(0f, 10f);
     }
 
     public void start(float x, float y, Vector2 vektor) {
