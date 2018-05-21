@@ -4,10 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2D;
@@ -18,8 +16,6 @@ import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.BackgroundManager;
@@ -27,7 +23,6 @@ import com.oopgame.game.Bullet;
 import com.oopgame.game.BulletManager;
 import com.oopgame.game.DustParticleManager;
 import com.oopgame.game.Enemy;
-import com.oopgame.game.EnemyManager;
 import com.oopgame.game.ExplosionManager;
 import com.oopgame.game.GibsManager;
 import com.oopgame.game.MusicManager;
@@ -52,16 +47,11 @@ public class GameScreen implements Screen, ContactListener {
     private World world;
     private Box2DDebugRenderer debugRenderer;
 
-    private BitmapFont font;
-    private Label currentScore;
-    private Label wave;
-
     private UIManager uiManager;
 
     private BackgroundManager bgManager;
     private DustParticleManager tolm;
     private ExplosionManager explosionManager;
-    private EnemyManager enemyManager;
     private BulletManager bulletManager;
     private WaveManager waveManager;
     private GibsManager gibsManager;
@@ -114,32 +104,12 @@ public class GameScreen implements Screen, ContactListener {
 
         explosionManager = new ExplosionManager(batch);
 
-        // tüüpi 1 vaenlaste jaoks
-        enemyManager = new EnemyManager(batch, player, world,
-                uiManager, bulletManager, musicManager, explosionManager, gibsManager);
-
         // seinad mänguvälja ümber
         looSeinad();
 
-        waveManager = new WaveManager(enemyManager);
-
-        font = new BitmapFont();
-        font.getData().setScale(2);
-
-        currentScore = new Label(waveManager.getScoreInfo(),
-                new Label.LabelStyle(font, Color.WHITE));
-        currentScore.setFontScale(2);
-        currentScore.setAlignment(Align.topLeft);
-
-
-        wave = new Label(waveManager.getWaveInfo(),
-                new Label.LabelStyle(font, Color.WHITE));
-        wave.setFontScale(2);
-        wave.setAlignment(Align.center);
-
-        stage.addActor(currentScore);
-        stage.addActor(wave);
-        Gdx.input.setInputProcessor(stage);
+        waveManager = new WaveManager(batch, player, world, stage,
+                uiManager, bulletManager, musicManager,
+                explosionManager, gibsManager);
 
         hitmarker = Gdx.audio.newSound(Gdx.files.internal("hitmarker.wav"));
 
@@ -152,8 +122,7 @@ public class GameScreen implements Screen, ContactListener {
 
     }
 
-    @Override
-    public void render(float delta) {
+    public void update(float delta) {
         waveManager.update();
 
         world.step(1 / 60f, 6, 2);
@@ -165,7 +134,6 @@ public class GameScreen implements Screen, ContactListener {
 
         tolm.update();
         gibsManager.update();
-        enemyManager.update();
         musicManager.update(delta);
         bulletManager.update();
         explosionManager.update();
@@ -174,6 +142,11 @@ public class GameScreen implements Screen, ContactListener {
         // liigutab kaamerat playeri positsiooni järgi
         player.updateCam(camera);
         camera.update();
+    }
+
+    @Override
+    public void render(float delta) {
+        update(delta);
 
         batch.setProjectionMatrix(camera.combined);
 
@@ -185,25 +158,20 @@ public class GameScreen implements Screen, ContactListener {
 
         tolm.render();
         bulletManager.render();
-        enemyManager.render();
 
         // kutsub Playeris playeri renderimise välja
         player.draw(batch);
 
-        explosionManager.render();
-
         uiManager.update();
         uiManager.render();
 
-        currentScore.setPosition(10, GameInfo.HEIGHT - 40);
-        currentScore.setText(waveManager.getScoreInfo());
-
-        wave.setText(waveManager.getWaveInfo());
-        wave.setPosition(
-                GameInfo.WIDTH * 0.5f - wave.getWidth() * 0.5f,
-                GameInfo.HEIGHT - 40);
+        waveManager.render();
 
         gibsManager.render();
+
+        explosionManager.render();
+
+        batch.end();
 
         // debug camera render
         //debugRenderer.render(world, camera.combined);
@@ -214,20 +182,6 @@ public class GameScreen implements Screen, ContactListener {
         // stage loodud touchpadi jaoks
         stage.act(/*Gdx.graphics.getDeltaTime()*/delta);
         stage.draw();
-
-        batch.end();
-
-
-        // bulletid mis collidisid
-        for (Bullet b : bulletManager.getCorpses())
-            b.kill();
-        bulletManager.getCorpses().clear();
-
-        // vaenlased mis tapeti
-        for (Enemy e : enemyManager.getCorpses())
-            if (e.isKill())
-                waveManager.addScore(e.getScoreValue());
-        enemyManager.getCorpses().clear();
 
         if (player.getHealth() <= 0) {
             int score = waveManager.getScore();
@@ -273,13 +227,11 @@ public class GameScreen implements Screen, ContactListener {
         tolm.dispose();
         explosionManager.dispose();
         bulletManager.dispose();
-        enemyManager.dispose();
+        waveManager.dispose();
         uiManager.dispose();
 
         musicManager.dispose();
         hitmarker.dispose();
-
-        font.dispose();
 
         stage.dispose();
     }
@@ -346,15 +298,15 @@ public class GameScreen implements Screen, ContactListener {
         Bullet bullet = (Bullet) bulletObject;
 
         if (object instanceof Player && !bullet.isPlayerShot()) {
-            bulletManager.getCorpses().add(bullet);
+            bullet.hasHit();
 
             player.damage(bullet.getDamage());
         } else if (object instanceof Enemy && bullet.isPlayerShot()) {
             Enemy enemy = (Enemy) object;
 
-            hitmarker.play(0.5f);
+            bullet.hasHit();
 
-            bulletManager.getCorpses().add(bullet);
+            hitmarker.play(0.5f);
 
             enemy.damage(bullet.getDamage());
         }
