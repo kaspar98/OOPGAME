@@ -3,7 +3,6 @@ package com.oopgame.game;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -29,6 +28,7 @@ public class Enemy extends Sprite {
     private Vector2 playerVektor;
 
     private UIMarker uiMarker;
+    private GibsManager gibsManager;
 
     private float health = 100;
     private float shield = 25;
@@ -48,16 +48,13 @@ public class Enemy extends Sprite {
 
     private int scoreValue = 10;
 
-    private boolean gibsMode = false;
-    private long gibsStart;
-    private Array<Gibs> gibs;
+    private String gibsKey;
 
     public Enemy(Vector2 start,
-                 World world, Sprite appearance,
+                 World world, Sprite appearance, String gibsKey,
                  Vector2 playerPos, Vector2 playerVektor,
-                 Array<Gibs> gibs, UIManager uiManager,
-                 BulletManager bulletManager,
-                 EnemyManager enemyManager) {
+                 UIManager uiManager, BulletManager bulletManager,
+                 EnemyManager enemyManager, GibsManager gibsManager) {
         super(appearance);
 
         this.world = world;
@@ -65,6 +62,9 @@ public class Enemy extends Sprite {
         this.playerPos = playerPos;
         this.playerVektor = playerVektor;
         this.enemyManager = enemyManager;
+        this.gibsManager = gibsManager;
+
+        this.gibsKey = gibsKey;
 
         setCenter(start.x, start.y);
 
@@ -92,24 +92,10 @@ public class Enemy extends Sprite {
         circle.dispose();
 
         uiMarker = uiManager.addMarker(body.getPosition());
-        this.gibs = gibs;
     }
 
     public void draw(Batch batch) {
         super.draw(batch);
-    }
-
-    public void drawGibs(SpriteBatch batch) {
-        long time = TimeUtils.millis();
-
-        float visibleTime = GameInfo.GIBS_DURATION * 0.5f;
-
-        float alpha = (time - gibsStart > visibleTime ?
-                1f - (time - gibsStart - visibleTime) / (GameInfo.GIBS_DURATION - visibleTime) :
-                1);
-
-        for (Gibs gib : gibs)
-            gib.draw(batch, alpha);
     }
 
     public float update() {
@@ -161,22 +147,6 @@ public class Enemy extends Sprite {
         return vaheVektor.len();
     }
 
-    public void updateGibs() {
-        long time = TimeUtils.millis();
-
-        // kui enemy surma saab, siis hakatakse hoopis gibs'e uuendama
-        for (Gibs gib : gibs)
-            gib.update();
-
-        // kui gibside aeg otsa saab, siis lõpetatakse enemy uuendamine
-        if (gibsStart + GameInfo.GIBS_DURATION < time) {
-            for (Gibs gib : gibs)
-                gib.stop();
-
-            remove();
-        }
-    }
-
     private Vector2 vektorPlayerist() {
         return new Vector2(
                 body.getPosition().x - playerPos.x,
@@ -187,11 +157,7 @@ public class Enemy extends Sprite {
         float x = body.getPosition().x;
         float y = body.getPosition().y;
 
-        for (Gibs gib : gibs)
-            gib.start(x, y, body.getLinearVelocity());
-
-        gibsStart = TimeUtils.millis();
-        gibsMode = true;
+        gibsManager.createGibs()
 
         enemyManager.killEnemy(this, x, y);
         body.setLinearVelocity(0, 0);

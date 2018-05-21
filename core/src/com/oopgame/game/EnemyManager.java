@@ -18,7 +18,6 @@ public class EnemyManager {
 
     private Array<Enemy> enemies = new Array<Enemy>();
     private Array<Enemy> corpses = new Array<Enemy>();
-    private Array<Enemy> killed = new Array<Enemy>();
     private Array<Enemy> graveyard = new Array<Enemy>();
 
     private Vector2 playerPos;
@@ -69,9 +68,6 @@ public class EnemyManager {
         }
 
         musicManager.setClosestEnemyDistance(lähimKaugus);
-
-        for (Enemy e : killed)
-            e.updateGibs();
     }
 
     public Array<Enemy> getCorpses() {
@@ -81,9 +77,6 @@ public class EnemyManager {
     public void render() {
         for (Enemy e : enemies)
             e.draw(batch);
-
-        for (Enemy e : killed)
-            e.drawGibs(batch);
     }
 
     public void dispose() {
@@ -107,10 +100,10 @@ public class EnemyManager {
 
             enemy = new Enemy(
                     suvaline,
-                    world, appearance,
+                    world, appearance, "enemy_alien_fighter_1b",
                     playerPos, playerVektor,
-                    gibsManager.createGibs("enemy_alien_fighter_1b"), uiManager,
-                    bulletManager, this);
+                    uiManager, bulletManager,
+                    this, gibsManager);
         }
         enemies.add(enemy);
     }

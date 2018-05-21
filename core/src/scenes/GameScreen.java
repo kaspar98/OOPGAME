@@ -99,7 +99,7 @@ public class GameScreen implements Screen, ContactListener {
                 stage,
                 bulletManager);
 
-        gibsManager = new GibsManager(world);
+        gibsManager = new GibsManager(world, batch);
 
         uiManager = new UIManager(batch, camera, player);
 
@@ -164,7 +164,7 @@ public class GameScreen implements Screen, ContactListener {
         player.update();
 
         tolm.update();
-
+        gibsManager.update();
         enemyManager.update();
         musicManager.update(delta);
         bulletManager.update();
@@ -203,8 +203,7 @@ public class GameScreen implements Screen, ContactListener {
                 GameInfo.WIDTH * 0.5f - wave.getWidth() * 0.5f,
                 GameInfo.HEIGHT - 40);
 
-        batch.end();
-
+        gibsManager.render();
 
         // debug camera render
         //debugRenderer.render(world, camera.combined);
@@ -213,8 +212,10 @@ public class GameScreen implements Screen, ContactListener {
         player.inputs();
 
         // stage loodud touchpadi jaoks
-        stage.act(Gdx.graphics.getDeltaTime());
+        stage.act(/*Gdx.graphics.getDeltaTime()*/delta);
         stage.draw();
+
+        batch.end();
 
 
         // bulletid mis collidisid
