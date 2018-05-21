@@ -32,8 +32,7 @@ public class Player extends Sprite {
     private float maxShield = 100;
 
     private boolean damaged = false;
-    private long damagedTime;
-    private long damagedDelay = 200;
+    private long timeDamagedExpire;
 
     private Sprite thruster;
     private float thrusterRadius;
@@ -52,8 +51,7 @@ public class Player extends Sprite {
 
     private BulletManager bulletManager;
     private float bulletDamage = 25;
-    private long shootDelay = 200;
-    private long lastShot = 0;
+    private long timeNextShot = 0;
 
     public Player(float x, float y, World world, Stage stage, BulletManager bulletManager) {
         super(new Texture(Gdx.files.internal("player_laev_t.png")));
@@ -173,8 +171,8 @@ public class Player extends Sprite {
 
             long time = TimeUtils.millis();
 
-            if (touchpadVector.len() > 0 && time > lastShot + shootDelay) {
-                lastShot = time;
+            if (touchpadVector.len() > 0 && time > timeNextShot) {
+                timeNextShot = time + GameInfo.PLAYER_SHOOTING_INTERVAL;
 
                 bulletManager.playerShoot(body.getPosition(), touchpadVector, bulletDamage);
             }
@@ -205,7 +203,7 @@ public class Player extends Sprite {
         // väike shield regen
         if (shield < maxShield) shield += 1 / 30.0f;
 
-        if (damaged && damagedTime + damagedDelay < time) {
+        if (damaged && timeDamagedExpire < time) {
             setColor(Color.WHITE);
             damaged = false;
         }
@@ -273,7 +271,7 @@ public class Player extends Sprite {
     }
 
     public void damage(float damage) {
-        damagedTime = TimeUtils.millis();
+        timeDamagedExpire = TimeUtils.millis() + GameInfo.PLAYER_DAMAGED_DURATION;
         damaged = true;
 
         if (shield < damage) {
