@@ -17,7 +17,6 @@ import com.badlogic.gdx.utils.TimeUtils;
 import helpers.GameInfo;
 
 public class Enemy extends Sprite {
-    private World world;
     private Body body;
     private Fixture fixture;
 
@@ -30,17 +29,16 @@ public class Enemy extends Sprite {
     private UIMarker uiMarker;
     private GibsManager gibsManager;
 
+    private boolean alive;
     private float health = 100;
     private float shield = 25;
 
     private boolean damaged = false;
-    private long damagedTime;
-    private long damagedDelay = 200;
+    private long timeDamagedExpire = 0;
 
     private int tippkiirus = 25;
 
-    private long shootDelay = 1000;
-    private long lastShot = 0;
+    private long timeNextShot = 0;
 
     private float lasuDamage = 25;
     private float optKaugus = GameInfo.INNER_RADIUS * GameInfo.SCALING * 0.75f;
@@ -57,13 +55,11 @@ public class Enemy extends Sprite {
                  EnemyManager enemyManager, GibsManager gibsManager) {
         super(appearance);
 
-        this.world = world;
         this.bulletManager = bulletManager;
         this.playerPos = playerPos;
         this.playerVektor = playerVektor;
         this.enemyManager = enemyManager;
         this.gibsManager = gibsManager;
-
         this.gibsKey = gibsKey;
 
         setCenter(start.x, start.y);
@@ -92,6 +88,8 @@ public class Enemy extends Sprite {
         circle.dispose();
 
         uiMarker = uiManager.addMarker(body.getPosition());
+
+        alive = true;
     }
 
     public void draw(Batch batch) {
@@ -99,6 +97,11 @@ public class Enemy extends Sprite {
     }
 
     public float update() {
+        if (!alive) {
+            kill();
+            return -1;
+        }
+
         // tulistamise handlemine
         long time = TimeUtils.millis();
 
@@ -126,7 +129,7 @@ public class Enemy extends Sprite {
             body.setLinearVelocity(body.getLinearVelocity().setLength(tippkiirus));
         }
 
-        if (time > lastShot + shootDelay && playeriPoole.len() < tulistamisKaugus) {
+        if (time > timeNextShot && playeriPoole.len() < tulistamisKaugus) {
             if (playeriPoole.len() < tulistamisKaugus * 0.25f) {
                 bulletManager.enemyShoot(
                         body.getPosition(), playeriPoole, lasuDamage);
@@ -136,10 +139,10 @@ public class Enemy extends Sprite {
                         playeriPoole.cpy().add(playerVektor.cpy().scl(1f - 1 / playeriPoole.len())),
                         lasuDamage);
             }
-            lastShot = time;
+            timeNextShot = time + GameInfo.ENEMY_SHOOTING_INTERVAL;
         }
 
-        if (damaged && damagedTime + damagedDelay < time) {
+        if (damaged && timeDamagedExpire < time) {
             setColor(Color.WHITE);
             damaged = false;
         }
@@ -157,23 +160,24 @@ public class Enemy extends Sprite {
         float x = body.getPosition().x;
         float y = body.getPosition().y;
 
-        gibsManager.createGibs()
+        gibsManager.createGibs(gibsKey, x, y, body.getLinearVelocity());
 
         enemyManager.killEnemy(this, x, y);
+
         body.setLinearVelocity(0, 0);
         body.setTransform(-GameInfo.W_WIDTH, 0, 0);
         body.setActive(false);
     }
 
-    private void remove() {
-        enemyManager.removeEnemy(this);
-    }
-
     public void revive() {
-        Vector2 suvaline = uusAsukoht();
-        health = 100;
-        body.setActive(true);
-        body.setTransform(suvaline, 0);
+        if (!alive) {
+            Vector2 suvaline = uusAsukoht();
+            health = 100;
+            body.setActive(true);
+            body.setTransform(suvaline, 0);
+
+            alive = true;
+        }
     }
 
     public static Vector2 uusAsukoht() {
@@ -189,20 +193,12 @@ public class Enemy extends Sprite {
         return scoreValue;
     }
 
-    public boolean isKill() {
-        if (health <= 0) {
-            kill();
-            return true;
-        }
-        return false;
-    }
-
     public UIMarker getMarker() {
         return uiMarker;
     }
 
     public void damage(float damage) {
-        damagedTime = TimeUtils.millis();
+        timeDamagedExpire = TimeUtils.millis() + GameInfo.ENEMY_DAMAGED_DURATION;
         damaged = true;
 
         if (shield < damage) {
@@ -214,7 +210,7 @@ public class Enemy extends Sprite {
             health -= overflow;
 
             if (health <= 0) {
-                enemyManager.getCorpses().add(this);
+                alive = false;
             }
         } else {
             setColor(Color.YELLOW);
