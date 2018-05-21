@@ -20,8 +20,7 @@ public class BulletManager {
     private World world;
 
     private Array<Bullet> bullets = new Array<Bullet>();
-    private Array<Bullet> corpses = new Array<Bullet>();
-    private Array<Bullet> surnuaed = new Array<Bullet>();
+    private Array<Bullet> graveyard = new Array<Bullet>();
 
     private Sound laserSound;
 
@@ -63,6 +62,11 @@ public class BulletManager {
     public void update() {
         for (Bullet b : bullets) {
             b.update();
+
+            if(!b.isAlive()) {
+                b.kill();
+                removeBullet(b);
+            }
         }
     }
 
@@ -70,7 +74,7 @@ public class BulletManager {
         for (Bullet bullet : bullets)
             world.destroyBody(bullet.getBody());
 
-        for (Bullet bullet : surnuaed)
+        for (Bullet bullet : graveyard)
             world.destroyBody(bullet.getBody());
 
         bulletSprite1.getTexture().dispose();
@@ -79,8 +83,8 @@ public class BulletManager {
     }
 
     public void enemyShoot(Vector2 algpunkt, Vector2 vektor, float damage) {
-        if (surnuaed.size > 0) {
-            Bullet bullet = surnuaed.pop();
+        if (graveyard.size > 0) {
+            Bullet bullet = graveyard.pop();
             bullet.revive(algpunkt, vektor, damage, bulletSprite1, false);
             bullets.add(bullet);
         } else {
@@ -90,8 +94,8 @@ public class BulletManager {
     }
 
     public void playerShoot(Vector2 algpunkt, Vector2 vektor, float damage) {
-        if (surnuaed.size > 0) {
-            Bullet bullet = surnuaed.pop();
+        if (graveyard.size > 0) {
+            Bullet bullet = graveyard.pop();
             bullet.revive(algpunkt, vektor, damage, bulletSprite2, true);
             bullets.add(bullet);
         } else {
@@ -101,12 +105,8 @@ public class BulletManager {
         laserSound.play(0.35f);
     }
 
-    public void removeBullet(Bullet bullet) {
+    private void removeBullet(Bullet bullet) {
         bullets.removeValue(bullet, false);
-        surnuaed.add(bullet);
-    }
-
-    public Array<Bullet> getCorpses() {
-        return corpses;
+        graveyard.add(bullet);
     }
 }
