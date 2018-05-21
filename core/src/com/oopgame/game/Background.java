@@ -30,8 +30,8 @@ public class Background extends Sprite {
 
         setOrigin(getWidth() * 0.5f, getHeight() * 0.5f);
 
-        this.cropX = cropX;
-        this.cropY = cropY;
+        this.cropX = /*cropX*/getWidth() * 0.45f;
+        this.cropY = /*cropY*/getHeight() * 0.45f;
 
         parallaxConstantXY =
                 1 - (
@@ -40,9 +40,9 @@ public class Background extends Sprite {
     }
 
     public void update() {
-        setPosition(
-                dx + camPos.x * parallaxConstantXY - cropX,
-                dy + camPos.y * parallaxConstantXY - cropY
+        setCenter(
+                dx + camPos.x * parallaxConstantXY,
+                dy + camPos.y * parallaxConstantXY
         );
     }
 
