@@ -13,11 +13,14 @@ import helpers.GameInfo;
 public class Gibs {
     private SpriteBatch batch;
     private Array<Gib> gibs = new Array<Gib>();
-    private long timeStart;
+    private long timeExpires;
     private boolean alive;
 
     public Gibs(ObjectMap<String, Array<Sprite>> appearances, String key,
                 SpriteBatch batch, World world, float x, float y, Vector2 vektor) {
+
+        this.batch = batch;
+
         for (Sprite sprite : appearances.get(key))
             gibs.add(new Gib(sprite, world));
 
@@ -25,7 +28,7 @@ public class Gibs {
     }
 
     public void start(float x, float y, Vector2 vektor) {
-        timeStart = TimeUtils.millis();
+        timeExpires = TimeUtils.millis() + GameInfo.GIBS_DURATION;
         alive = true;
 
         for (Gib gib : gibs) {
@@ -42,9 +45,10 @@ public class Gibs {
                 gib.update();
 
             // kui gibside aeg otsa saab, siis lõpetatakse enemy uuendamine
-            if (timeStart + GameInfo.GIBS_DURATION < time) {
+            if (timeExpires < time) {
                 for (Gib gib : gibs)
                     gib.stop();
+                alive = false;
             }
         }
     }
@@ -54,8 +58,8 @@ public class Gibs {
 
         float visibleTime = GameInfo.GIBS_DURATION * 0.5f;
 
-        float alpha = (time - timeStart > visibleTime ?
-                1f - (time - timeStart - visibleTime) / (GameInfo.GIBS_DURATION - visibleTime) : 1);
+        float alpha = (timeExpires - time < visibleTime ?
+                (timeExpires - time) / (GameInfo.GIBS_DURATION - visibleTime) : 1);
 
         for (Gib gib : gibs)
             gib.draw(batch, alpha);
