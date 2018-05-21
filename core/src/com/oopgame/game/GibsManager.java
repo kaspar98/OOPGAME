@@ -23,6 +23,7 @@ public class GibsManager {
 
     public GibsManager(World world, SpriteBatch batch) {
         this.world = world;
+        this.batch = batch;
 
         // loeb vastase gibs'id sisse ja paneb neile õige suuruse
         String key = "enemy_alien_fighter_1b";
@@ -68,9 +69,10 @@ public class GibsManager {
     public void update() {
         for (String key : alive.keys()) {
             for (Gibs gibs : alive.get(key)) {
-                if (!gibs.isAlive())
+                if (!gibs.isAlive()) {
+                    alive.get(key).removeValue(gibs, false);
                     dead.get(key).add(gibs);
-                else
+                } else
                     gibs.update();
             }
         }
@@ -85,11 +87,14 @@ public class GibsManager {
     public void createGibs(String key, float x, float y, Vector2 vektor) {
         if (dead.get(key).size == 0) {
             // teeme uued gibsid
-
             Gibs gibs = new Gibs(appearances, key, batch, world, x, y, vektor);
+
+            alive.get(key).add(gibs);
         } else {
             Gibs gibs = dead.get(key).pop();
+
             gibs.start(x, y, vektor);
+
             alive.get(key).add(gibs);
         }
     }
