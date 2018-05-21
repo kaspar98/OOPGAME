@@ -12,12 +12,19 @@ public class GameInfo {
     public static final float SCALING = 0.1f;
     public static final float CAM_SCALING = SCALING * 2;
 
-    public static final float FORCE_MULTIPLIER = 5000;
-    public static final float PLAYER_MAXSPEED = 45;
-    public static final float PLAYER_ACCELERATION = 0.25f;
-
     public static final float W_WIDTH = 2048;
     public static final float W_HEIGHT = 2048;
 
+    public static final float FORCE_MULTIPLIER = 5000;
+    public static final float PLAYER_MAXSPEED = 45;
+    public static final float PLAYER_ACCELERATION = 0.25f;
+    public static final long PLAYER_SHOOTING_INTERVAL = 200;
+    public static final long PLAYER_DAMAGED_DURATION = 200;
+
+    public static final long ENEMY_SHOOTING_INTERVAL = 1000;
+    public static final long ENEMY_DAMAGED_DURATION = 200;
+
     public static final long GIBS_DURATION = 5000;
+
+    public static final long BULLET_DURATION = 2500;
 }
