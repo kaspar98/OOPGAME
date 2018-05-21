@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.TimeUtils;
 
 import helpers.GameInfo;
 
@@ -16,8 +15,7 @@ public class EnemyManager {
     private World world;
     private Sprite appearance;
 
-    private Array<Enemy> enemies = new Array<Enemy>();
-    private Array<Enemy> corpses = new Array<Enemy>();
+    private Array<Enemy> alive = new Array<Enemy>();
     private Array<Enemy> graveyard = new Array<Enemy>();
 
     private Vector2 playerPos;
@@ -28,6 +26,8 @@ public class EnemyManager {
     private MusicManager musicManager;
     private ExplosionManager explosionManager;
     private GibsManager gibsManager;
+
+    private int points;
 
     public EnemyManager(
             SpriteBatch batch, Player player, World world,
@@ -60,7 +60,7 @@ public class EnemyManager {
     public void update() {
         float lähimKaugus = -1;
 
-        for (Enemy e : enemies) {
+        for (Enemy e : alive) {
             float kaugus = e.update();
 
             if (kaugus != -1 && (kaugus < lähimKaugus || lähimKaugus == -1))
@@ -70,17 +70,13 @@ public class EnemyManager {
         musicManager.setClosestEnemyDistance(lähimKaugus);
     }
 
-    public Array<Enemy> getCorpses() {
-        return corpses;
-    }
-
     public void render() {
-        for (Enemy e : enemies)
+        for (Enemy e : alive)
             e.draw(batch);
     }
 
     public void dispose() {
-        for (Enemy e : enemies)
+        for (Enemy e : alive)
             e.kill();
 
         appearance.getTexture().dispose();
@@ -105,12 +101,7 @@ public class EnemyManager {
                     uiManager, bulletManager,
                     this, gibsManager);
         }
-        enemies.add(enemy);
-    }
-
-    public void removeEnemy(Enemy e) {
-        killed.removeValue(e, false);
-        graveyard.add(e);
+        alive.add(enemy);
     }
 
     public void killEnemy(Enemy e, float x, float y) {
@@ -118,13 +109,25 @@ public class EnemyManager {
 
         uiManager.removeMarker(e.getMarker());
 
-        enemies.removeValue(e, false);
-        killed.add(e);
+        points += e.getScoreValue();
+
+        alive.removeValue(e, false);
+        graveyard.add(e);
     }
 
     public int getEnemyCount() {
         // waveManager kasutab seda.
-        return enemies.size;
+        return alive.size;
+    }
+
+    public int getNewPoints() {
+        // waveManager kasutab seda.
+        return points;
+    }
+
+    public void resetPoints() {
+        // waveManager kasutab seda.
+        points = 0;
     }
 }
 
