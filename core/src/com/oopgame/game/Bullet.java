@@ -17,18 +17,17 @@ public class Bullet extends Sprite {
     private Fixture fixture;
 
     private float damage;
-    private BulletManager bm;
 
     private boolean playerShot;
 
-    private long startTime;
-    private long length = 2500;
+    private long timeExpire;
+
+    private boolean alive;
 
     public Bullet(Vector2 kust, Vector2 suunaVektor, float damage,
-                  Sprite appearance, World world, BulletManager bm, boolean playerShot) {
+                  Sprite appearance, World world, boolean playerShot) {
         super(appearance);
         this.damage = damage;
-        this.bm = bm;
         this.playerShot = playerShot;
 
         BodyDef bodyDef = new BodyDef();
@@ -54,7 +53,9 @@ public class Bullet extends Sprite {
         setRotation(suunaVektor.angle());
         body.setTransform(body.getPosition(), suunaVektor.angleRad());
 
-        startTime = TimeUtils.millis();
+        timeExpire = TimeUtils.millis() + GameInfo.BULLET_DURATION;
+
+        alive = true;
     }
 
     public void draw(Batch batch) {
@@ -65,13 +66,12 @@ public class Bullet extends Sprite {
         setCenter(body.getPosition().x, body.getPosition().y);
 
         long time = TimeUtils.millis();
-        if (startTime + length < time) {
+        if (timeExpire < time) {
             kill();
         }
     }
 
     public void kill() {
-        bm.removeBullet(this);
         body.setLinearVelocity(0, 0);
         body.setTransform(-GameInfo.W_WIDTH, 0, 0);
         body.setActive(false);
@@ -82,7 +82,7 @@ public class Bullet extends Sprite {
 
         this.damage = damage;
         this.playerShot = playerShot;
-        startTime = TimeUtils.millis();
+        timeExpire = TimeUtils.millis() + GameInfo.BULLET_DURATION;
 
         setRotation(suunaVektor.angle());
 
@@ -91,6 +91,8 @@ public class Bullet extends Sprite {
         body.setLinearVelocity(suunaVektor.cpy().setLength(GameInfo.FORCE_MULTIPLIER * 1000));
 
         body.setActive(true);
+
+        alive = true;
     }
 
     public Body getBody() {
@@ -105,8 +107,11 @@ public class Bullet extends Sprite {
         return playerShot;
     }
 
-    // tagastab distantsi etteantud punktist
-    public float getDistance(float x, float y) {
-        return new Vector2(x - body.getPosition().x, y - body.getPosition().y).len();
+    public void hasHit() {
+        alive = false;
+    }
+
+    public boolean isAlive() {
+        return alive;
     }
 }

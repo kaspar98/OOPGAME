@@ -89,7 +89,7 @@ public class BulletManager {
             bullets.add(bullet);
         } else {
             bullets.add(new Bullet(algpunkt, vektor,
-                    damage, bulletSprite1, world, this, false));
+                    damage, bulletSprite1, world, false));
         }
     }
 
@@ -100,7 +100,7 @@ public class BulletManager {
             bullets.add(bullet);
         } else {
             bullets.add(new Bullet(algpunkt, vektor,
-                    damage, bulletSprite2, world, this, true));
+                    damage, bulletSprite2, world, true));
         }
         laserSound.play(0.35f);
     }
