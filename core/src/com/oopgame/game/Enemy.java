@@ -130,15 +130,18 @@ public class Enemy extends Sprite {
         }
 
         if (time > timeNextShot && playeriPoole.len() < tulistamisKaugus) {
-            if (playeriPoole.len() < tulistamisKaugus * 0.25f) {
+            /*if (playeriPoole.len() > 1) {*/
+            bulletManager.enemyShoot(
+                    body.getPosition(),
+                    playeriPoole.cpy().add(playerVektor
+                            .cpy()
+                            .sub(body.getLinearVelocity())
+                            .scl(playeriPoole.len() > 1 ? 1f - 1 / playeriPoole.len() : 1f)),
+                    lasuDamage);
+            /*} else {
                 bulletManager.enemyShoot(
                         body.getPosition(), playeriPoole, lasuDamage);
-            } else {
-                bulletManager.enemyShoot(
-                        body.getPosition(),
-                        playeriPoole.cpy().add(playerVektor.cpy().scl(1f - 1 / playeriPoole.len())),
-                        lasuDamage);
-            }
+            }*/
             timeNextShot = time + GameInfo.ENEMY_SHOOTING_INTERVAL;
         }
 
