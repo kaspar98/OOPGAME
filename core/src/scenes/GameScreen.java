@@ -162,14 +162,14 @@ public class GameScreen implements Screen, ContactListener {
         // kutsub Playeris playeri renderimise välja
         player.draw(batch);
 
-        uiManager.update();
-        uiManager.render();
-
         waveManager.render();
 
         gibsManager.render();
 
         explosionManager.render();
+
+        uiManager.update();
+        uiManager.render();
 
         batch.end();
 

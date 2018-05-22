@@ -43,7 +43,7 @@ public class WaveManager {
 
         currentScore = new Label("", new Label.LabelStyle(font, Color.WHITE));
         currentScore.setFontScale(2);
-        currentScore.setAlignment(Align.topLeft);
+        currentScore.setAlignment(Align.left);
 
 
         wave = new Label("", new Label.LabelStyle(font, Color.WHITE));
