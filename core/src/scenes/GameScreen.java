@@ -47,14 +47,14 @@ public class GameScreen implements Screen, ContactListener {
     private World world;
     private Box2DDebugRenderer debugRenderer;
 
-    private UIManager uiManager;
-
-    private BackgroundManager bgManager;
-    private DustParticleManager tolm;
     private ExplosionManager explosionManager;
     private BulletManager bulletManager;
-    private WaveManager waveManager;
     private GibsManager gibsManager;
+
+    private UIManager uiManager;
+    private BackgroundManager bgManager;
+    private DustParticleManager tolm;
+    private WaveManager waveManager;
 
     private MusicManager musicManager;
     private Sound hitmarker;
@@ -81,15 +81,17 @@ public class GameScreen implements Screen, ContactListener {
 
         bulletManager = new BulletManager(batch, world);
 
+        gibsManager = new GibsManager(world, batch);
+
+        explosionManager = new ExplosionManager(batch);
+
         // loome Playeri mänguvälja keskele
         player = new Player(
                 GameInfo.W_WIDTH * 0.5f,
                 GameInfo.W_HEIGHT * 0.5f,
                 world,
                 stage,
-                bulletManager);
-
-        gibsManager = new GibsManager(world, batch);
+                bulletManager, gibsManager, explosionManager);
 
         uiManager = new UIManager(batch, camera, player);
 
@@ -101,8 +103,6 @@ public class GameScreen implements Screen, ContactListener {
 
         // tolmuefekti jaoks DustParticleManager
         tolm = new DustParticleManager(batch, player);
-
-        explosionManager = new ExplosionManager(batch);
 
         // seinad mänguvälja ümber
         looSeinad();
@@ -183,7 +183,7 @@ public class GameScreen implements Screen, ContactListener {
         stage.act(/*Gdx.graphics.getDeltaTime()*/delta);
         stage.draw();
 
-        if (player.getHealth() <= 0) {
+        if (player.done()) {
             int score = waveManager.getScore();
             // loeb igakord uuesti sisse failis oleva highscore'i, sest muidu äkki sama ajal kui
             // mäng lahti on, kirjutab teine sama mängu instance faili kõrgema highscore'i
@@ -193,7 +193,8 @@ public class GameScreen implements Screen, ContactListener {
             if (score > highscore)
                 handle.writeString("" + score, false, "UTF-8");
 
-            game.setScreen(new MainMenuScreen(game, highscore));
+            /*game.setScreen(new MainMenuScreen(game, highscore));*/
+            game.setScreen(new BlueScreenOfDeath(game, highscore));
             dispose();
         }
     }
