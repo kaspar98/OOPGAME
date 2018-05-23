@@ -57,6 +57,18 @@ public class ExplosionManager {
         }
     }
 
+    public void addExplosion(float x, float y, float scaler) {
+        if (surnuaed.size > 0) {
+            Explosion explosion = surnuaed.pop();
+
+            explosion.revive(x, y);
+
+            explosions.add(explosion);
+        } else {
+            explosions.add(new Explosion(x, y, scaler, frames, this));
+        }
+    }
+
     public void removeExplosion(Explosion explosion) {
         explosions.removeValue(explosion, false);
         surnuaed.add(explosion);
