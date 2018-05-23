@@ -9,8 +9,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import scenes.MainMenuScreen;
 
 public class OOPGame extends Game {
-    public SpriteBatch batch;
-    public BitmapFont font;
+    private SpriteBatch batch;
+    private BitmapFont font;
 
     private int highscore = 0;
 
@@ -23,6 +23,7 @@ public class OOPGame extends Game {
 
         if (handle.exists())
             highscore = Integer.parseInt(handle.readString());
+        else handle.writeString("0", false);
 
         this.setScreen(new MainMenuScreen(this, highscore));
     }
@@ -37,4 +38,7 @@ public class OOPGame extends Game {
         font.dispose();
     }
 
+    public SpriteBatch getBatch() {
+        return batch;
+    }
 }
