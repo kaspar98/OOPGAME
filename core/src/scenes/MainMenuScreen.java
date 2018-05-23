@@ -83,7 +83,10 @@ public class MainMenuScreen implements Screen {
 
         background.draw(game.batch);
         title.draw(game.batch);
+
         game.batch.end();
+
+
         stage.act(Gdx.graphics.getDeltaTime());
 
         stage.draw();
