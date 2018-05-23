@@ -11,7 +11,6 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 
 import helpers.GameInfo;
@@ -42,7 +41,7 @@ public class Enemy extends Sprite {
 
     private float lasuDamage = 25;
     private float optKaugus = GameInfo.INNER_RADIUS * GameInfo.SCALING * 0.75f;
-    private float tulistamisKaugus = optKaugus;
+    private float tulistamisKaugus = optKaugus + 10;
 
     private int scoreValue = 10;
 
