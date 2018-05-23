@@ -28,7 +28,7 @@ public class BlueScreenOfDeath implements Screen {
 
     public BlueScreenOfDeath(OOPGame game, int highscore) {
         this.game = game;
-        this.batch = game.batch;
+        this.batch = game.getBatch();
         this.highscore = highscore;
 
         camera = new OrthographicCamera();

@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -19,13 +20,13 @@ import helpers.GameInfo;
 
 public class MainMenuScreen implements Screen {
     private OOPGame game;
+    private SpriteBatch batch;
     private OrthographicCamera camera;
     private Stage stage;
 
     private Viewport viewport;
 
     private Sprite title;
-    private int highscore;
 
     private Label info;
 
@@ -33,13 +34,13 @@ public class MainMenuScreen implements Screen {
 
     public MainMenuScreen(final OOPGame game, int highscore) {
         this.game = game;
-        this.highscore = highscore;
+        this.batch = game.getBatch();
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, GameInfo.WIDTH, GameInfo.HEIGHT);
         viewport = new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT, camera);
 
-        stage = new Stage(new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT), game.batch);
+        stage = new Stage(new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT), batch);
 
         title = new Sprite(new Texture(Gdx.files.internal("title_OOPGame.png")));
         title.setCenter(GameInfo.WIDTH * 0.5f, GameInfo.HEIGHT * 0.75f);
@@ -76,15 +77,15 @@ public class MainMenuScreen implements Screen {
 
         camera.update();
 
-        game.batch.setProjectionMatrix(camera.combined);
+        batch.setProjectionMatrix(camera.combined);
 
 
-        game.batch.begin();
+        batch.begin();
 
-        background.draw(game.batch);
-        title.draw(game.batch);
+        background.draw(batch);
+        title.draw(batch);
 
-        game.batch.end();
+        batch.end();
 
 
         stage.act(Gdx.graphics.getDeltaTime());

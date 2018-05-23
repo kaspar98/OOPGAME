@@ -61,7 +61,7 @@ public class GameScreen implements Screen, ContactListener {
 
     public GameScreen(final OOPGame game) {
         this.game = game;
-        this.batch = game.batch;
+        this.batch = game.getBatch();
 
         Box2D.init();
 
@@ -190,8 +190,10 @@ public class GameScreen implements Screen, ContactListener {
             FileHandle handle = Gdx.files.local("highscore.txt");
             int highscore = Integer.parseInt(handle.readString("UTF-8"));
 
-            if (score > highscore)
+            if (score > highscore) {
                 handle.writeString("" + score, false, "UTF-8");
+                highscore = score;
+            }
 
             /*game.setScreen(new MainMenuScreen(game, highscore));*/
             game.setScreen(new BlueScreenOfDeath(game, highscore));
