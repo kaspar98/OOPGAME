@@ -26,6 +26,8 @@ public class Player extends Sprite {
     private Body body;
     private Fixture fixture;
 
+    private boolean done = false;
+
     private float health = 100;
     private float maxHealth = 100;
     private float shield = 100;
@@ -33,6 +35,7 @@ public class Player extends Sprite {
 
     private boolean damaged = false;
     private long timeDamagedExpire;
+    private Sound damagedSound;
 
     private Sprite thruster;
     private float thrusterRadius;
@@ -53,10 +56,25 @@ public class Player extends Sprite {
     private float bulletDamage = 25;
     private long timeNextShot = 0;
 
-    public Player(float x, float y, World world, Stage stage, BulletManager bulletManager) {
+    private GibsManager gibsManager;
+    private String gibsKey = "player_ship_1b";
+    private boolean wasJustKilled = false;
+
+    private ExplosionManager explosionManager;
+    private Sound explosionSound;
+    private float scaler = 1;
+    private long timeNextExplosion = 0;
+
+    private long timeDeath;
+
+    public Player(float x, float y, World world, Stage stage,
+                  BulletManager bulletManager, GibsManager gibsManager,
+                  ExplosionManager explosionManager) {
         super(new Texture(Gdx.files.internal("player_laev_t.png")));
 
         this.bulletManager = bulletManager;
+        this.gibsManager = gibsManager;
+        this.explosionManager = explosionManager;
 
         setSize(
                 getTexture().getWidth() * GameInfo.SCALING,
@@ -136,53 +154,62 @@ public class Player extends Sprite {
                 15);
 
         stage.addActor(touchpadR);
+
+        damagedSound = Gdx.audio.newSound(Gdx.files.internal("damaged.wav"));
+        explosionSound = Gdx.audio.newSound(Gdx.files.internal("explosion.wav"));
     }
 
     public void inputs() {
         setBoosterPower(0);
 
-        for (int i = 0; i < 2; i++) {
-            if (!Gdx.input.isTouched(i)) continue;
+        if (health > 0) {
+            for (int i = 0; i < 2; i++) {
+                if (!Gdx.input.isTouched(i)) continue;
 
-            // touchpadi inputist saadud info põhjalt paneme playeri vastava vektori suunas liikuma
-            Vector2 touchpadVector = new Vector2(
-                    touchpadL.getKnobPercentX(),
-                    touchpadL.getKnobPercentY());
+                // touchpadi inputist saadud info põhjalt paneme
+                // playeri vastava vektori suunas liikuma
+                Vector2 touchpadVector = new Vector2(
+                        touchpadL.getKnobPercentX(),
+                        touchpadL.getKnobPercentY());
 
-            body.applyForceToCenter(
-                    touchpadVector.cpy().scl(GameInfo.FORCE_MULTIPLIER * GameInfo.PLAYER_ACCELERATION),
-                    true);
+                body.applyForceToCenter(
+                        touchpadVector.cpy()
+                                .scl(GameInfo.FORCE_MULTIPLIER * GameInfo.PLAYER_ACCELERATION),
+                        true);
 
-            setBoosterPower(touchpadVector.len());
+                setBoosterPower(touchpadVector.len());
 
-            if (touchpadVector.len() > 0) {
-                setRotation(touchpadVector.angle());
+                if (touchpadVector.len() > 0) {
+                    setRotation(touchpadVector.angle());
 
-                // paneb Playeri kehale ka uuesti suuna
-                body.setTransform(
-                        body.getPosition(),
-                        touchpadVector.angleRad());
-            }
+                    // paneb Playeri kehale ka uuesti suuna
+                    body.setTransform(
+                            body.getPosition(),
+                            touchpadVector.angleRad());
+                }
 
-            // playeri tulistamine
-            touchpadVector = new Vector2(
-                    touchpadR.getKnobPercentX(),
-                    touchpadR.getKnobPercentY());
+                // playeri tulistamine
+                touchpadVector = new Vector2(
+                        touchpadR.getKnobPercentX(),
+                        touchpadR.getKnobPercentY());
 
-            long time = TimeUtils.millis();
+                long time = TimeUtils.millis();
 
-            if (touchpadVector.len() > 0 && time > timeNextShot) {
-                timeNextShot = time + GameInfo.PLAYER_SHOOTING_INTERVAL;
+                if (touchpadVector.len() > 0 && time > timeNextShot) {
+                    timeNextShot = time + GameInfo.PLAYER_SHOOTING_INTERVAL;
 
-                bulletManager.playerShoot(body.getPosition(), touchpadVector, bulletDamage);
+                    bulletManager.playerShoot(body.getPosition(), touchpadVector, bulletDamage);
+                }
             }
         }
     }
 
     @Override
     public void draw(Batch batch) {
-        thruster.draw(batch);
-        super.draw(batch);
+        if (health >= 0) {
+            thruster.draw(batch);
+            super.draw(batch);
+        }
     }
 
     public void update() {
@@ -201,11 +228,38 @@ public class Player extends Sprite {
         updateBooster();
 
         // väike shield regen
-        if (shield < maxShield) shield += 1 / 30.0f;
+        if (shield < maxShield && health > 0) {
+            shield += 1 / 30.0f;
+            if (shield > maxShield) shield = maxShield;
+        }
 
         if (damaged && timeDamagedExpire < time) {
             setColor(Color.WHITE);
             damaged = false;
+        }
+
+        if (wasJustKilled) {
+            wasJustKilled = false;
+
+            gibsManager.createGibs(gibsKey,
+                    body.getPosition().x, body.getPosition().y,
+                    body.getLinearVelocity());
+
+            explosionSound.play();
+            explosionManager.addExplosion(body.getPosition().x, body.getPosition().y);
+        }
+
+        if (health <= 0) {
+            if (timeNextExplosion < time) {
+                timeNextExplosion = time + 200;
+                scaler = scaler * 2f;
+                explosionSound.play();
+                explosionManager.addExplosion(body.getPosition().x, body.getPosition().y, scaler);
+            }
+
+            if (timeDeath < time) {
+                done = true;
+            }
         }
     }
 
@@ -213,6 +267,8 @@ public class Player extends Sprite {
         thruster.getTexture().dispose();
         getTexture().dispose();
         thrusterSound.dispose();
+        explosionSound.dispose();
+        damagedSound.dispose();
 
         for (TouchPad touchPad : touchPads)
             touchPad.dispose();
@@ -227,7 +283,7 @@ public class Player extends Sprite {
     }
 
     private void setBoosterPower(float value) {
-        thrusterSound.setVolume(thrusterSoundId, value * 0.3f);
+        thrusterSound.setVolume(thrusterSoundId, value * 0.25f);
         thruster.setSize(
                 10 * value + MathUtils.random(-1, 1),
                 thruster.getHeight());
@@ -271,19 +327,31 @@ public class Player extends Sprite {
     }
 
     public void damage(float damage) {
-        timeDamagedExpire = TimeUtils.millis() + GameInfo.PLAYER_DAMAGED_DURATION;
+        long time = TimeUtils.millis();
+        timeDamagedExpire = time + GameInfo.PLAYER_DAMAGED_DURATION;
         damaged = true;
 
-        if (shield < damage) {
-            setColor(Color.RED);
 
-            float overflow = damage - shield;
+        if (health > 0) {
+            damagedSound.play();
+            if (shield < damage) {
+                setColor(Color.RED);
 
-            shield = 0;
-            health -= overflow;
-        } else {
-            setColor(Color.CYAN);
-            shield -= damage;
+                float overflow = damage - shield;
+
+                shield = 0;
+                health -= overflow;
+
+                if (health <= 0) {
+                    timeDeath = time + 5000;
+                    timeNextExplosion = time + 2000;
+
+                    wasJustKilled = true;
+                }
+            } else {
+                setColor(Color.CYAN);
+                shield -= damage;
+            }
         }
     }
 
@@ -293,5 +361,9 @@ public class Player extends Sprite {
 
     public Vector2 getVector() {
         return body.getLinearVelocity();
+    }
+
+    public boolean done() {
+        return done;
     }
 }
