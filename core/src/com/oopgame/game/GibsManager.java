@@ -43,7 +43,7 @@ public class GibsManager {
         }
 
         // loeb playeri gibs'id sisse ja paneb neile õige suuruse
-        /*key = "player_ship_1b";
+        key = "player_ship_1b";
 
         if (!appearances.containsKey(key))
             appearances.put(key, new Array<Sprite>());
@@ -58,7 +58,7 @@ public class GibsManager {
                     sprite.getHeight() * GameInfo.SCALING);
 
             appearances.get(key).add(sprite);
-        }*/
+        }
 
         for (String appearance : appearances.keys()) {
             alive.put(appearance, new Array<Gibs>());
