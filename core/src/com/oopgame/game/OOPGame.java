@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 import scenes.MainMenuScreen;
 
@@ -16,7 +17,19 @@ public class OOPGame extends Game {
 
     public void create() {
         batch = new SpriteBatch();
-        font = new BitmapFont();
+
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+                Gdx.files.internal("fonts/ratio___.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter =
+                new FreeTypeFontGenerator.FreeTypeFontParameter();
+
+        parameter.size = 64;
+
+        font = generator.generateFont(parameter);
+
+        generator.dispose();
+
+        /*font = new BitmapFont();*/
 
         // highscore sisselugemine
         FileHandle handle = Gdx.files.local("highscore.txt");
@@ -36,6 +49,10 @@ public class OOPGame extends Game {
         getScreen().dispose();
         batch.dispose();
         font.dispose();
+    }
+
+    public BitmapFont getFont() {
+        return font;
     }
 
     public SpriteBatch getBatch() {

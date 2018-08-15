@@ -24,7 +24,6 @@ public class WaveManager {
 
     private int score;
 
-    private BitmapFont font;
     private Label currentScore;
     private Label wave;
 
@@ -32,22 +31,17 @@ public class WaveManager {
     public WaveManager(SpriteBatch batch, Player player, World world, Stage stage,
                        UIManager uiManager, BulletManager bulletManager,
                        MusicManager musicManager, ExplosionManager explosionManager,
-                       GibsManager gibsManager) {
+                       GibsManager gibsManager, BitmapFont font) {
         this.timeNextWave = TimeUtils.millis() + timeWaitWave;
 
         enemyManager = new EnemyManager(batch, player, world,
                 uiManager, bulletManager, musicManager, explosionManager, gibsManager);
 
-        font = new BitmapFont();
-        font.getData().setScale(2);
-
         currentScore = new Label("", new Label.LabelStyle(font, Color.WHITE));
-        currentScore.setFontScale(2);
         currentScore.setAlignment(Align.left);
 
 
         wave = new Label("", new Label.LabelStyle(font, Color.WHITE));
-        wave.setFontScale(2);
         wave.setAlignment(Align.center);
 
         stage.addActor(currentScore);
@@ -111,6 +105,5 @@ public class WaveManager {
 
     public void dispose() {
         enemyManager.dispose();
-        font.dispose();
     }
 }
