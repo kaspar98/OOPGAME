@@ -48,9 +48,8 @@ public class MainMenuScreen implements Screen {
         info = new Label(
                 "Highscore " + highscore + "\n" +
                         "TAP ANYWHERE TO BEGIN",
-                new Label.LabelStyle(new BitmapFont(), Color.ORANGE));
+                new Label.LabelStyle(game.getFont(), Color.ORANGE));
 
-        info.setFontScale(2);
         info.setPosition(GameInfo.WIDTH * 0.25f, GameInfo.HEIGHT * 0.3f);
 
         stage.addActor(info);
