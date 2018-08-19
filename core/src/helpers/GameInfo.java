@@ -3,8 +3,8 @@ package helpers;
 import com.badlogic.gdx.math.Vector2;
 
 public class GameInfo {
-    public static final int WIDTH = 1000/*800*/;
-    public static final int HEIGHT = 560/*480*/;
+    public static final int WIDTH = 1920;
+    public static final int HEIGHT = 1080;
 
     public static final float INNER_RADIUS = (WIDTH < HEIGHT ? WIDTH : HEIGHT);
     public static final float OUTER_RADIUS = new Vector2(WIDTH, HEIGHT).len() / 2f;
