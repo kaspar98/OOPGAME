@@ -27,7 +27,6 @@ public class WaveManager {
     private Label currentScore;
     private Label wave;
 
-
     public WaveManager(SpriteBatch batch, Player player, World world, Stage stage,
                        UIManager uiManager, BulletManager bulletManager,
                        MusicManager musicManager, ExplosionManager explosionManager,
@@ -37,11 +36,12 @@ public class WaveManager {
         enemyManager = new EnemyManager(batch, player, world,
                 uiManager, bulletManager, musicManager, explosionManager, gibsManager);
 
-        currentScore = new Label("", new Label.LabelStyle(font, Color.WHITE));
+        Label.LabelStyle style = new Label.LabelStyle(font, Color.WHITE);
+
+        currentScore = new Label("", style);
         currentScore.setAlignment(Align.left);
 
-
-        wave = new Label("", new Label.LabelStyle(font, Color.WHITE));
+        wave = new Label("", style);
         wave.setAlignment(Align.center);
 
         stage.addActor(currentScore);
@@ -80,8 +80,9 @@ public class WaveManager {
 
         wave.setText(getWaveInfo());
         wave.setPosition(
-                GameInfo.WIDTH * 0.5f - wave.getWidth() * 0.5f,
-                GameInfo.HEIGHT - 40);
+                GameInfo.WIDTH * 0.5f,
+                GameInfo.HEIGHT - 40,
+                Align.center);
     }
 
     public String getWaveInfo() {
