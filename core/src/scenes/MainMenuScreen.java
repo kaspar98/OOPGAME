@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.OOPGame;
@@ -50,7 +51,11 @@ public class MainMenuScreen implements Screen {
                         "TAP ANYWHERE TO BEGIN",
                 new Label.LabelStyle(game.getFont(), Color.ORANGE));
 
-        info.setPosition(GameInfo.WIDTH * 0.25f, GameInfo.HEIGHT * 0.3f);
+        info.setAlignment(Align.center);
+        info.setPosition(
+                GameInfo.WIDTH * 0.5f,
+                GameInfo.HEIGHT * 0.3f,
+                Align.center);
 
         stage.addActor(info);
         Gdx.input.setInputProcessor(stage);
