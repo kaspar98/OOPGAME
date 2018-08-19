@@ -109,7 +109,7 @@ public class GameScreen implements Screen, ContactListener {
 
         waveManager = new WaveManager(batch, player, world, stage,
                 uiManager, bulletManager, musicManager,
-                explosionManager, gibsManager);
+                explosionManager, gibsManager, game.getFont());
 
         hitmarker = Gdx.audio.newSound(Gdx.files.internal("hitmarker.wav"));
 
