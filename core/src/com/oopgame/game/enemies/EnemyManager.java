@@ -1,4 +1,4 @@
-package com.oopgame.game;
+package com.oopgame.game.enemies;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -7,6 +7,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
+import com.oopgame.game.BulletManager;
+import com.oopgame.game.ExplosionManager;
+import com.oopgame.game.GibsManager;
+import com.oopgame.game.MusicManager;
+import com.oopgame.game.Player;
+import com.oopgame.game.ui.UIManager;
 
 import helpers.GameInfo;
 
@@ -21,7 +27,7 @@ public class EnemyManager {
     private Vector2 playerPos;
     private Vector2 playerVektor;
 
-    private UIManager uiManager;
+    private com.oopgame.game.ui.UIManager uiManager;
     private BulletManager bulletManager;
     private MusicManager musicManager;
     private ExplosionManager explosionManager;

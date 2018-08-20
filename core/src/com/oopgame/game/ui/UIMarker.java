@@ -1,4 +1,4 @@
-package com.oopgame.game;
+package com.oopgame.game.ui;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Sprite;

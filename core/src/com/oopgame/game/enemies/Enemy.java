@@ -1,4 +1,4 @@
-package com.oopgame.game;
+package com.oopgame.game.enemies;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -12,6 +12,10 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.oopgame.game.BulletManager;
+import com.oopgame.game.GibsManager;
+import com.oopgame.game.ui.UIManager;
+import com.oopgame.game.ui.UIMarker;
 
 import helpers.GameInfo;
 
@@ -25,7 +29,7 @@ public class Enemy extends Sprite {
     private Vector2 playerPos;
     private Vector2 playerVektor;
 
-    private UIMarker uiMarker;
+    private com.oopgame.game.ui.UIMarker uiMarker;
     private GibsManager gibsManager;
 
     private boolean alive;
