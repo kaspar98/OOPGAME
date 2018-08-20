@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
@@ -19,6 +20,10 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.oopgame.game.inputs.Ekraan;
+import com.oopgame.game.inputs.Hiir;
+import com.oopgame.game.inputs.Klaviatuur;
+import com.oopgame.game.inputs.Pult;
 
 import helpers.GameInfo;
 
@@ -66,6 +71,9 @@ public class Player extends Sprite {
     private long timeNextExplosion = 0;
 
     private long timeDeath;
+
+    private Sprite pointer;
+    private Vector3 cameraPos;
 
     public Player(float x, float y, World world, Stage stage,
                   BulletManager bulletManager, GibsManager gibsManager,
@@ -157,49 +165,86 @@ public class Player extends Sprite {
 
         damagedSound = Gdx.audio.newSound(Gdx.files.internal("damaged.wav"));
         explosionSound = Gdx.audio.newSound(Gdx.files.internal("explosion.wav"));
+
+        pointer = new Sprite(new Texture(Gdx.files.internal("pointerTest.png")));
+        pointer.setSize(pointer.getWidth() * GameInfo.CAM_SCALING, pointer.getHeight() * GameInfo.CAM_SCALING);
+        pointer.setOrigin(0, pointer.getHeight() * 0.5f);
+        //pointer.setAlpha(0);
     }
 
     public void inputs() {
+        // hetkel veel väga segane kõik :D
+
         setBoosterPower(0);
 
+        // keyboard < controller < screen
+
         if (health > 0) {
+            Vector2 moving = new Vector2();
+            Vector2 aiming = new Vector2();
+            boolean shooting;
+
+            // klaviatuuri inputid
+            Klaviatuur.movement(moving);
+            shooting = Hiir.aiming(aiming, cameraPos, body.getPosition());
+
+
+            // puldi inputid
+            Pult.movement(moving);
+
+            if (Pult.aiming(aiming))
+                shooting = Pult.isShooting();
+
+            if (aiming.len() > 0) {
+                pointer.setOriginBasedPosition(body.getPosition().x, body.getPosition().y);
+                pointer.setRotation(aiming.angle());
+            }
+
+            // ekraani inputid
             for (int i = 0; i < 2; i++) {
                 if (!Gdx.input.isTouched(i)) continue;
 
-                // touchpadi inputist saadud info põhjalt paneme
-                // playeri vastava vektori suunas liikuma
-                Vector2 touchpadVector = new Vector2(
-                        touchpadL.getKnobPercentX(),
-                        touchpadL.getKnobPercentY());
-
-                body.applyForceToCenter(
-                        touchpadVector.cpy()
-                                .scl(GameInfo.FORCE_MULTIPLIER * GameInfo.PLAYER_ACCELERATION),
-                        true);
-
-                setBoosterPower(touchpadVector.len());
-
-                if (touchpadVector.len() > 0) {
-                    setRotation(touchpadVector.angle());
-
-                    // paneb Playeri kehale ka uuesti suuna
-                    body.setTransform(
-                            body.getPosition(),
-                            touchpadVector.angleRad());
-                }
+                // touchpadi input
+                Ekraan.movement(touchpadL, moving);
 
                 // playeri tulistamine
-                touchpadVector = new Vector2(
-                        touchpadR.getKnobPercentX(),
-                        touchpadR.getKnobPercentY());
+                if (touchpadR.isTouched()) {
+                    shooting = true;
 
-                long time = TimeUtils.millis();
+                    Ekraan.aiming(touchpadR, aiming);
 
-                if (touchpadVector.len() > 0 && time > timeNextShot) {
-                    timeNextShot = time + GameInfo.PLAYER_SHOOTING_INTERVAL;
-
-                    bulletManager.playerShoot(body.getPosition(), touchpadVector, bulletDamage);
+                    pointer.setOriginBasedPosition(body.getPosition().x, body.getPosition().y);
+                    pointer.setRotation(aiming.angle());
                 }
+            }
+
+            // liikumisvektori rakendamine
+            if (moving.len() > 1)
+                moving.setLength(1);
+
+            body.applyForceToCenter(
+                    moving.cpy()
+                            .scl(GameInfo.FORCE_MULTIPLIER * GameInfo.PLAYER_ACCELERATION),
+                    true);
+
+            setBoosterPower(moving.len());
+
+            if (moving.len() > 0) {
+                setRotation(moving.angle());
+
+                // paneb Playeri kehale ka uuesti suuna
+                body.setTransform(
+                        body.getPosition(),
+                        moving.angleRad());
+            }
+
+            // tegeleme tulistamisega
+            long time = TimeUtils.millis();
+
+            if (aiming.len() > 0 && time > timeNextShot && shooting) {
+                timeNextShot = time + GameInfo.PLAYER_SHOOTING_INTERVAL;
+
+                bulletManager.playerShoot(body.getPosition(), aiming, bulletDamage);
             }
         }
     }
@@ -208,6 +253,7 @@ public class Player extends Sprite {
     public void draw(Batch batch) {
         if (health >= 0) {
             thruster.draw(batch);
+            pointer.draw(batch);
             super.draw(batch);
         }
     }
@@ -270,16 +316,19 @@ public class Player extends Sprite {
         explosionSound.dispose();
         damagedSound.dispose();
 
+        pointer.getTexture().dispose();
+
         for (TouchPad touchPad : touchPads)
             touchPad.dispose();
     }
 
     public void updateCam(OrthographicCamera camera) {
-        camera.position.set(
-                body.getPosition().x + body.getLinearVelocity().x / 12f * GameInfo.CAM_SCALING * 20,
-                body.getPosition().y + body.getLinearVelocity().y / 12f * GameInfo.CAM_SCALING * 20,
-                0
-        );
+        float x = body.getPosition().x + body.getLinearVelocity().x / 12f * GameInfo.CAM_SCALING * 20;
+        float y = body.getPosition().y + body.getLinearVelocity().y / 12f * GameInfo.CAM_SCALING * 20;
+
+        camera.position.set(x, y, 0);
+
+        cameraPos = camera.position;
     }
 
     private void setBoosterPower(float value) {
