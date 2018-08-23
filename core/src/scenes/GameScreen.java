@@ -29,6 +29,7 @@ import com.oopgame.game.MusicManager;
 import com.oopgame.game.OOPGame;
 import com.oopgame.game.Player;
 import com.oopgame.game.Sein;
+import com.oopgame.game.inputs.GameControls;
 import com.oopgame.game.ui.UIManager;
 import com.oopgame.game.WaveManager;
 
@@ -58,6 +59,8 @@ public class GameScreen implements Screen, ContactListener {
 
     private MusicManager musicManager;
     private Sound hitmarker;
+
+    private GameControls gameControls;
 
     public GameScreen(final OOPGame game) {
         this.game = game;
@@ -89,8 +92,7 @@ public class GameScreen implements Screen, ContactListener {
         player = new Player(
                 GameInfo.W_WIDTH * 0.5f,
                 GameInfo.W_HEIGHT * 0.5f,
-                world,
-                stage,
+                world, stage, camera,
                 bulletManager, gibsManager, explosionManager);
 
         uiManager = new UIManager(batch, camera, player);
@@ -115,6 +117,9 @@ public class GameScreen implements Screen, ContactListener {
 
         // debug renderer
         debugRenderer = new Box2DDebugRenderer();
+
+        gameControls = new GameControls(player);
+        Gdx.input.setInputProcessor(gameControls);
     }
 
     @Override
@@ -127,9 +132,6 @@ public class GameScreen implements Screen, ContactListener {
 
         world.step(1 / 60f, 6, 2);
 
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
         player.update();
 
         tolm.update();
@@ -139,8 +141,9 @@ public class GameScreen implements Screen, ContactListener {
         explosionManager.update();
         waveManager.update();
 
+        gameControls.holdPressed();
+
         // liigutab kaamerat playeri positsiooni järgi
-        player.updateCam(camera);
         camera.update();
     }
 
@@ -151,6 +154,9 @@ public class GameScreen implements Screen, ContactListener {
         batch.setProjectionMatrix(camera.combined);
 
         batch.begin();
+
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // tausta lisamine
         bgManager.update();
@@ -183,7 +189,7 @@ public class GameScreen implements Screen, ContactListener {
         stage.act(/*Gdx.graphics.getDeltaTime()*/delta);
         stage.draw();
 
-        if (player.done()) {
+        if (player.isDone()) {
             int score = waveManager.getScore();
             // loeb igakord uuesti sisse failis oleva highscore'i, sest muidu äkki sama ajal kui
             // mäng lahti on, kirjutab teine sama mängu instance faili kõrgema highscore'i
