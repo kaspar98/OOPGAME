@@ -13,13 +13,13 @@ import scenes.MainMenuScreen;
 public class OOPGame extends Game {
     private SpriteBatch batch;
     private BitmapFont font;
-    private BitmapFont fontBlur;
 
     private int highscore = 0;
 
     public void create() {
         batch = new SpriteBatch();
 
+        // teeme valmis sobiva suurusega fonti
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
                 Gdx.files.internal("fonts/rational-integer/ratio___.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter =
@@ -29,12 +29,6 @@ public class OOPGame extends Game {
         parameter.color = Color.WHITE;
 
         font = generator.generateFont(parameter);
-
-        parameter.size = 16;
-        parameter.color = Color.PINK;
-        parameter.borderColor = new Color(0.7f,0,0.5f,0);
-        parameter.borderWidth = 2f;
-        fontBlur = generator.generateFont(parameter);
 
         generator.dispose();
 
@@ -60,10 +54,6 @@ public class OOPGame extends Game {
 
     public BitmapFont getFont() {
         return font;
-    }
-
-    public BitmapFont getFontBlur() {
-        return fontBlur;
     }
 
     public SpriteBatch getBatch() {
