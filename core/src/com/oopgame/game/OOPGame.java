@@ -32,6 +32,9 @@ public class OOPGame extends Game {
 
         generator.dispose();
 
+        // commenti kõik selle ja eelmise commenti vahelt ja uncommenti järgmine rida pärast seda commenti, et katsetada ilma uue fonti lugemiseta
+        /*font = new BitmapFont();*/
+
         // highscore sisselugemine
         FileHandle handle = Gdx.files.local("highscore.txt");
 
