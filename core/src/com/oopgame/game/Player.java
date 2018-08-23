@@ -21,8 +21,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.oopgame.game.inputs.Ekraan;
-import com.oopgame.game.inputs.Hiir;
-import com.oopgame.game.inputs.Klaviatuur;
 import com.oopgame.game.inputs.Pult;
 
 import helpers.GameInfo;
@@ -72,10 +70,14 @@ public class Player extends Sprite {
 
     private long timeDeath;
 
+    private Vector2 aiming = new Vector2(0,0);
     private Sprite pointer;
+    private float pointerAlpha;
     private Vector3 cameraPos;
 
-    public Player(float x, float y, World world, Stage stage,
+    private Vector2 movementVector = new Vector2();
+
+    public Player(float x, float y, World world, Stage stage, OrthographicCamera camera,
                   BulletManager bulletManager, GibsManager gibsManager,
                   ExplosionManager explosionManager) {
         super(new Texture(Gdx.files.internal("player_laev_t.png")));
@@ -83,6 +85,7 @@ public class Player extends Sprite {
         this.bulletManager = bulletManager;
         this.gibsManager = gibsManager;
         this.explosionManager = explosionManager;
+        this.cameraPos = camera.position;
 
         setSize(
                 getTexture().getWidth() * GameInfo.SCALING,
@@ -182,18 +185,11 @@ public class Player extends Sprite {
         if (health > 0) {
             Vector2 moving = new Vector2();
             Vector2 aiming = new Vector2();
-            boolean shooting;
-
-            // klaviatuuri inputid
-            Klaviatuur.movement(moving);
-            shooting = Hiir.aiming(aiming, cameraPos, body.getPosition());
-
 
             // puldi inputid
             Pult.movement(moving);
 
-            if (Pult.aiming(aiming))
-                shooting = Pult.isShooting();
+            Pult.aiming(aiming);
 
             if (aiming.len() > 0) {
                 pointer.setOriginBasedPosition(body.getPosition().x, body.getPosition().y);
@@ -209,8 +205,6 @@ public class Player extends Sprite {
 
                 // playeri tulistamine
                 if (touchpadR.isTouched()) {
-                    shooting = true;
-
                     Ekraan.aiming(touchpadR, aiming);
 
                     pointer.setOriginBasedPosition(body.getPosition().x, body.getPosition().y);
@@ -219,29 +213,29 @@ public class Player extends Sprite {
             }
 
             // liikumisvektori rakendamine
-            if (moving.len() > 1)
-                moving.setLength(1);
+            if (movementVector.len() > 1)
+                movementVector.setLength(1);
 
             body.applyForceToCenter(
-                    moving.cpy()
+                    movementVector.cpy()
                             .scl(GameInfo.FORCE_MULTIPLIER * GameInfo.PLAYER_ACCELERATION),
                     true);
 
-            setBoosterPower(moving.len());
+            setBoosterPower(movementVector.len());
 
-            if (moving.len() > 0) {
-                setRotation(moving.angle());
+            if (movementVector.len() > 0) {
+                setRotation(movementVector.angle());
 
                 // paneb Playeri kehale ka uuesti suuna
                 body.setTransform(
                         body.getPosition(),
-                        moving.angleRad());
+                        movementVector.angleRad());
             }
 
             // tegeleme tulistamisega
             long time = TimeUtils.millis();
 
-            if (aiming.len() > 0 && time > timeNextShot && shooting) {
+            if (aiming.len() > 0 && time > timeNextShot) {
                 timeNextShot = time + GameInfo.PLAYER_SHOOTING_INTERVAL;
 
                 bulletManager.playerShoot(body.getPosition(), aiming, bulletDamage);
@@ -307,6 +301,20 @@ public class Player extends Sprite {
                 done = true;
             }
         }
+
+        updateCam();
+
+        pointer.setAlpha(pointerAlpha > 1 ? 1 : pointerAlpha);
+
+        if (pointerAlpha > 0) {
+            pointerAlpha -= 0.05f;
+
+            if (pointerAlpha < 0)
+                pointerAlpha = 0;
+
+            pointer.setOriginBasedPosition(body.getPosition().x, body.getPosition().y);
+        }
+
     }
 
     public void dispose() {
@@ -322,13 +330,11 @@ public class Player extends Sprite {
             touchPad.dispose();
     }
 
-    public void updateCam(OrthographicCamera camera) {
+    private void updateCam() {
         float x = body.getPosition().x + body.getLinearVelocity().x / 12f * GameInfo.CAM_SCALING * 20;
         float y = body.getPosition().y + body.getLinearVelocity().y / 12f * GameInfo.CAM_SCALING * 20;
 
-        camera.position.set(x, y, 0);
-
-        cameraPos = camera.position;
+        cameraPos.set(x, y, 0);
     }
 
     private void setBoosterPower(float value) {
@@ -412,7 +418,41 @@ public class Player extends Sprite {
         return body.getLinearVelocity();
     }
 
-    public boolean done() {
+    public boolean isDone() {
         return done;
+    }
+
+    public void aimPointer(int x, int y) {
+        aiming = new Vector2(
+                cameraPos.x + (x - 0.5f * GameInfo.WIDTH) * GameInfo.CAM_SCALING,
+                cameraPos.y + (0.5f * GameInfo.HEIGHT - y) * GameInfo.CAM_SCALING);
+
+        aiming.sub(body.getPosition());
+
+        aimPointer(aiming.angle());
+    }
+
+    public void aimPointer(float angle) {
+        pointer.setRotation(angle);
+
+        pointerAlpha = 1.5f;
+    }
+
+    public void shoot() {
+        pointerAlpha = 1.5f;
+        long time = TimeUtils.millis();
+
+        // saaks delegeerida relva objektidele edasi ja tagastada booleani vastavalt sellele,
+        // kas tulistamine toimus vmitte
+
+        if (health > 0 && timeNextShot < time) {
+            timeNextShot = time + GameInfo.PLAYER_SHOOTING_INTERVAL;
+
+            bulletManager.playerShoot(body.getPosition(), aiming, bulletDamage);
+        }
+    }
+
+    public void movementVector(Vector2 vector) {
+        movementVector.set(0,0).add(vector);
     }
 }
