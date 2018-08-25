@@ -20,12 +20,15 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.oopgame.game.guns.GunList;
+import com.oopgame.game.guns.damagers.Damager;
+import com.oopgame.game.guns.damagers.DamagerManager;
 import com.oopgame.game.inputs.Ekraan;
 import com.oopgame.game.inputs.Pult;
 
 import helpers.GameInfo;
 
-public class Player extends Sprite {
+public class Player extends Sprite implements Hittable {
     private Body body;
     private Fixture fixture;
 
@@ -55,10 +58,6 @@ public class Player extends Sprite {
     private Vector2 forces;
     private float tippkiirus = GameInfo.PLAYER_MAXSPEED;
 
-    private BulletManager bulletManager;
-    private float bulletDamage = 25;
-    private long timeNextShot = 0;
-
     private GibsManager gibsManager;
     private String gibsKey = "player_ship_1b";
     private boolean wasJustKilled = false;
@@ -70,19 +69,22 @@ public class Player extends Sprite {
 
     private long timeDeath;
 
-    private Vector2 aiming = new Vector2(0,0);
+    private Vector2 aiming = new Vector2(0, 0);
     private Sprite pointer;
     private float pointerAlpha;
     private Vector3 cameraPos;
 
     private Vector2 movementVector = new Vector2();
 
+    private GunList gunList;
+
+    private Integer faction = 0;
+
     public Player(float x, float y, World world, Stage stage, OrthographicCamera camera,
-                  BulletManager bulletManager, GibsManager gibsManager,
+                  DamagerManager damagerManager, GibsManager gibsManager,
                   ExplosionManager explosionManager) {
         super(new Texture(Gdx.files.internal("player_laev_t.png")));
 
-        this.bulletManager = bulletManager;
         this.gibsManager = gibsManager;
         this.explosionManager = explosionManager;
         this.cameraPos = camera.position;
@@ -169,9 +171,12 @@ public class Player extends Sprite {
         damagedSound = Gdx.audio.newSound(Gdx.files.internal("damaged.wav"));
         explosionSound = Gdx.audio.newSound(Gdx.files.internal("explosion.wav"));
 
+        gunList = new GunList(damagerManager, body.getPosition(), faction);
+
         pointer = new Sprite(new Texture(Gdx.files.internal("pointerTest.png")));
         pointer.setSize(pointer.getWidth() * GameInfo.CAM_SCALING, pointer.getHeight() * GameInfo.CAM_SCALING);
         pointer.setOrigin(0, pointer.getHeight() * 0.5f);
+        pointer.setAlpha(0);
         //pointer.setAlpha(0);
     }
 
@@ -233,13 +238,13 @@ public class Player extends Sprite {
             }
 
             // tegeleme tulistamisega
-            long time = TimeUtils.millis();
+            /*long time = TimeUtils.millis();
 
             if (aiming.len() > 0 && time > timeNextShot) {
                 timeNextShot = time + GameInfo.PLAYER_SHOOTING_INTERVAL;
 
                 bulletManager.playerShoot(body.getPosition(), aiming, bulletDamage);
-            }
+            }*/
         }
     }
 
@@ -304,7 +309,7 @@ public class Player extends Sprite {
 
         updateCam();
 
-        pointer.setAlpha(pointerAlpha > 1 ? 1 : pointerAlpha);
+        pointer.setAlpha(pointerAlpha > 0.5f ? 0.5f : pointerAlpha);
 
         if (pointerAlpha > 0) {
             pointerAlpha -= 0.05f;
@@ -381,11 +386,21 @@ public class Player extends Sprite {
         return maxShield;
     }
 
-    public void damage(float damage) {
+    @Override
+    public boolean isHit(Damager damager) {
+        if (damager.getFaction() != 1)
+            return false;
+
+        damage(damager.getDamage());
+        damager.hit();
+
+        return true;
+    }
+
+    private void damage(float damage) {
         long time = TimeUtils.millis();
         timeDamagedExpire = time + GameInfo.PLAYER_DAMAGED_DURATION;
         damaged = true;
-
 
         if (health > 0) {
             damagedSound.play();
@@ -440,19 +455,15 @@ public class Player extends Sprite {
 
     public void shoot() {
         pointerAlpha = 1.5f;
-        long time = TimeUtils.millis();
 
-        // saaks delegeerida relva objektidele edasi ja tagastada booleani vastavalt sellele,
-        // kas tulistamine toimus vmitte
-
-        if (health > 0 && timeNextShot < time) {
-            timeNextShot = time + GameInfo.PLAYER_SHOOTING_INTERVAL;
-
-            bulletManager.playerShoot(body.getPosition(), aiming, bulletDamage);
+        if (health > 0) {
+            if (!gunList.shoot(aiming.angle())) {
+                // vb lisab mingi sound effecti, millega saab aru, et tulistamine ei õnnestunud
+            }
         }
     }
 
     public void movementVector(Vector2 vector) {
-        movementVector.set(0,0).add(vector);
+        movementVector.set(0, 0).add(vector);
     }
 }
