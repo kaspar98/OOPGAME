@@ -18,9 +18,8 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.oopgame.game.Hittable;
 import com.oopgame.game.backgrounds.BackgroundManager;
-import com.oopgame.game.Bullet;
-import com.oopgame.game.BulletManager;
 import com.oopgame.game.DustParticleManager;
 import com.oopgame.game.enemies.Enemy;
 import com.oopgame.game.ExplosionManager;
@@ -29,6 +28,8 @@ import com.oopgame.game.MusicManager;
 import com.oopgame.game.OOPGame;
 import com.oopgame.game.Player;
 import com.oopgame.game.Sein;
+import com.oopgame.game.guns.damagers.Damager;
+import com.oopgame.game.guns.damagers.DamagerManager;
 import com.oopgame.game.inputs.GameControls;
 import com.oopgame.game.ui.UIManager;
 import com.oopgame.game.WaveManager;
@@ -49,7 +50,7 @@ public class GameScreen implements Screen, ContactListener {
     private Box2DDebugRenderer debugRenderer;
 
     private ExplosionManager explosionManager;
-    private BulletManager bulletManager;
+    private DamagerManager damagerManager;
     private GibsManager gibsManager;
 
     private UIManager uiManager;
@@ -82,7 +83,7 @@ public class GameScreen implements Screen, ContactListener {
         // loome lava, millele touchpadi paigutada + loome touchpadi inpute töötleva protsessori
         stage = new Stage(new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT), batch);
 
-        bulletManager = new BulletManager(batch, world);
+        damagerManager = new DamagerManager(batch, world);
 
         gibsManager = new GibsManager(world, batch);
 
@@ -93,7 +94,7 @@ public class GameScreen implements Screen, ContactListener {
                 GameInfo.W_WIDTH * 0.5f,
                 GameInfo.W_HEIGHT * 0.5f,
                 world, stage, camera,
-                bulletManager, gibsManager, explosionManager);
+                damagerManager, gibsManager, explosionManager);
 
         uiManager = new UIManager(batch, camera, player);
 
@@ -110,7 +111,7 @@ public class GameScreen implements Screen, ContactListener {
         looSeinad();
 
         waveManager = new WaveManager(batch, player, world, stage,
-                uiManager, bulletManager, musicManager,
+                uiManager, damagerManager, musicManager,
                 explosionManager, gibsManager, game.getFont());
 
         hitmarker = Gdx.audio.newSound(Gdx.files.internal("hitmarker.wav"));
@@ -137,7 +138,7 @@ public class GameScreen implements Screen, ContactListener {
         tolm.update();
         gibsManager.update();
         musicManager.update(delta);
-        bulletManager.update();
+        damagerManager.update();
         explosionManager.update();
         waveManager.update();
 
@@ -163,7 +164,7 @@ public class GameScreen implements Screen, ContactListener {
         bgManager.render();
 
         tolm.render();
-        bulletManager.render();
+        damagerManager.render();
 
         // kutsub Playeris playeri renderimise välja
         player.draw(batch);
@@ -180,7 +181,7 @@ public class GameScreen implements Screen, ContactListener {
         batch.end();
 
         // debug camera render
-        //debugRenderer.render(world, camera.combined);
+        /*debugRenderer.render(world, camera.combined);*/
 
         // input checks koos touchpadiga
         player.inputs();
@@ -235,7 +236,7 @@ public class GameScreen implements Screen, ContactListener {
         bgManager.dispose();
         tolm.dispose();
         explosionManager.dispose();
-        bulletManager.dispose();
+        damagerManager.dispose();
         waveManager.dispose();
         uiManager.dispose();
 
@@ -266,10 +267,10 @@ public class GameScreen implements Screen, ContactListener {
             }
         }
 
-        if (first instanceof Bullet)
-            bulletCheck(first, second);
-        else if (second instanceof Bullet)
-            bulletCheck(second, first);
+        if (first instanceof Damager)
+            damagerCheck(first, second);
+        else if (second instanceof Damager)
+            damagerCheck(second, first);
     }
 
 
@@ -303,21 +304,17 @@ public class GameScreen implements Screen, ContactListener {
 
     }
 
-    private void bulletCheck(Object bulletObject, Object object) {
-        Bullet bullet = (Bullet) bulletObject;
+    private void damagerCheck(Object damagerObject, Object object) {
+        // siinkohas me veel ühtegi body modifitseerida ei saa, seega pidin damagerManagerile
+        // tegema eraldi süsteemi, millega kuule deactivate'ida ja poolida
 
-        if (object instanceof Player && !bullet.isPlayerShot()) {
-            bullet.hasHit();
+        if (object instanceof Hittable) {
+            Hittable hittable = (Hittable) object;
+            Damager damager = (Damager) damagerObject;
 
-            player.damage(bullet.getDamage());
-        } else if (object instanceof Enemy && bullet.isPlayerShot()) {
-            Enemy enemy = (Enemy) object;
-
-            bullet.hasHit();
-
-            hitmarker.play(0.5f);
-
-            enemy.damage(bullet.getDamage());
+            if (hittable.isHit(damager) && object instanceof Enemy) {
+                hitmarker.play(0.5f);
+            }
         }
     }
 
