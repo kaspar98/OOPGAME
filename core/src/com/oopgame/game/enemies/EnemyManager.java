@@ -7,11 +7,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
-import com.oopgame.game.BulletManager;
 import com.oopgame.game.ExplosionManager;
 import com.oopgame.game.GibsManager;
 import com.oopgame.game.MusicManager;
 import com.oopgame.game.Player;
+import com.oopgame.game.guns.damagers.DamagerManager;
 import com.oopgame.game.ui.UIManager;
 
 import helpers.GameInfo;
@@ -28,7 +28,7 @@ public class EnemyManager {
     private Vector2 playerVektor;
 
     private com.oopgame.game.ui.UIManager uiManager;
-    private BulletManager bulletManager;
+    private DamagerManager damagerManager;
     private MusicManager musicManager;
     private ExplosionManager explosionManager;
     private GibsManager gibsManager;
@@ -37,14 +37,14 @@ public class EnemyManager {
 
     public EnemyManager(
             SpriteBatch batch, Player player, World world,
-            UIManager uiManager, BulletManager bulletManager, MusicManager musicManager,
+            UIManager uiManager, DamagerManager damagerManager, MusicManager musicManager,
             ExplosionManager explosionManager, GibsManager gibsManager) {
         this.batch = batch;
         this.playerPos = player.getPosition();
         this.playerVektor = player.getVector();
         this.world = world;
         this.uiManager = uiManager;
-        this.bulletManager = bulletManager;
+        this.damagerManager = damagerManager;
         this.musicManager = musicManager;
         this.explosionManager = explosionManager;
         this.gibsManager = gibsManager;
@@ -104,7 +104,7 @@ public class EnemyManager {
                     suvaline,
                     world, appearance, "enemy_alien_fighter_1b",
                     playerPos, playerVektor,
-                    uiManager, bulletManager,
+                    uiManager, damagerManager,
                     this, gibsManager);
         }
         alive.add(enemy);

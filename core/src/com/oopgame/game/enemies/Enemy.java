@@ -12,18 +12,20 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.oopgame.game.BulletManager;
 import com.oopgame.game.GibsManager;
+import com.oopgame.game.Hittable;
+import com.oopgame.game.guns.LaserGun;
+import com.oopgame.game.guns.damagers.Damager;
+import com.oopgame.game.guns.damagers.DamagerManager;
 import com.oopgame.game.ui.UIManager;
 import com.oopgame.game.ui.UIMarker;
 
 import helpers.GameInfo;
 
-public class Enemy extends Sprite {
+public class Enemy extends Sprite implements Hittable {
     private Body body;
     private Fixture fixture;
 
-    private BulletManager bulletManager;
     private EnemyManager enemyManager;
 
     private Vector2 playerPos;
@@ -41,9 +43,6 @@ public class Enemy extends Sprite {
 
     private int tippkiirus = 25;
 
-    private long timeNextShot = 0;
-
-    private float lasuDamage = 25;
     private float optKaugus = GameInfo.INNER_RADIUS * GameInfo.SCALING * 0.75f;
     private float tulistamisKaugus = optKaugus + 10;
 
@@ -51,14 +50,17 @@ public class Enemy extends Sprite {
 
     private String gibsKey;
 
+    private Integer faction = 1;
+
+    private LaserGun laserGun;
+
     public Enemy(Vector2 start,
                  World world, Sprite appearance, String gibsKey,
                  Vector2 playerPos, Vector2 playerVektor,
-                 UIManager uiManager, BulletManager bulletManager,
+                 UIManager uiManager, DamagerManager damagerManager,
                  EnemyManager enemyManager, GibsManager gibsManager) {
         super(appearance);
 
-        this.bulletManager = bulletManager;
         this.playerPos = playerPos;
         this.playerVektor = playerVektor;
         this.enemyManager = enemyManager;
@@ -91,6 +93,8 @@ public class Enemy extends Sprite {
         circle.dispose();
 
         uiMarker = uiManager.addMarker(body.getPosition());
+
+        laserGun = new LaserGun(damagerManager, body.getPosition(), faction);
 
         alive = true;
     }
@@ -132,20 +136,16 @@ public class Enemy extends Sprite {
             body.setLinearVelocity(body.getLinearVelocity().setLength(tippkiirus));
         }
 
-        if (time > timeNextShot && playeriPoole.len() < tulistamisKaugus) {
+        if (playeriPoole.len() < tulistamisKaugus) {
             /*if (playeriPoole.len() > 1) {*/
-            bulletManager.enemyShoot(
-                    body.getPosition(),
-                    playeriPoole.cpy().add(playerVektor
-                            .cpy()
-                            .sub(body.getLinearVelocity())
-                            .scl(playeriPoole.len() > 1 ? 1f - 1 / playeriPoole.len() : 1f)),
-                    lasuDamage);
+            laserGun.shoot(playeriPoole.cpy().add(
+                    playerVektor.cpy().sub(body.getLinearVelocity())
+                            .scl(playeriPoole.len() > 1 ? 1f - 1 / playeriPoole.len() : 1f))
+                    .angle());
             /*} else {
                 bulletManager.enemyShoot(
                         body.getPosition(), playeriPoole, lasuDamage);
             }*/
-            timeNextShot = time + GameInfo.ENEMY_SHOOTING_INTERVAL;
         }
 
         if (damaged && timeDamagedExpire < time) {
@@ -203,7 +203,18 @@ public class Enemy extends Sprite {
         return uiMarker;
     }
 
-    public void damage(float damage) {
+    @Override
+    public boolean isHit(Damager damager) {
+        if (damager.getFaction() != 0)
+            return false;
+
+        damage(damager.getDamage());
+        damager.hit();
+
+        return true;
+    }
+
+    private void damage(float damage) {
         timeDamagedExpire = TimeUtils.millis() + GameInfo.ENEMY_DAMAGED_DURATION;
         damaged = true;
 
