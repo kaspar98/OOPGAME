@@ -1,5 +1,6 @@
 package com.oopgame.game.inputs;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
@@ -44,6 +45,9 @@ public class GameControls implements InputProcessor {
         // sündmused selleks, kui mõni klaviatuuri nupp lahti lastakse
         keys[keycode] = false;
 
+        if (keycode == Input.Keys.ESCAPE)
+            Gdx.app.exit();
+
         return false;
     }
 
@@ -51,6 +55,7 @@ public class GameControls implements InputProcessor {
     public boolean keyTyped(char character) {
         // loeb ainult nupuvajutust, sellega saaks mingit kirjutamise süsteemi teha,
         // vb teeb mingi commandide interpretatori mingi hetk, et paremini testida
+
         return false;
     }
 
