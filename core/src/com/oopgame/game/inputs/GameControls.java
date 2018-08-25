@@ -25,7 +25,7 @@ public class GameControls implements InputProcessor {
     // teistele ns booleanid jätma?
 
     // vektor, mis antakse playerile ette, selle järgi pannakse player liikuma.
-    Vector2 movementVector = new Vector2(0, 0);
+    private Vector2 movementVector = new Vector2(0, 0);
 
     public GameControls(Player player) {
         this.player = player;
@@ -58,8 +58,6 @@ public class GameControls implements InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         // sündmused selleks, kui hiirenuppe vajutatakse või ekraanile vajutatakse
         buttons[button] = true;
-
-        System.out.println(buttons[button]);
 
         return false;
     }
@@ -120,8 +118,6 @@ public class GameControls implements InputProcessor {
         // hiirega seotud nupud
         if (buttons[Input.Buttons.LEFT]) {
             mousePress();
-
-            System.out.println("asd");
         }
     }
 }
