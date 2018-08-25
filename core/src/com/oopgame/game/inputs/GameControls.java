@@ -53,9 +53,6 @@ public class GameControls implements InputProcessor {
 
     @Override
     public boolean keyTyped(char character) {
-        if(keys[Input.Keys.ESCAPE]) {
-            Gdx.app.exit();
-        }
         // loeb ainult nupuvajutust, sellega saaks mingit kirjutamise süsteemi teha,
         // vb teeb mingi commandide interpretatori mingi hetk, et paremini testida
 
