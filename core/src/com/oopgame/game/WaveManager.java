@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.oopgame.game.enemies.EnemyManager;
+import com.oopgame.game.guns.damagers.DamagerManager;
 import com.oopgame.game.ui.UIManager;
 
 import helpers.GameInfo;
@@ -30,13 +31,13 @@ public class WaveManager {
     private Label wave;
 
     public WaveManager(SpriteBatch batch, Player player, World world, Stage stage,
-                       UIManager uiManager, BulletManager bulletManager,
+                       UIManager uiManager, DamagerManager damagerManager,
                        MusicManager musicManager, ExplosionManager explosionManager,
                        GibsManager gibsManager, BitmapFont font) {
         this.timeNextWave = TimeUtils.millis() + timeWaitWave;
 
         enemyManager = new EnemyManager(batch, player, world,
-                uiManager, bulletManager, musicManager, explosionManager, gibsManager);
+                uiManager, damagerManager, musicManager, explosionManager, gibsManager);
 
         Label.LabelStyle style = new Label.LabelStyle(font, Color.WHITE);
 
