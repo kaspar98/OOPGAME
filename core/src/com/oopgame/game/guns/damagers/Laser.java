@@ -6,6 +6,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 
 import helpers.GameInfo;
@@ -27,7 +28,8 @@ public class Laser extends Sprite implements Damager {
     public Laser(DamagerManager damagerManager, World world, Sprite sprite,
                  Integer damage, Integer faction,
                  Vector2 source,
-                 Float speed, float angle) {
+                 Float speed, float angle,
+                 BodyDef bodyDef, Shape shape) {
         super(sprite);
 
         this.damagerManager = damagerManager;
@@ -35,22 +37,14 @@ public class Laser extends Sprite implements Damager {
         this.faction = faction;
 
         // TODO: Äkki annab seda ka optimiseerida: delegeerib kõik eelneva body loomisele
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(source);
 
         body = world.createBody(bodyDef);
         body.setUserData(this);
         body.setBullet(true);
 
-        PolygonShape box = new PolygonShape();
-        box.setAsBox(getWidth() * 0.5f, getHeight() * 0.5f);
-
-        fixture = body.createFixture(box, 0);
+        fixture = body.createFixture(shape, 0);
         fixture.setSensor(true);
         fixture.setUserData(this);
-
-        box.dispose();
 
         setOrigin(getWidth() * 0.5f, getHeight() * 0.5f);
 
