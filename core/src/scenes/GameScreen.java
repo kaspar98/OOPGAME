@@ -16,9 +16,11 @@ import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.Hittable;
+import com.oopgame.game.Time;
 import com.oopgame.game.backgrounds.BackgroundManager;
 import com.oopgame.game.DustParticleManager;
 import com.oopgame.game.enemies.Enemy;
@@ -63,11 +65,15 @@ public class GameScreen implements Screen, ContactListener {
 
     private GameControls gameControls;
 
+    private Time time;
+
     public GameScreen(final OOPGame game) {
         this.game = game;
         this.batch = game.getBatch();
 
         Box2D.init();
+
+        time = new Time();
 
         world = new World(new Vector2(0, 0), true);
         world.setContactListener(this);
@@ -83,7 +89,7 @@ public class GameScreen implements Screen, ContactListener {
         // loome lava, millele touchpadi paigutada + loome touchpadi inpute töötleva protsessori
         stage = new Stage(new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT), batch);
 
-        damagerManager = new DamagerManager(batch, world);
+        damagerManager = new DamagerManager(batch, world, time);
 
         gibsManager = new GibsManager(world, batch);
 
@@ -129,6 +135,8 @@ public class GameScreen implements Screen, ContactListener {
     }
 
     public void update(float delta) {
+        time.update();
+
         waveManager.update();
 
         world.step(1 / 60f, 6, 2);
