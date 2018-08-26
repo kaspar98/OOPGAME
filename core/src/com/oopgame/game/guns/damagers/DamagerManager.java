@@ -11,6 +11,8 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.TimeUtils;
+import com.oopgame.game.Time;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -22,13 +24,13 @@ import java.util.Map;
 import helpers.GameInfo;
 
 public class DamagerManager {
-    // hakkab asendama BulletManageri
-
     // hetkel nimetasin DamagerManageriks, aga Damager võib edaspidi segadust tekitada äkki,
     // seega peaks mingile paremale nimele mõtlema
 
     private SpriteBatch batch;
     private World world;
+
+    private Time time;
 
     // map, kus hoiame tekstuure
     private Map<String, Sprite> spriteMap = new HashMap<String, Sprite>();
@@ -52,9 +54,10 @@ public class DamagerManager {
 
     // TODO: damageride BodyDef siin ära teha ja alles hoida, siis delegeerida damageridele
 
-    public DamagerManager(SpriteBatch batch, World world) {
+    public DamagerManager(SpriteBatch batch, World world, Time time) {
         this.batch = batch;
         this.world = world;
+        this.time = time;
 
         Sprite sprite = new Sprite(new Texture(Gdx.files.internal("damagers/laser1.png")));
         sprite.setSize(sprite.getTexture().getWidth() * GameInfo.SCALING,
@@ -107,7 +110,7 @@ public class DamagerManager {
             lasers.add(laser);
         } else
             lasers.add(new Laser(
-                    this, world, spriteMap.get("laser"),
+                    this, world, spriteMap.get("laser"), time,
                     damage, faction, source, speed, angle,
                     bodyDefMap.get("laser"), shapeMap.get("laser")));
 
