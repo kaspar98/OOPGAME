@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.oopgame.game.Time;
 
 import helpers.GameInfo;
 
@@ -16,6 +17,13 @@ public class Laser extends Sprite implements Damager {
     private Body body;
     private Fixture fixture;
 
+    private Time time;
+
+    private final int duration = 10000;
+    private final int fadeDuration = 1000;
+    private long timeTillFade;
+    private long timeTillDeactivate;
+
     private Vector2 bodyPos;
 
     private Integer damage;
@@ -24,7 +32,7 @@ public class Laser extends Sprite implements Damager {
     private Vector2 movementVector;
 
 
-    public Laser(DamagerManager damagerManager, World world, Sprite sprite,
+    public Laser(DamagerManager damagerManager, World world, Sprite sprite, Time time,
                  Integer damage, Integer faction,
                  Vector2 source,
                  Float speed, float angle,
@@ -32,6 +40,7 @@ public class Laser extends Sprite implements Damager {
         super(sprite);
 
         this.damagerManager = damagerManager;
+        this.time = time;
         this.damage = damage;
         this.faction = faction;
 
@@ -50,6 +59,13 @@ public class Laser extends Sprite implements Damager {
         setupLocation(source, speed, angle);
 
         setFactionColor();
+
+        setupTimers();
+    }
+
+    private void setupTimers() {
+        timeTillFade = time.getTime() + duration;
+        timeTillDeactivate = timeTillFade + fadeDuration;
     }
 
     private void setFactionColor() {
@@ -64,6 +80,17 @@ public class Laser extends Sprite implements Damager {
 
     public void update() {
         setCenter(body.getPosition().x, body.getPosition().y);
+
+        // tundub väga ebaoptimaalne atm,
+        // sellise väikse asja jaoks teeb minuarust liiga palju arvutusi
+        long time = this.time.getTime();
+
+        if (time > timeTillFade) {
+            if (time > timeTillDeactivate)
+                damagerManager.poolLaser(this);
+            else
+                setAlpha((timeTillDeactivate - time) / (float) fadeDuration);
+        }
     }
 
     @Override
@@ -86,7 +113,7 @@ public class Laser extends Sprite implements Damager {
     private void setupLocation(Vector2 source, Float speed, float angle) {
         movementVector = new Vector2(speed, 0).setAngle(angle);
 
-        body.setLinearVelocity(movementVector.cpy().setLength(GameInfo.FORCE_MULTIPLIER * 1000));
+        body.setLinearVelocity(movementVector.cpy().scl(5));
 
         setRotation(movementVector.angle());
         body.setTransform(source, movementVector.angleRad());
@@ -104,6 +131,10 @@ public class Laser extends Sprite implements Damager {
 
         body.setActive(true);
         setAlpha(1);
+
+        setFactionColor();
+
+        setupTimers();
     }
 
     public void deactivate() {
