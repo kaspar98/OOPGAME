@@ -7,6 +7,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 
 import java.util.ArrayList;
@@ -33,6 +36,12 @@ public class DamagerManager {
     // map, kus hoiame soundfx-e
     private Map<String, Sound> soundMap = new HashMap<String, Sound>();
 
+    // map, kus hoiame damageride bodyDef-e
+    private Map<String, BodyDef> bodyDefMap = new HashMap<String, BodyDef>();
+
+    // map, kus hoiame damageride shape-e
+    private Map<String, Shape> shapeMap = new HashMap<String, Shape>();
+
     // Laseri väljad
     private List<Laser> lasers = new ArrayList<Laser>();
     private Deque<Laser> laserPool = new LinkedList<Laser>();
@@ -53,6 +62,14 @@ public class DamagerManager {
 
         spriteMap.put("laser", sprite);
         soundMap.put("laser", Gdx.audio.newSound(Gdx.files.internal("lask.wav")));
+
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDefMap.put("laser", bodyDef);
+
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(sprite.getWidth() * 0.5f, sprite.getHeight() * 0.5f);
+        shapeMap.put("laser", shape);
     }
 
     public void render() {
@@ -74,6 +91,9 @@ public class DamagerManager {
 
         for (Sound sound : soundMap.values())
             sound.dispose();
+
+        for (Shape shape : shapeMap.values())
+            shape.dispose();
     }
 
     public void shootLaser(
@@ -88,7 +108,8 @@ public class DamagerManager {
         } else
             lasers.add(new Laser(
                     this, world, spriteMap.get("laser"),
-                    damage, faction, source, speed, angle));
+                    damage, faction, source, speed, angle,
+                    bodyDefMap.get("laser"), shapeMap.get("laser")));
 
         if (faction == 0)
             soundMap.get("laser").play(0.35f);
