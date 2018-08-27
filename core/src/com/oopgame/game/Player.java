@@ -448,6 +448,10 @@ public class Player extends Sprite implements Hittable {
     }
 
     public void aimPointer(float angle) {
+        // TODO: tuleks pointerit uuendada ka siis, kui laeva asukoht vähemalt kaamera suhtes muutub
+        // märkasin, et kui hiir laskmise ajal paigale jätta ja laeva liikumissuunda
+        // näiteks muuta, siis pointer ei muutu, kuulida sihtimise suund ka mitte
+
         pointer.setRotation(angle);
 
         pointerAlpha = 1.5f;
