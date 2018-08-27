@@ -8,7 +8,6 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.oopgame.game.enemies.EnemyManager;
 import com.oopgame.game.guns.damagers.DamagerManager;
 import com.oopgame.game.ui.UIManager;
@@ -16,7 +15,11 @@ import com.oopgame.game.ui.UIManager;
 import helpers.GameInfo;
 
 public class WaveManager {
+    private EnemyManagerOld enemyManagerOld;
+
     private EnemyManager enemyManager;
+
+    private Time time;
 
     private boolean waveActive = false;
     private long timeNextWave;
@@ -33,11 +36,15 @@ public class WaveManager {
     public WaveManager(SpriteBatch batch, Player player, World world, Stage stage,
                        UIManager uiManager, DamagerManager damagerManager,
                        MusicManager musicManager, ExplosionManager explosionManager,
-                       GibsManager gibsManager, BitmapFont font) {
-        this.timeNextWave = TimeUtils.millis() + timeWaitWave;
+                       GibsManager gibsManager, BitmapFont font, Time time) {
+        this.time = time;
+        this.timeNextWave = time.getTime() + timeWaitWave;
 
-        enemyManager = new EnemyManager(batch, player, world,
+        enemyManagerOld = new EnemyManagerOld(batch, player, world,
                 uiManager, damagerManager, musicManager, explosionManager, gibsManager);
+
+        enemyManager = new EnemyManager(batch, world, time, player, damagerManager);
+
 
         Label.LabelStyle style = new Label.LabelStyle(font, Color.WHITE);
 
@@ -53,11 +60,13 @@ public class WaveManager {
     }
 
     public void update() {
-        enemyManager.update();
-        score += enemyManager.getNewPoints();
-        enemyManager.resetPoints();
+        enemyManagerOld.update();
+        score += enemyManagerOld.getNewPoints();
+        enemyManagerOld.resetPoints();
 
-        long time = TimeUtils.millis();
+        enemyManager.update();
+
+        long time = this.time.getTime();
 
         if (!waveActive) {
             if (timeNextWave < time) {
@@ -65,9 +74,11 @@ public class WaveManager {
                 score = score + waveNumber++;
 
                 for (int i = 0; i < enemyAmount; i++)
-                    enemyManager.addEnemy();
+                    enemyManagerOld.addEnemy();
+
+                enemyManager.addEnemy(2);
             }
-        } else if (enemyManager.getEnemyCount() == 0) {
+        } else if (enemyManagerOld.getEnemyCount() == 0) {
             waveActive = false;
             timeNextWave = time + timeWaitWave;
 
@@ -76,6 +87,8 @@ public class WaveManager {
     }
 
     public void render() {
+        enemyManagerOld.render();
+
         enemyManager.render();
 
         currentScore.setPosition(10, GameInfo.HEIGHT - 40);
@@ -100,7 +113,7 @@ public class WaveManager {
     }
 
     private String getWaitLeftText() {
-        return "" + (timeNextWave - TimeUtils.millis()) / 100 / 10f;
+        return "" + (timeNextWave - time.getTime()) / 100 / 10f;
     }
 
     public int getScore() {
@@ -108,6 +121,8 @@ public class WaveManager {
     }
 
     public void dispose() {
+        enemyManagerOld.dispose();
+
         enemyManager.dispose();
     }
 }
