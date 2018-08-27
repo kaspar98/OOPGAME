@@ -1,7 +1,6 @@
-package com.oopgame.game.enemies;
+package com.oopgame.game;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -12,8 +11,6 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.oopgame.game.GibsManager;
-import com.oopgame.game.Hittable;
 import com.oopgame.game.guns.LaserGun;
 import com.oopgame.game.guns.damagers.Damager;
 import com.oopgame.game.guns.damagers.DamagerManager;
@@ -22,11 +19,11 @@ import com.oopgame.game.ui.UIMarker;
 
 import helpers.GameInfo;
 
-public class Enemy extends Sprite implements Hittable {
+public class EnemyOld extends Sprite implements Hittable {
     private Body body;
     private Fixture fixture;
 
-    private EnemyManager enemyManager;
+    private EnemyManagerOld enemyManager;
 
     private Vector2 playerPos;
     private Vector2 playerVektor;
@@ -54,11 +51,11 @@ public class Enemy extends Sprite implements Hittable {
 
     private LaserGun laserGun;
 
-    public Enemy(Vector2 start,
-                 World world, Sprite appearance, String gibsKey,
-                 Vector2 playerPos, Vector2 playerVektor,
-                 UIManager uiManager, DamagerManager damagerManager,
-                 EnemyManager enemyManager, GibsManager gibsManager) {
+    public EnemyOld(Vector2 start,
+                    World world, Sprite appearance, String gibsKey,
+                    Vector2 playerPos, Vector2 playerVektor,
+                    UIManager uiManager, DamagerManager damagerManager,
+                    EnemyManagerOld enemyManager, GibsManager gibsManager) {
         super(appearance);
 
         this.playerPos = playerPos;
@@ -98,11 +95,6 @@ public class Enemy extends Sprite implements Hittable {
 
         alive = true;
     }
-
-    public void draw(Batch batch) {
-        super.draw(batch);
-    }
-
     public float update() {
         if (!alive) {
             kill();
