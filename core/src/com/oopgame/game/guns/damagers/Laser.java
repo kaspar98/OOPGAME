@@ -1,6 +1,7 @@
 package com.oopgame.game.guns.damagers;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -19,10 +20,10 @@ public class Laser extends Sprite implements Damager {
 
     private Time time;
 
-    private final int duration = 10000;
+    private final int duration = 2500;
     private final int fadeDuration = 1000;
-    private long timeTillFade;
-    private long timeTillDeactivate;
+    private long timeFade;
+    private long timeDeactivate;
 
     private Vector2 bodyPos;
 
@@ -64,8 +65,8 @@ public class Laser extends Sprite implements Damager {
     }
 
     private void setupTimers() {
-        timeTillFade = time.getTime() + duration;
-        timeTillDeactivate = timeTillFade + fadeDuration;
+        timeFade = time.getTime() + duration;
+        timeDeactivate = timeFade + fadeDuration;
     }
 
     private void setFactionColor() {
@@ -85,11 +86,11 @@ public class Laser extends Sprite implements Damager {
         // sellise väikse asja jaoks teeb minuarust liiga palju arvutusi
         long time = this.time.getTime();
 
-        if (time > timeTillFade) {
-            if (time > timeTillDeactivate)
-                damagerManager.poolLaser(this);
+        if (time > timeFade) {
+            if (time > timeDeactivate)
+                damagerManager.poolDamager(this);
             else
-                setAlpha((timeTillDeactivate - time) / (float) fadeDuration);
+                setAlpha((timeDeactivate - time) / (float) fadeDuration);
         }
     }
 
@@ -107,7 +108,12 @@ public class Laser extends Sprite implements Damager {
     public void hit() {
         // TODO: tabamise efektid!!! PLAHVATUSED!!!
 
-        damagerManager.poolLaser(this);
+        damagerManager.poolDamager(this);
+    }
+
+    @Override
+    public void draw(SpriteBatch batch) {
+        super.draw(batch);
     }
 
     private void setupLocation(Vector2 source, Float speed, float angle) {

@@ -11,7 +11,6 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.oopgame.game.Time;
 
 import java.util.ArrayList;
@@ -32,6 +31,10 @@ public class DamagerManager {
 
     private Time time;
 
+    private List<Damager> aliveDamagers = new ArrayList<Damager>();
+    private Map<String, Deque<Damager>> damagerPools = new HashMap<String, Deque<Damager>>();
+    private Deque<Damager> toDeactivate = new LinkedList<Damager>();
+
     // map, kus hoiame tekstuure
     private Map<String, Sprite> spriteMap = new HashMap<String, Sprite>();
 
@@ -44,13 +47,8 @@ public class DamagerManager {
     // map, kus hoiame damageride shape-e
     private Map<String, Shape> shapeMap = new HashMap<String, Shape>();
 
-    // Laseri väljad
-    private List<Laser> lasers = new ArrayList<Laser>();
-    private Deque<Laser> laserPool = new LinkedList<Laser>();
-
     // edasi...
 
-    private Deque<Damager> toDeactivate = new LinkedList<Damager>();
 
     // TODO: damageride BodyDef siin ära teha ja alles hoida, siis delegeerida damageridele
 
@@ -76,16 +74,28 @@ public class DamagerManager {
     }
 
     public void render() {
-        for (Laser laser : lasers)
-            laser.draw(batch);
+        for (Damager damager : aliveDamagers)
+            damager.draw(batch);
     }
 
     public void update() {
-        for (Damager damager = toDeactivate.poll(); damager != null; damager = toDeactivate.poll())
-            damager.deactivate();
+        for (Damager damager = toDeactivate.poll(); damager != null; damager = toDeactivate.poll()) {
+            aliveDamagers.remove(damager);
 
-        for (Laser laser : lasers)
-            laser.update();
+            String key;
+
+            if (damager instanceof Laser)
+                key = "laser";
+            else
+                throw new RuntimeException("sellist damageri tüüpi pole siin välja toodud!");
+
+            damagerPools.get(key).add(damager);
+
+            damager.deactivate();
+        }
+
+        for (Damager damager : aliveDamagers)
+            damager.update();
     }
 
     public void dispose() {
@@ -103,24 +113,30 @@ public class DamagerManager {
             Integer damage, Integer faction,
             Vector2 source, Float speed, float angle) {
         // meetod mida kutsuda, et laserit lasta
-        Laser laser = laserPool.poll();
+        String key = "laser";
 
-        if (laser != null) {
-            laser.reset(damage, faction, source, speed, angle);
-            lasers.add(laser);
+        if (!damagerPools.containsKey(key))
+            damagerPools.put(key, new LinkedList<Damager>());
+
+        Damager damager = damagerPools.get(key).poll();
+
+        if (damager != null) {
+            ((Laser) damager).reset(damage, faction, source, speed, angle);
         } else
-            lasers.add(new Laser(
+            damager = new Laser(
                     this, world, spriteMap.get("laser"), time,
                     damage, faction, source, speed, angle,
-                    bodyDefMap.get("laser"), shapeMap.get("laser")));
+                    bodyDefMap.get("laser"), shapeMap.get("laser"));
+
+        aliveDamagers.add(damager);
 
         if (faction == 0)
             soundMap.get("laser").play(0.35f);
     }
 
-    public void poolLaser(Laser laser) {
-        lasers.remove(laser);
-        toDeactivate.add(laser);
-        laserPool.add(laser);
+    public void poolDamager(Damager damager) {
+        // siin ei tohi laserite listist midagi eemaldada,
+        // sest seda listi võibolla läbitakse selle meetodi kutsumise ajal
+        toDeactivate.add(damager);
     }
 }
