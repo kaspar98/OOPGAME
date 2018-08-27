@@ -4,136 +4,172 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.Array;
-import com.oopgame.game.ExplosionManager;
-import com.oopgame.game.GibsManager;
-import com.oopgame.game.MusicManager;
 import com.oopgame.game.Player;
+import com.oopgame.game.Time;
+import com.oopgame.game.enemies.ships.EnemyShip;
+import com.oopgame.game.enemies.ships.FastShip;
 import com.oopgame.game.guns.damagers.DamagerManager;
-import com.oopgame.game.ui.UIManager;
+
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import helpers.GameInfo;
 
 public class EnemyManager {
     private SpriteBatch batch;
     private World world;
-    private Sprite appearance;
 
-    private Array<Enemy> alive = new Array<Enemy>();
-    private Array<Enemy> graveyard = new Array<Enemy>();
+    private Time time;
 
     private Vector2 playerPos;
-    private Vector2 playerVektor;
 
-    private com.oopgame.game.ui.UIManager uiManager;
     private DamagerManager damagerManager;
-    private MusicManager musicManager;
-    private ExplosionManager explosionManager;
-    private GibsManager gibsManager;
 
-    private int points;
+    // sprite'ide hoidmiseks
+    private Map<String, Sprite> spriteMap = new HashMap<String, Sprite>();
 
-    public EnemyManager(
-            SpriteBatch batch, Player player, World world,
-            UIManager uiManager, DamagerManager damagerManager, MusicManager musicManager,
-            ExplosionManager explosionManager, GibsManager gibsManager) {
+    private List<EnemyShip> aliveShips = new ArrayList<EnemyShip>();
+    private Map<String, Deque<EnemyShip>> shipPools = new HashMap<String, Deque<EnemyShip>>();
+    private Deque<EnemyShip> toDeactivate = new LinkedList<EnemyShip>();
+
+
+    private Map<String, BodyDef> bodyDefMap = new HashMap<String, BodyDef>();
+
+    private Map<String, FixtureDef> fixtureDefMap = new HashMap<String, FixtureDef>();
+
+    // TODO: kaaluda kas teha see map setiks, sest tegelikult siit objekte edaspidi vaja võtta ei olegi
+    private Map<String, Shape> shapeMap = new HashMap<String, Shape>();
+
+
+    public EnemyManager(SpriteBatch batch, World world, Time time, Player player,
+                        DamagerManager damagerManager) {
         this.batch = batch;
-        this.playerPos = player.getPosition();
-        this.playerVektor = player.getVector();
         this.world = world;
-        this.uiManager = uiManager;
+        this.time = time;
+        this.playerPos = player.getPosition();
+
         this.damagerManager = damagerManager;
-        this.musicManager = musicManager;
-        this.explosionManager = explosionManager;
-        this.gibsManager = gibsManager;
 
-        Texture texture = new Texture(
-                Gdx.files.internal("enemy_alien_fighter_1b_t.png"));
+        // TODO: vb saab seda mappide valmispanemise protsessi vastaste loomise juurde tõsta?
 
-        appearance = new Sprite(texture);
+        // paneme valmis FastShip objektide loomiseks vajalikud objektid
+        String key = "fastShip";
 
-        appearance.setSize(
-                texture.getWidth() * GameInfo.SCALING,
-                texture.getHeight() * GameInfo.SCALING);
+        Sprite sprite = new Sprite(new Texture(
+                Gdx.files.internal("ships/enemy_alien_fighter_1b_t.png")));
 
-        appearance.setOrigin(
-                appearance.getWidth() * 0.5f,
-                appearance.getHeight() * 0.5f);
+        sprite.setSize(
+                sprite.getWidth() * GameInfo.SCALING,
+                sprite.getHeight() * GameInfo.SCALING);
+
+        sprite.setOrigin(
+                sprite.getWidth() * 0.5f,
+                sprite.getHeight() * 0.5f);
+
+        spriteMap.put(key, sprite);
+
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+
+        bodyDefMap.put(key, bodyDef);
+
+        CircleShape circle = new CircleShape();
+        circle.setRadius(spriteMap.get(key).getHeight() * 0.3f);
+
+        shapeMap.put(key, circle);
+
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = shapeMap.get(key);
+        fixtureDef.density = 0.9f;
+        fixtureDef.friction = 0.5f;
+        fixtureDef.restitution = 0.1f;
+
+        fixtureDefMap.put(key, fixtureDef);
     }
 
     public void update() {
-        float lähimKaugus = -1;
+        for (EnemyShip ship = toDeactivate.poll(); ship != null; ship = toDeactivate.poll()) {
+            aliveShips.remove(ship);
 
-        for (Enemy e : alive) {
-            float kaugus = e.update();
+            String key;
 
-            if (kaugus != -1 && (kaugus < lähimKaugus || lähimKaugus == -1))
-                lähimKaugus = kaugus;
+            if (ship instanceof FastShip) {
+                key = "fastShip";
+            } else
+                throw new RuntimeException("sellist vastase laeva tüüpi pole siin välja toodud!");
+
+            if (!shipPools.containsKey(key))
+                shipPools.put(key, new LinkedList<EnemyShip>());
+
+            shipPools.get(key).add(ship);
+
+            ship.deactivate();
         }
 
-        musicManager.setClosestEnemyDistance(lähimKaugus);
+        for (EnemyShip ship : aliveShips)
+            ship.update();
     }
 
     public void render() {
-        for (Enemy e : alive)
-            e.draw(batch);
+        for (EnemyShip ship : aliveShips)
+            ship.draw(batch);
     }
 
     public void dispose() {
-        for (Enemy e : alive)
-            e.kill();
+        for (Sprite sprite : spriteMap.values())
+            sprite.getTexture().dispose();
 
-        appearance.getTexture().dispose();
+        for (Shape shape : shapeMap.values())
+            shape.dispose();
     }
 
-    public void addEnemy() {
-        Enemy enemy;
+    public void addEnemy(int fastShipCount) {
+        if (fastShipCount <= 0) return;
 
-        if (graveyard.size > 0) {
-            enemy = graveyard.pop();
+        // TODO: testimisega leida hea kaugus, kus vastaseid spawnida
+        Vector2 spawn = playerPos.cpy().add(
+                new Vector2().setLength(GameInfo.OUTER_RADIUS * GameInfo.SCALING)
+                        .setAngle(MathUtils.random(360)));
 
-            enemy.revive();
+        // TODO: tuleb natuke veel ümber teha, et teise klassi laevu ka spawniks
+        for (int i = 0; i < fastShipCount; i++) {
+            Vector2 point = spawn.cpy().add(new Vector2().setLength(10 * GameInfo.CAM_SCALING)
+                    .setAngle(MathUtils.random(360)));
 
-            uiManager.reviveMarker(enemy.getMarker());
-        } else {
-            Vector2 suvaline = Enemy.uusAsukoht();
+            String key = "fastShip";
 
-            enemy = new Enemy(
-                    suvaline,
-                    world, appearance, "enemy_alien_fighter_1b",
-                    playerPos, playerVektor,
-                    uiManager, damagerManager,
-                    this, gibsManager);
+            if (!shipPools.containsKey(key))
+                shipPools.put(key, new LinkedList<EnemyShip>());
+
+            EnemyShip ship = shipPools.get(key).poll();
+
+            if (ship != null) {
+                ship.reset(point);
+                // TODO: LAEVADE RESETTIMINE
+            } else {
+                // TODO: väiksema kauguse testimine ka läbi teha
+
+                ship = new FastShip(point, world, spriteMap.get(key), time,
+                        bodyDefMap.get(key), fixtureDefMap.get(key),
+                        this, damagerManager);
+
+                aliveShips.add(ship);
+            }
         }
-        alive.add(enemy);
     }
 
-    public void killEnemy(Enemy e, float x, float y) {
-        explosionManager.addExplosion(x, y);
-
-        uiManager.removeMarker(e.getMarker());
-
-        points += e.getScoreValue();
-
-        alive.removeValue(e, false);
-        graveyard.add(e);
-    }
-
-    public int getEnemyCount() {
-        // waveManager kasutab seda.
-        return alive.size;
-    }
-
-    public int getNewPoints() {
-        // waveManager kasutab seda.
-        return points;
-    }
-
-    public void resetPoints() {
-        // waveManager kasutab seda.
-        points = 0;
+    public void poolEnemyShip(EnemyShip ship) {
+        toDeactivate.add(ship);
     }
 }
-
