@@ -16,14 +16,13 @@ import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.oopgame.game.EnemyOld;
 import com.oopgame.game.Hittable;
 import com.oopgame.game.Time;
 import com.oopgame.game.backgrounds.BackgroundManager;
 import com.oopgame.game.DustParticleManager;
-import com.oopgame.game.enemies.Enemy;
 import com.oopgame.game.ExplosionManager;
 import com.oopgame.game.GibsManager;
 import com.oopgame.game.MusicManager;
@@ -118,7 +117,7 @@ public class GameScreen implements Screen, ContactListener {
 
         waveManager = new WaveManager(batch, player, world, stage,
                 uiManager, damagerManager, musicManager,
-                explosionManager, gibsManager, game.getFont());
+                explosionManager, gibsManager, game.getFont(), time);
 
         hitmarker = Gdx.audio.newSound(Gdx.files.internal("hitmarker.wav"));
 
@@ -189,7 +188,7 @@ public class GameScreen implements Screen, ContactListener {
         batch.end();
 
         // debug camera render
-        /*debugRenderer.render(world, camera.combined);*/
+        debugRenderer.render(world, camera.combined);
 
         // input checks koos touchpadiga
         player.inputs();
@@ -320,7 +319,7 @@ public class GameScreen implements Screen, ContactListener {
             Hittable hittable = (Hittable) object;
             Damager damager = (Damager) damagerObject;
 
-            if (hittable.isHit(damager) && object instanceof Enemy) {
+            if (hittable.isHit(damager) && object instanceof EnemyOld) {
                 hitmarker.play(0.5f);
             }
         }
