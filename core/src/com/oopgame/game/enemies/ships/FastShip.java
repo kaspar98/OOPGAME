@@ -40,8 +40,8 @@ public class FastShip extends Sprite implements EnemyShip {
     private long timeDamagedExpire;
 
     private Vector2 movementVector = new Vector2();
-    private static float turnModifier = 2.5f;
-    private static float maxSpeed = 1;
+    private static float turnModifier = 100f;
+    private static int maxSpeed = 40;
 
     public FastShip(Vector2 spawn, World world, Sprite sprite,
                     Time time,
@@ -96,6 +96,7 @@ public class FastShip extends Sprite implements EnemyShip {
     private void handleMovement() {
         // returnib kas body-il on sama angle, mis movementVectoril
         // TODO: pole otseselt vajalik vist isegi, aga saaks kraadidest radiaanidesse optimiseerida
+        System.out.println(movementVector.angle() + ", " + movementVector.len());
 
         float current = body.getAngle() * MathUtils.radiansToDegrees;
         float target = movementVector.angle();
@@ -128,11 +129,18 @@ public class FastShip extends Sprite implements EnemyShip {
 
             // visuaalide pärast oleks ka äkki variant, et mida rohkem liikumise suunas laev on,
             // seda rohkem booster töötaks
+
+
             body.applyForceToCenter(
                     movementVector.cpy()
-                            .scl(GameInfo.FORCE_MULTIPLIER * GameInfo.PLAYER_ACCELERATION),
+                            .scl(GameInfo.PLAYER_ACCELERATION),
                     true);
         }
+
+        Vector2 linearVelocity = body.getLinearVelocity();
+
+        if (linearVelocity.len() > maxSpeed)
+            body.setLinearVelocity(linearVelocity.setLength(maxSpeed));
     }
 
     @Override
