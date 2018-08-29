@@ -20,9 +20,9 @@ public class GameInfo {
 
     public static final float PLAYER_MAXSPEED = 45;
     public static final float PLAYER_ACCELERATION = 0.25f;
-    public static final long PLAYER_DAMAGED_DURATION = 200;
+    public static final long PLAYER_DAMAGED_DURATION = 100;
 
-    public static final long ENEMY_DAMAGED_DURATION = 200;
+    public static final long ENEMY_DAMAGED_DURATION = PLAYER_DAMAGED_DURATION;
 
     public static final long GIBS_DURATION = 5000;
 }
