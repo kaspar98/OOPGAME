@@ -386,6 +386,9 @@ public class Player extends Sprite implements Hittable {
         return maxShield;
     }
 
+    // relvade vahetamiseks
+    public GunList getGunList() {return gunList;}
+
     @Override
     public boolean isHit(Damager damager) {
         if (damager.getFaction() != 1)
