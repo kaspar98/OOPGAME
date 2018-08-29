@@ -13,6 +13,8 @@ import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.oopgame.game.Player;
 import com.oopgame.game.Time;
+import com.oopgame.game.enemies.ai.EnemyAI;
+import com.oopgame.game.enemies.ai.RegularEnemy;
 import com.oopgame.game.enemies.ships.EnemyShip;
 import com.oopgame.game.enemies.ships.FastShip;
 import com.oopgame.game.guns.damagers.DamagerManager;
@@ -49,6 +51,10 @@ public class EnemyManager {
     private Map<String, FixtureDef> fixtureDefMap = new HashMap<String, FixtureDef>();
 
     private Map<String, Shape> shapeMap = new HashMap<String, Shape>();
+
+
+    // ai map
+    private Map<String, EnemyAI> aiMap = new HashMap<String, EnemyAI>();
 
 
     public EnemyManager(SpriteBatch batch, World world, Time time, Player player,
@@ -95,6 +101,9 @@ public class EnemyManager {
         fixtureDef.restitution = 0.1f;
 
         fixtureDefMap.put(key, fixtureDef);
+
+
+        aiMap.put("regular", new RegularEnemy(player));
     }
 
     public void update() {
@@ -138,12 +147,12 @@ public class EnemyManager {
 
         // TODO: testimisega leida hea kaugus, kus vastaseid spawnida
         Vector2 spawn = playerPos.cpy().add(
-                new Vector2(1, 0).setLength(GameInfo.OUTER_RADIUS * GameInfo.CAM_SCALING)
+                new Vector2(0/*1*/, 0).setLength(GameInfo.OUTER_RADIUS * GameInfo.SCALING)
                         .setAngle(MathUtils.random(360)));
 
         // TODO: tuleb natuke veel ümber teha, et teise klassi laevu ka spawniks
         for (int i = 0; i < fastShipCount; i++) {
-            Vector2 point = spawn.cpy().add(new Vector2(1, 0).setLength(100 * GameInfo.CAM_SCALING)
+            Vector2 point = spawn.cpy().add(new Vector2(1, 0).setLength(100 * GameInfo.SCALING)
                     .setAngle(MathUtils.random(360)));
 
             String key = "fastShip";
@@ -158,7 +167,7 @@ public class EnemyManager {
             } else {
                 ship = new FastShip(point, world, spriteMap.get(key), time,
                         bodyDefMap.get(key), fixtureDefMap.get(key),
-                        this, damagerManager);
+                        this, damagerManager, aiMap.get("regular"));
             }
 
             aliveShips.add(ship);
