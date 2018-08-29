@@ -23,7 +23,6 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.oopgame.game.guns.GunList;
 import com.oopgame.game.guns.damagers.Damager;
 import com.oopgame.game.guns.damagers.DamagerManager;
-import com.oopgame.game.inputs.Ekraan;
 import com.oopgame.game.inputs.Pult;
 
 import helpers.GameInfo;
@@ -79,6 +78,8 @@ public class Player extends Sprite implements Hittable {
     private GunList gunList;
 
     private Integer faction = 0;
+
+    private static float turnModifier = 5f;
 
     public Player(float x, float y, World world, Stage stage, OrthographicCamera camera,
                   DamagerManager damagerManager, GibsManager gibsManager,
@@ -177,7 +178,6 @@ public class Player extends Sprite implements Hittable {
         pointer.setSize(pointer.getWidth() * GameInfo.CAM_SCALING, pointer.getHeight() * GameInfo.CAM_SCALING);
         pointer.setOrigin(0, pointer.getHeight() * 0.5f);
         pointer.setAlpha(0);
-        //pointer.setAlpha(0);
     }
 
     public void inputs() {
@@ -192,7 +192,8 @@ public class Player extends Sprite implements Hittable {
             Vector2 aiming = new Vector2();
 
             // puldi inputid
-            Pult.movement(moving);
+            Pult.movement(movementVector);
+            System.out.println();
 
             Pult.aiming(aiming);
 
@@ -202,7 +203,7 @@ public class Player extends Sprite implements Hittable {
             }
 
             // ekraani inputid
-            for (int i = 0; i < 2; i++) {
+            /*for (int i = 0; i < 2; i++) {
                 if (!Gdx.input.isTouched(i)) continue;
 
                 // touchpadi input
@@ -215,27 +216,13 @@ public class Player extends Sprite implements Hittable {
                     pointer.setOriginBasedPosition(body.getPosition().x, body.getPosition().y);
                     pointer.setRotation(aiming.angle());
                 }
-            }
+            }*/
 
             // liikumisvektori rakendamine
             if (movementVector.len() > 1)
                 movementVector.setLength(1);
 
-            body.applyForceToCenter(
-                    movementVector.cpy()
-                            .scl(GameInfo.FORCE_MULTIPLIER * GameInfo.PLAYER_ACCELERATION),
-                    true);
-
-            setBoosterPower(movementVector.len());
-
-            if (movementVector.len() > 0) {
-                setRotation(movementVector.angle());
-
-                // paneb Playeri kehale ka uuesti suuna
-                body.setTransform(
-                        body.getPosition(),
-                        movementVector.angleRad());
-            }
+            handleMovement();
 
             // tegeleme tulistamisega
             /*long time = TimeUtils.millis();
@@ -269,8 +256,10 @@ public class Player extends Sprite implements Hittable {
         // muudab sprite'i keskpunkti asukoht vastavalt keha asukohale
         body.setAngularVelocity(0);
         setCenter(body.getPosition().x, body.getPosition().y);
+        setRotation(body.getAngle() * MathUtils.radiansToDegrees);
 
         updateBooster();
+
 
         // väike shield regen
         if (shield < maxShield && health > 0) {
@@ -340,6 +329,54 @@ public class Player extends Sprite implements Hittable {
         float y = body.getPosition().y + body.getLinearVelocity().y / 12f * GameInfo.CAM_SCALING * 20;
 
         cameraPos.set(x, y, 0);
+    }
+
+    private void handleMovement() {
+        // returnib kas body-il on sama angle, mis movementVectoril
+        // TODO: pole otseselt vajalik vist isegi, aga saaks kraadidest radiaanidesse optimiseerida
+
+        float current = body.getAngle() * MathUtils.radiansToDegrees;
+        float target = movementVector.angle();
+
+        if (movementVector.len() > 0) {
+            float difference = target - current;
+
+            // siin vaatame kumba pidi oleks tegelikult kõige otsem tee liikumissuunda pöörata
+            if (difference > 180)
+                difference -= 360;
+            else if (difference < -180)
+                difference += 360;
+
+            if ((difference > 0 ? difference : -difference) < turnModifier /*5*/) {
+                body.setTransform(body.getPosition().x, body.getPosition().y,
+                        MathUtils.degreesToRadians * target);
+                current = target;
+            } else {
+                // siin pidin natuke pikemalt tegema, et pööramine toimiks õigesti
+                body.setAngularVelocity(
+                        MathUtils.degreesToRadians * turnModifier * difference);
+            }
+        }
+
+        if (current == target) {
+            // kui if ära kaotada ja niisama handleMovement() jätta,
+            // siis saab ka täitsa okei välimusega lendamise,
+            // vb selle jätakski playerile esialgu,
+            // sest pööramise piirang sai vastaste laevade jaoks tehtud
+
+            // visuaalide pärast oleks ka äkki variant, et mida rohkem liikumise suunas laev on,
+            // seda rohkem booster töötaks
+            body.applyForceToCenter(
+                    movementVector.cpy()
+                            .scl(GameInfo.FORCE_MULTIPLIER * GameInfo.PLAYER_ACCELERATION),
+                    true);
+
+            setBoosterPower();
+        }
+    }
+
+    private void setBoosterPower() {
+        setBoosterPower(movementVector.len());
     }
 
     private void setBoosterPower(float value) {
@@ -465,6 +502,17 @@ public class Player extends Sprite implements Hittable {
                 // vb lisab mingi sound effecti, millega saab aru, et tulistamine ei õnnestunud
             }
         }
+    }
+
+    public void slowDown() {
+        Vector2 current = body.getLinearVelocity();
+        float length = current.len();
+
+        // et lõpmatult aeglustama ei jääks
+        if (length < 0.1)
+            body.setLinearVelocity(0, 0);
+        else
+            movementVector.add(current.cpy().scl(-1).setLength((length > 1 ? 1 : length)));
     }
 
     public void movementVector(Vector2 vector) {
