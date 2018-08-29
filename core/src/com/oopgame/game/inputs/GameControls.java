@@ -37,6 +37,12 @@ public class GameControls implements InputProcessor {
         // sündmused selleks, kui mõnda klaviatuuri nuppu vajutatakse
         keys[keycode] = true;
 
+        if (keys[Input.Keys.NUM_1])
+            player.getGunList().selectGun(0);
+
+        if (keys[Input.Keys.NUM_2])
+            player.getGunList().selectGun(1);
+
         return false;
     }
 

@@ -4,19 +4,19 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.oopgame.game.guns.damagers.DamagerManager;
 
-public class LaserGun implements Gun {
+public class MiniGun implements Gun {
     private DamagerManager damagerManager;
 
     // miinimum intervall tulistamiste vahel
-    private static final int baseInterval = 200;
+    private static final int baseInterval = 80;
     private Integer interval = baseInterval;
 
     // kuuli damage
-    private static final int baseDamage = 10;
+    private static final int baseDamage = 4;
     private Integer damage = baseDamage;
 
     // kuuli kiirus
-    private static final float baseSpeed = 20;
+    private static final float baseSpeed = 40;
     private Float speed = baseSpeed;
 
     // jätab meelde kunasest alatest järgmine lask lubatud
@@ -26,7 +26,7 @@ public class LaserGun implements Gun {
 
     private Vector2 source;
 
-    public LaserGun(DamagerManager damagerManager,
+    public MiniGun(DamagerManager damagerManager,
                     Vector2 source, Integer faction) {
         this.damagerManager = damagerManager;
         this.source = source;
@@ -44,7 +44,7 @@ public class LaserGun implements Gun {
         if (nextShot < time) {
             nextShot = time + interval;
 
-            damagerManager.shootLaser(damage, faction, source, speed, angle);
+            damagerManager.shootMiniLaser(damage, faction, source, speed, angle);
 
             return true;
         }
