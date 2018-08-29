@@ -48,7 +48,6 @@ public class EnemyManager {
 
     private Map<String, FixtureDef> fixtureDefMap = new HashMap<String, FixtureDef>();
 
-    // TODO: kaaluda kas teha see map setiks, sest tegelikult siit objekte edaspidi vaja võtta ei olegi
     private Map<String, Shape> shapeMap = new HashMap<String, Shape>();
 
 
@@ -139,12 +138,12 @@ public class EnemyManager {
 
         // TODO: testimisega leida hea kaugus, kus vastaseid spawnida
         Vector2 spawn = playerPos.cpy().add(
-                new Vector2().setLength(GameInfo.OUTER_RADIUS * GameInfo.SCALING)
+                new Vector2(1, 0).setLength(GameInfo.OUTER_RADIUS * GameInfo.CAM_SCALING)
                         .setAngle(MathUtils.random(360)));
 
         // TODO: tuleb natuke veel ümber teha, et teise klassi laevu ka spawniks
         for (int i = 0; i < fastShipCount; i++) {
-            Vector2 point = spawn.cpy().add(new Vector2().setLength(10 * GameInfo.CAM_SCALING)
+            Vector2 point = spawn.cpy().add(new Vector2(1, 0).setLength(100 * GameInfo.CAM_SCALING)
                     .setAngle(MathUtils.random(360)));
 
             String key = "fastShip";
@@ -156,16 +155,13 @@ public class EnemyManager {
 
             if (ship != null) {
                 ship.reset(point);
-                // TODO: LAEVADE RESETTIMINE
             } else {
-                // TODO: väiksema kauguse testimine ka läbi teha
-
                 ship = new FastShip(point, world, spriteMap.get(key), time,
                         bodyDefMap.get(key), fixtureDefMap.get(key),
                         this, damagerManager);
-
-                aliveShips.add(ship);
             }
+
+            aliveShips.add(ship);
         }
     }
 
