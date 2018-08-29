@@ -37,7 +37,7 @@ public class EnemyManagerOld {
             ExplosionManager explosionManager, GibsManager gibsManager) {
         this.batch = batch;
         this.playerPos = player.getPosition();
-        this.playerVektor = player.getVector();
+        this.playerVektor = player.getLinearVelocity();
         this.world = world;
         this.uiManager = uiManager;
         this.damagerManager = damagerManager;
