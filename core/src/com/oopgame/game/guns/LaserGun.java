@@ -12,7 +12,7 @@ public class LaserGun implements Gun {
     private Integer interval = baseInterval;
 
     // kuuli damage
-    private static final int baseDamage = 5;
+    private static final int baseDamage = 10;
     private Integer damage = baseDamage;
 
     // kuuli kiirus
