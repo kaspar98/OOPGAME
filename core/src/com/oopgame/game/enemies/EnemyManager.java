@@ -147,7 +147,7 @@ public class EnemyManager {
 
         // TODO: testimisega leida hea kaugus, kus vastaseid spawnida
         Vector2 spawn = playerPos.cpy().add(
-                new Vector2(0/*1*/, 0).setLength(GameInfo.OUTER_RADIUS * GameInfo.SCALING)
+                new Vector2(1, 0).setLength(GameInfo.OUTER_RADIUS * GameInfo.SCALING)
                         .setAngle(MathUtils.random(360)));
 
         // TODO: tuleb natuke veel ümber teha, et teise klassi laevu ka spawniks
