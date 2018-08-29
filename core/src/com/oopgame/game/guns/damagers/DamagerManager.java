@@ -74,20 +74,20 @@ public class DamagerManager {
         shapeMap.put("laser", shape);
 
         // minilaser
-        Sprite sprite2 = new Sprite(new Texture(Gdx.files.internal("damagers/laser1.png")));
-        sprite2.setSize(sprite2.getTexture().getWidth() * GameInfo.SCALING * (float) 0.5,
-                sprite2.getTexture().getHeight() * GameInfo.SCALING * (float) 0.5);
+        sprite = new Sprite(new Texture(Gdx.files.internal("damagers/laser1.png")));
+        sprite.setSize(sprite.getTexture().getWidth() * GameInfo.SCALING * 0.5f,
+                sprite.getTexture().getHeight() * GameInfo.SCALING * 0.5f);
 
-        spriteMap.put("minilaser", sprite2);
+        spriteMap.put("minilaser", sprite);
         soundMap.put("minilaser", Gdx.audio.newSound(Gdx.files.internal("lask.wav")));
 
-        BodyDef bodyDef2 = new BodyDef();
-        bodyDef2.type = BodyDef.BodyType.DynamicBody;
-        bodyDefMap.put("minilaser", bodyDef2);
+        bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDefMap.put("minilaser", bodyDef);
 
-        PolygonShape shape2 = new PolygonShape();
-        shape2.setAsBox(sprite2.getWidth() * 0.5f, sprite2.getHeight() * 0.5f);
-        shapeMap.put("minilaser", shape2);
+        shape = new PolygonShape();
+        shape.setAsBox(sprite.getWidth() * 0.5f, sprite.getHeight() * 0.5f);
+        shapeMap.put("minilaser", shape);
 
     }
 
