@@ -5,13 +5,15 @@ import com.badlogic.gdx.math.Vector2;
 import com.oopgame.game.Hittable;
 
 public interface EnemyShip extends Hittable{
+    void update();
+
+    void draw(SpriteBatch batch);
+
     // see meetod tuleks asendada äkki kahe eraldi meetodiga:
     // ühega saab määrata boosteri powerit ja teisega saab määrata liikumise suunda
     void movement(Vector2 movementVector);
 
-    void update();
-
-    void draw(SpriteBatch batch);
+    void slowDown();
 
     void shoot(float angle);
 
