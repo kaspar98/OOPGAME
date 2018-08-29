@@ -120,6 +120,9 @@ public class GameControls implements InputProcessor {
 
         player.movementVector(movementVector);
 
+        if (keys[Input.Keys.SHIFT_LEFT])
+            player.slowDown();
+
         // hiirega seotud nupud
         if (buttons[Input.Buttons.LEFT]) {
             mousePress();
