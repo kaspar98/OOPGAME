@@ -1,4 +1,4 @@
-package com.oopgame.game;
+package com.oopgame.game.backgrounds;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
