@@ -33,10 +33,11 @@ public class Player extends Sprite implements Hittable {
 
     private boolean done = false;
 
-    private float health = 100;
-    private float maxHealth = 100;
-    private float shield = 100;
-    private float maxShield = 100;
+    // TODO: health ja shield tagasi korda panna!!!
+    private float maxHealth = 10000;
+    private float health = maxHealth;
+    private float maxShield = 10000;
+    private float shield = maxShield;
 
     private boolean damaged = false;
     private long timeDamagedExpire;
@@ -193,7 +194,6 @@ public class Player extends Sprite implements Hittable {
 
             // puldi inputid
             Pult.movement(movementVector);
-            System.out.println();
 
             Pult.aiming(aiming);
 
@@ -437,6 +437,11 @@ public class Player extends Sprite implements Hittable {
         return true;
     }
 
+    @Override
+    public int getFaction() {
+        return faction;
+    }
+
     private void damage(float damage) {
         long time = TimeUtils.millis();
         timeDamagedExpire = time + GameInfo.PLAYER_DAMAGED_DURATION;
@@ -469,7 +474,7 @@ public class Player extends Sprite implements Hittable {
         return body.getPosition();
     }
 
-    public Vector2 getVector() {
+    public Vector2 getLinearVelocity() {
         return body.getLinearVelocity();
     }
 
@@ -520,5 +525,16 @@ public class Player extends Sprite implements Hittable {
 
     public void movementVector(Vector2 vector) {
         movementVector.set(0, 0).add(vector);
+    }
+
+    public boolean isVisible(Vector2 position) {
+        float halfWidth = GameInfo.CAM_SCALING * GameInfo.WIDTH * 0.5f;
+        float halfHeight = GameInfo.CAM_SCALING * GameInfo.HEIGHT * 0.5f;
+
+        return position.x > cameraPos.x - halfWidth &&
+                position.x < cameraPos.x + halfWidth &&
+                position.y > cameraPos.y - halfHeight &&
+                position.y < cameraPos.y + halfHeight;
+
     }
 }
