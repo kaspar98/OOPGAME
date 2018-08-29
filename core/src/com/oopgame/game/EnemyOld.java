@@ -206,6 +206,11 @@ public class EnemyOld extends Sprite implements Hittable {
         return true;
     }
 
+    @Override
+    public int getFaction() {
+        return 1;
+    }
+
     private void damage(float damage) {
         timeDamagedExpire = TimeUtils.millis() + GameInfo.ENEMY_DAMAGED_DURATION;
         damaged = true;
