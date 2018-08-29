@@ -60,6 +60,7 @@ public class WaveManager {
     }
 
     public void update() {
+        // TODO: enemy count balance - kahe astmetena on veits op :D
         enemyManagerOld.update();
         score += enemyManagerOld.getNewPoints();
         enemyManagerOld.resetPoints();
