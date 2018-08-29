@@ -39,7 +39,7 @@ public class FastShip extends Sprite implements EnemyShip {
     private boolean damaged;
     private long timeDamagedExpire;
 
-    private Vector2 movementVector;
+    private Vector2 movementVector = new Vector2();
     private static float turnModifier = 2.5f;
 
     public FastShip(Vector2 spawn, World world, Sprite sprite,
@@ -86,7 +86,7 @@ public class FastShip extends Sprite implements EnemyShip {
 
     @Override
     public void movement(Vector2 movementVector) {
-        this.movementVector = movementVector;
+        this.movementVector.add(movementVector);
     }
 
     private void handleMovement() {
