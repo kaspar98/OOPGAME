@@ -25,6 +25,11 @@ public class RegularEnemy implements EnemyAI {
 
     @Override
     public void getCommands(EnemyShip ship) {
+        // praegu lendavad vaenlased playerile otsa vahepeal,
+        // sellest vb saaks teha olukorra, kus vastane lendab õhku ja
+        // player saab ka natuke viga, näiteks mingi osa vastasel kokkupõrkel olnud eludest
+        // on playeri laevale damage'iks
+
         movement.set(1, 0);
 
         Body shipBody = ship.getBody();
