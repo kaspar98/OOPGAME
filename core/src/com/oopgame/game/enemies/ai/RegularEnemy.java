@@ -8,7 +8,7 @@ import com.oopgame.game.enemies.ships.EnemyShip;
 import helpers.GameInfo;
 
 public class RegularEnemy implements EnemyAI {
-    private static float optDistance = GameInfo.INNER_RADIUS * 0.5f;
+    private static float optDistance = GameInfo.INNER_RADIUS * 0.5f * GameInfo.SCALING;
 
     private Player player;
     private Vector2 playerPosition;
