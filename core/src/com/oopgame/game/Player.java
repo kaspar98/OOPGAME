@@ -528,8 +528,8 @@ public class Player extends Sprite implements Hittable {
     }
 
     public boolean isVisible(Vector2 position) {
-        float halfWidth = GameInfo.CAM_SCALING * GameInfo.WIDTH * 0.5f;
-        float halfHeight = GameInfo.CAM_SCALING * GameInfo.HEIGHT * 0.5f;
+        float halfWidth = GameInfo.CAM_SCALING/*GameInfo.SCALING*/ * 2 * GameInfo.WIDTH * 0.5f;
+        float halfHeight = GameInfo.CAM_SCALING/*GameInfo.SCALING*/ * 2 * GameInfo.HEIGHT * 0.5f;
 
         return position.x > cameraPos.x - halfWidth &&
                 position.x < cameraPos.x + halfWidth &&
