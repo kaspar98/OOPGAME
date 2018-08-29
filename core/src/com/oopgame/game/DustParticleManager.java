@@ -28,7 +28,7 @@ public class DustParticleManager {
         this.batch = batch;
 
         this.pos = player.getPosition();
-        this.vel = player.getVector();
+        this.vel = player.getLinearVelocity();
 
         tekstuur = new Texture(Gdx.files.internal("bgl_motiondust_1_t.png"));
 
