@@ -9,4 +9,6 @@ public interface Hittable {
     // mingeid seisvaid või väga aeglaseid pomme lisame
 
     boolean isHit(Damager damager);
+
+    int getFaction();
 }
