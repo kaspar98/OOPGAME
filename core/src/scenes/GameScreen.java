@@ -319,7 +319,7 @@ public class GameScreen implements Screen, ContactListener {
             Hittable hittable = (Hittable) object;
             Damager damager = (Damager) damagerObject;
 
-            if (hittable.isHit(damager) && object instanceof EnemyOld) {
+            if (hittable.isHit(damager) && hittable.getFaction() != 0) {
                 hitmarker.play(0.5f);
             }
         }
