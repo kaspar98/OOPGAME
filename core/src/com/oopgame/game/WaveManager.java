@@ -77,7 +77,7 @@ public class WaveManager {
                 for (int i = 0; i < enemyAmount; i++)
                     enemyManagerOld.addEnemy();
 
-                enemyManager.addEnemy(2);
+                enemyManager.addEnemy(1/*2*/);
             }
         } else if (enemyManagerOld.getEnemyCount() == 0) {
             waveActive = false;
