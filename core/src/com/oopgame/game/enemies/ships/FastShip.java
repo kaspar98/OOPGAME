@@ -37,8 +37,10 @@ public class FastShip extends Sprite implements EnemyShip {
     private Time time;
 
     private boolean damaged;
-    private int damagedDuration = 200;
     private long timeDamagedExpire;
+
+    private Vector2 movementVector;
+    private static float turnModifier = 2.5f;
 
     public FastShip(Vector2 spawn, World world, Sprite sprite,
                     Time time,
@@ -67,6 +69,10 @@ public class FastShip extends Sprite implements EnemyShip {
 
         long time = this.time.getTime();
 
+        // siin peaks AI küsitlus toimuma
+
+        handleMovement();
+
         if (damaged && time > timeDamagedExpire) {
             setColor(Color.WHITE);
             damaged = false;
@@ -80,7 +86,61 @@ public class FastShip extends Sprite implements EnemyShip {
 
     @Override
     public void movement(Vector2 movementVector) {
-        // temporary
+        this.movementVector = movementVector;
+    }
+
+    private void handleMovement() {
+        // returnib kas body-il on sama angle, mis movementVectoril
+        // TODO: pole otseselt vajalik vist isegi, aga saaks kraadidest radiaanidesse optimiseerida
+
+        float current = body.getAngle() * MathUtils.radiansToDegrees;
+        float target = movementVector.angle();
+
+        if (movementVector.len() > 0) {
+            float difference = target - current;
+
+            // siin vaatame kumba pidi oleks tegelikult kõige otsem tee liikumissuunda pöörata
+            if (difference > 180)
+                difference -= 360;
+            else if (difference < -180)
+                difference += 360;
+
+            if ((difference > 0 ? difference : -difference) < turnModifier /*5*/) {
+                body.setTransform(body.getPosition().x, body.getPosition().y,
+                        MathUtils.degreesToRadians * target);
+                current = target;
+            } else {
+                // siin pidin natuke pikemalt tegema, et pööramine toimiks õigesti
+                body.setAngularVelocity(
+                        MathUtils.degreesToRadians * turnModifier * difference);
+            }
+        }
+
+        if (current == target) {
+            // kui if ära kaotada ja niisama handleMovement() jätta,
+            // siis saab ka täitsa okei välimusega lendamise,
+            // vb selle jätakski playerile esialgu,
+            // sest pööramise piirang sai vastaste laevade jaoks tehtud
+
+            // visuaalide pärast oleks ka äkki variant, et mida rohkem liikumise suunas laev on,
+            // seda rohkem booster töötaks
+            body.applyForceToCenter(
+                    movementVector.cpy()
+                            .scl(GameInfo.FORCE_MULTIPLIER * GameInfo.PLAYER_ACCELERATION),
+                    true);
+        }
+    }
+
+    @Override
+    public void slowDown() {
+        Vector2 current = body.getLinearVelocity();
+        float length = current.len();
+
+        // et lõpmatult aeglustama ei jääks
+        if (length < 0.1)
+            body.setLinearVelocity(0, 0);
+        else
+            movementVector.add(current.cpy().scl(-1).setLength((length > 1 ? 1 : length)));
     }
 
     @Override
@@ -119,7 +179,7 @@ public class FastShip extends Sprite implements EnemyShip {
     }
 
     private void damage(float damage) {
-        timeDamagedExpire = time.getTime() + damagedDuration;
+        timeDamagedExpire = time.getTime() + GameInfo.ENEMY_DAMAGED_DURATION;
         damaged = true;
 
         if (shield < damage) {
