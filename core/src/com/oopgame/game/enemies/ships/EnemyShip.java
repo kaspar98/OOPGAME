@@ -2,6 +2,7 @@ package com.oopgame.game.enemies.ships;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.oopgame.game.Hittable;
 
 public interface EnemyShip extends Hittable{
@@ -16,6 +17,8 @@ public interface EnemyShip extends Hittable{
     void slowDown();
 
     void shoot(float angle);
+
+    Body getBody();
 
     void deactivate();
 
