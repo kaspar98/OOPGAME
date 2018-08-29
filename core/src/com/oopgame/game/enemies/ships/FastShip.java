@@ -41,15 +41,18 @@ public class FastShip extends Sprite implements EnemyShip {
 
     private Vector2 movementVector = new Vector2();
     private static float turnModifier = 2.5f;
+    private static float maxSpeed = 1;
 
     public FastShip(Vector2 spawn, World world, Sprite sprite,
                     Time time,
                     BodyDef bodyDef, FixtureDef fixtureDef,
-                    EnemyManager enemyManager, DamagerManager damagerManager) {
+                    EnemyManager enemyManager, DamagerManager damagerManager,
+                    EnemyAI ai) {
         super(sprite);
 
         this.time = time;
         this.enemyManager = enemyManager;
+        this.ai = ai;
 
 
         body = world.createBody(bodyDef);
@@ -70,6 +73,7 @@ public class FastShip extends Sprite implements EnemyShip {
         long time = this.time.getTime();
 
         // siin peaks AI küsitlus toimuma
+        ai.getCommands(this);
 
         handleMovement();
 
@@ -140,12 +144,17 @@ public class FastShip extends Sprite implements EnemyShip {
         if (length < 0.1)
             body.setLinearVelocity(0, 0);
         else
-            movementVector.add(current.cpy().scl(-1).setLength((length > 1 ? 1 : length)));
+            movementVector.add(current.cpy().scl(-2).setLength((length > 1 ? 1 : length)));
     }
 
     @Override
     public void shoot(float angle) {
         laserGun.shoot(angle);
+    }
+
+    @Override
+    public Body getBody() {
+        return body;
     }
 
     @Override
@@ -176,6 +185,11 @@ public class FastShip extends Sprite implements EnemyShip {
         damager.hit();
 
         return true;
+    }
+
+    @Override
+    public int getFaction() {
+        return faction;
     }
 
     private void damage(float damage) {
