@@ -53,7 +53,7 @@ public class Bullet extends Sprite {
         setRotation(suunaVektor.angle());
         body.setTransform(body.getPosition(), suunaVektor.angleRad());
 
-        timeExpire = TimeUtils.millis() + GameInfo.BULLET_DURATION;
+        timeExpire = TimeUtils.millis() + 2500;
 
         alive = true;
     }
@@ -82,7 +82,7 @@ public class Bullet extends Sprite {
 
         this.damage = damage;
         this.playerShot = playerShot;
-        timeExpire = TimeUtils.millis() + GameInfo.BULLET_DURATION;
+        timeExpire = TimeUtils.millis() + 2500;
 
         setRotation(suunaVektor.angle());
 
