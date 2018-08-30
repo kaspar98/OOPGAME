@@ -16,11 +16,15 @@ public class RegularEnemy implements EnemyAI {
 
     private Vector2 movement = new Vector2(1, 0);
 
+    private boolean paused;
+
     public RegularEnemy(Player player) {
         this.player = player;
 
         this.playerPosition = player.getPosition();
         this.playerVector = player.getLinearVelocity();
+
+        paused = true;
     }
 
     @Override
@@ -30,27 +34,34 @@ public class RegularEnemy implements EnemyAI {
         // player saab ka natuke viga, näiteks mingi osa vastasel kokkupõrkel olnud eludest
         // on playeri laevale damage'iks
 
-        movement.set(1, 0);
+        if (!paused) {
+            movement.set(1, 0);
 
-        Body shipBody = ship.getBody();
-        Vector2 shipPosition = shipBody.getPosition();
-        Vector2 shipVector = shipBody.getLinearVelocity();
+            Body shipBody = ship.getBody();
+            Vector2 shipPosition = shipBody.getPosition();
+            Vector2 shipVector = shipBody.getLinearVelocity();
 
-        Vector2 shipToPlayer = shipPosition.cpy().sub(playerPosition).scl(-1);
-        float distance = shipToPlayer.len();
+            Vector2 shipToPlayer = shipPosition.cpy().sub(playerPosition).scl(-1);
+            float distance = shipToPlayer.len();
 
-        // liikumine
-        if (optDistance + 5 < distance) {
-            ship.movement(movement.setAngle(shipToPlayer.angle()));
-        } else if (optDistance > distance) {
-            ship.movement(movement.setAngle(playerVector.angle()));
-        } else
-            ship.slowDown();
+            // liikumine
+            if (optDistance + 5 < distance) {
+                ship.movement(movement.setAngle(shipToPlayer.angle()));
+            } else if (optDistance > distance) {
+                ship.movement(movement.setAngle(playerVector.angle()));
+            } else
+                ship.slowDown();
 
-        // tulistamine
-        if (player.isVisible(shipPosition)) {
-            ship.shoot(shipToPlayer.cpy().add(shipToPlayer.cpy().sub(shipVector)
-                    .scl(distance > 1 ? 1f - 1 / distance : 1f)).angle());
+            // tulistamine
+            if (player.isVisible(shipPosition)) {
+                ship.shoot(shipToPlayer.cpy().add(shipToPlayer.cpy().sub(shipVector)
+                        .scl(distance > 1 ? 1f - 1 / distance : 1f)).angle());
+            }
         }
+    }
+
+    @Override
+    public void setPaused(boolean flag) {
+        paused = flag;
     }
 }
