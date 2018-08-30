@@ -1,6 +1,7 @@
 package com.oopgame.game.enemies;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -18,6 +19,7 @@ import com.oopgame.game.enemies.ai.RegularEnemy;
 import com.oopgame.game.enemies.ships.EnemyShip;
 import com.oopgame.game.enemies.ships.FastShip;
 import com.oopgame.game.guns.damagers.DamagerManager;
+import com.oopgame.game.vfx.VisualEffectsManager;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -37,6 +39,7 @@ public class EnemyManager {
     private Vector2 playerPos;
 
     private DamagerManager damagerManager;
+    private VisualEffectsManager vfxManager;
 
     // sprite'ide hoidmiseks
     private Map<String, Sprite> spriteMap = new HashMap<String, Sprite>();
@@ -58,13 +61,14 @@ public class EnemyManager {
 
 
     public EnemyManager(SpriteBatch batch, World world, Time time, Player player,
-                        DamagerManager damagerManager) {
+                        DamagerManager damagerManager, VisualEffectsManager vfxManager) {
         this.batch = batch;
         this.world = world;
         this.time = time;
         this.playerPos = player.getPosition();
 
         this.damagerManager = damagerManager;
+        this.vfxManager = vfxManager;
 
         // TODO: vb saab seda mappide valmispanemise protsessi vastaste loomise juurde tõsta?
 
@@ -120,9 +124,14 @@ public class EnemyManager {
             if (!shipPools.containsKey(key))
                 shipPools.put(key, new LinkedList<EnemyShip>());
 
-            shipPools.get(key).add(ship);
+            vfxManager.addExplosion(2,
+                    ship.getBody().getPosition().x,
+                    ship.getBody().getPosition().y,
+                    1, Color.WHITE);
 
             ship.deactivate();
+
+            shipPools.get(key).add(ship);
         }
 
         for (EnemyShip ship : aliveShips)
