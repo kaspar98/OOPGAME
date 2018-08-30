@@ -12,6 +12,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.oopgame.game.Time;
+import com.oopgame.game.vfx.VisualEffectsManager;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -47,15 +48,16 @@ public class DamagerManager {
     // map, kus hoiame damageride shape-e
     private Map<String, Shape> shapeMap = new HashMap<String, Shape>();
 
-    // edasi...
+
+    private VisualEffectsManager vfxManager;
 
 
-    // TODO: damageride BodyDef siin ära teha ja alles hoida, siis delegeerida damageridele
-
-    public DamagerManager(SpriteBatch batch, World world, Time time) {
+    public DamagerManager(SpriteBatch batch, World world, Time time,
+                          VisualEffectsManager vfxManager) {
         this.batch = batch;
         this.world = world;
         this.time = time;
+        this.vfxManager = vfxManager;
 
         // laser
         Sprite sprite = new Sprite(new Texture(Gdx.files.internal("damagers/laser1.png")));
@@ -78,16 +80,16 @@ public class DamagerManager {
         sprite.setSize(sprite.getTexture().getWidth() * GameInfo.SCALING * 0.5f,
                 sprite.getTexture().getHeight() * GameInfo.SCALING * 0.5f);
 
-        spriteMap.put("minilaser", sprite);
-        soundMap.put("minilaser", Gdx.audio.newSound(Gdx.files.internal("lask.wav")));
+        spriteMap.put("miniLaser", sprite);
+        soundMap.put("miniLaser", Gdx.audio.newSound(Gdx.files.internal("lask.wav")));
 
         bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDefMap.put("minilaser", bodyDef);
+        bodyDefMap.put("miniLaser", bodyDef);
 
         shape = new PolygonShape();
         shape.setAsBox(sprite.getWidth() * 0.5f, sprite.getHeight() * 0.5f);
-        shapeMap.put("minilaser", shape);
+        shapeMap.put("miniLaser", shape);
 
     }
 
@@ -100,18 +102,23 @@ public class DamagerManager {
         for (Damager damager = toDeactivate.poll(); damager != null; damager = toDeactivate.poll()) {
             aliveDamagers.remove(damager);
 
-            String key;
+            String key = damager.getKeyType();
 
-            if (damager instanceof Laser)
+            /*if (damager instanceof Laser)
                 key = "laser";
             else if (damager instanceof MiniLaser)
-                key = "minilaser";
+                key = "miniLaser";
             else
-                throw new RuntimeException("sellist damageri tüüpi pole siin välja toodud!");
+                throw new RuntimeException("sellist damageri tüüpi pole siin välja toodud!");*/
 
-            damagerPools.get(key).add(damager);
+            Vector2 pos = damager.getBody().getPosition();
+
+            vfxManager.addBloom(2, pos.x , pos.y,
+                    0.2f, damager.getColor(), 0.5f);
 
             damager.deactivate();
+
+            damagerPools.get(key).add(damager);
         }
 
         for (Damager damager : aliveDamagers)
@@ -158,7 +165,7 @@ public class DamagerManager {
             Integer damage, Integer faction,
             Vector2 source, Float speed, float angle) {
         // meetod mida kutsuda, et minilaserit lasta
-        String key = "minilaser";
+        String key = "miniLaser";
 
         if (!damagerPools.containsKey(key))
             damagerPools.put(key, new LinkedList<Damager>());
@@ -169,14 +176,14 @@ public class DamagerManager {
             ((MiniLaser) damager).reset(damage, faction, source, speed, angle);
         } else
             damager = new MiniLaser(
-                    this, world, spriteMap.get("minilaser"), time,
+                    this, world, spriteMap.get("miniLaser"), time,
                     damage, faction, source, speed, angle,
-                    bodyDefMap.get("minilaser"), shapeMap.get("minilaser"));
+                    bodyDefMap.get("miniLaser"), shapeMap.get("miniLaser"));
 
         aliveDamagers.add(damager);
 
         if (faction == 0)
-            soundMap.get("minilaser").play(0.25f);
+            soundMap.get("miniLaser").play(0.25f);
     }
 
     public void poolDamager(Damager damager) {
