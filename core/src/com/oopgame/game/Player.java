@@ -358,7 +358,7 @@ public class Player extends Sprite implements Hittable {
             }
         }
 
-        if (current == target) {
+        if (current == target || faction == 0) {
             // kui if ära kaotada ja niisama handleMovement() jätta,
             // siis saab ka täitsa okei välimusega lendamise,
             // vb selle jätakski playerile esialgu,
