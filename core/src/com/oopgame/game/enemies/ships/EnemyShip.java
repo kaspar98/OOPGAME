@@ -20,6 +20,8 @@ public interface EnemyShip extends Hittable{
 
     Body getBody();
 
+    String getKeyType();
+
     void deactivate();
 
     void reset(Vector2 spawn);

@@ -20,6 +20,8 @@ import com.oopgame.game.guns.damagers.DamagerManager;
 import helpers.GameInfo;
 
 public class FastShip extends Sprite implements EnemyShip {
+    public static String keyType = "fastShip";
+
     private Body body;
     private Fixture fixture;
 
@@ -96,7 +98,7 @@ public class FastShip extends Sprite implements EnemyShip {
     private void handleMovement() {
         // returnib kas body-il on sama angle, mis movementVectoril
         // TODO: pole otseselt vajalik vist isegi, aga saaks kraadidest radiaanidesse optimiseerida
-        System.out.println(movementVector.angle() + ", " + movementVector.len());
+        /*System.out.println(movementVector.angle() + ", " + movementVector.len());*/
 
         float current = body.getAngle() * MathUtils.radiansToDegrees;
         float target = movementVector.angle();
@@ -163,6 +165,11 @@ public class FastShip extends Sprite implements EnemyShip {
     @Override
     public Body getBody() {
         return body;
+    }
+
+    @Override
+    public String getKeyType() {
+        return keyType;
     }
 
     @Override
