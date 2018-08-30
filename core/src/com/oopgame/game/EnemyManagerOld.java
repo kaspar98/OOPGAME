@@ -1,6 +1,7 @@
 package com.oopgame.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -9,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.oopgame.game.guns.damagers.DamagerManager;
 import com.oopgame.game.ui.UIManager;
+import com.oopgame.game.vfx.VisualEffectsManager;
 
 import helpers.GameInfo;
 
@@ -27,6 +29,7 @@ public class EnemyManagerOld {
     private DamagerManager damagerManager;
     private MusicManager musicManager;
     private ExplosionManager explosionManager;
+    private VisualEffectsManager vfxManager;
     private GibsManager gibsManager;
 
     private int points;
@@ -34,7 +37,8 @@ public class EnemyManagerOld {
     public EnemyManagerOld(
             SpriteBatch batch, Player player, World world,
             UIManager uiManager, DamagerManager damagerManager, MusicManager musicManager,
-            ExplosionManager explosionManager, GibsManager gibsManager) {
+            ExplosionManager explosionManager, GibsManager gibsManager,
+            VisualEffectsManager vfxManager) {
         this.batch = batch;
         this.playerPos = player.getPosition();
         this.playerVektor = player.getLinearVelocity();
@@ -43,6 +47,7 @@ public class EnemyManagerOld {
         this.damagerManager = damagerManager;
         this.musicManager = musicManager;
         this.explosionManager = explosionManager;
+        this.vfxManager = vfxManager;
         this.gibsManager = gibsManager;
 
         Texture texture = new Texture(
@@ -108,6 +113,7 @@ public class EnemyManagerOld {
 
     public void killEnemy(EnemyOld e, float x, float y) {
         explosionManager.addExplosion(x, y);
+        vfxManager.addExplosion(2, x, y, 1, new Color(1, 0.8f, 0.8f, 1)/*Color.WHITE*/);
 
         uiManager.removeMarker(e.getMarker());
 
