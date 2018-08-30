@@ -4,4 +4,6 @@ import com.oopgame.game.enemies.ships.EnemyShip;
 
 public interface EnemyAI {
     void getCommands(EnemyShip ship);
+
+    void setPaused(boolean flag);
 }
