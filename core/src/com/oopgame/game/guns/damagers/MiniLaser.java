@@ -13,6 +13,8 @@ import com.oopgame.game.Time;
 import helpers.GameInfo;
 
 public class MiniLaser extends Sprite implements Damager {
+    private static String keyType = "miniLaser";
+
     private DamagerManager damagerManager;
 
     private Body body;
@@ -105,6 +107,11 @@ public class MiniLaser extends Sprite implements Damager {
     }
 
     @Override
+    public String getKeyType() {
+        return keyType;
+    }
+
+    @Override
     public void hit() {
         // TODO: tabamise efektid!!! PLAHVATUSED!!!
 
@@ -149,5 +156,10 @@ public class MiniLaser extends Sprite implements Damager {
         body.setActive(false);
 
         setAlpha(0);
+    }
+
+    @Override
+    public Body getBody() {
+        return body;
     }
 }
