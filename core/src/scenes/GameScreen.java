@@ -18,7 +18,6 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.oopgame.game.EnemyOld;
 import com.oopgame.game.Hittable;
 import com.oopgame.game.Time;
 import com.oopgame.game.backgrounds.BackgroundManager;
@@ -34,6 +33,7 @@ import com.oopgame.game.guns.damagers.DamagerManager;
 import com.oopgame.game.inputs.GameControls;
 import com.oopgame.game.ui.UIManager;
 import com.oopgame.game.WaveManager;
+import com.oopgame.game.vfx.VisualEffectsManager;
 
 import helpers.GameInfo;
 
@@ -45,12 +45,15 @@ public class GameScreen implements Screen, ContactListener {
     private OrthographicCamera camera;
     private Stage stage;
 
+    private boolean paused;
+
     private Player player;
 
     private World world;
     private Box2DDebugRenderer debugRenderer;
 
     private ExplosionManager explosionManager;
+    private VisualEffectsManager vfxManager;
     private DamagerManager damagerManager;
     private GibsManager gibsManager;
 
@@ -88,7 +91,9 @@ public class GameScreen implements Screen, ContactListener {
         // loome lava, millele touchpadi paigutada + loome touchpadi inpute töötleva protsessori
         stage = new Stage(new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT), batch);
 
-        damagerManager = new DamagerManager(batch, world, time);
+        vfxManager = new VisualEffectsManager(batch, world);
+
+        damagerManager = new DamagerManager(batch, world, time, vfxManager);
 
         gibsManager = new GibsManager(world, batch);
 
@@ -117,7 +122,8 @@ public class GameScreen implements Screen, ContactListener {
 
         waveManager = new WaveManager(batch, player, world, stage,
                 uiManager, damagerManager, musicManager,
-                explosionManager, gibsManager, game.getFont(), time);
+                explosionManager, gibsManager, game.getFont(), time,
+                vfxManager);
 
         hitmarker = Gdx.audio.newSound(Gdx.files.internal("hitmarker.wav"));
 
@@ -147,6 +153,7 @@ public class GameScreen implements Screen, ContactListener {
         musicManager.update(delta);
         damagerManager.update();
         explosionManager.update();
+        vfxManager.update();
         waveManager.update();
 
         gameControls.holdPressed();
@@ -157,7 +164,7 @@ public class GameScreen implements Screen, ContactListener {
 
     @Override
     public void render(float delta) {
-        update(delta);
+        if (!paused) update(delta);
 
         batch.setProjectionMatrix(camera.combined);
 
@@ -171,6 +178,8 @@ public class GameScreen implements Screen, ContactListener {
         bgManager.render();
 
         tolm.render();
+
+        /*vfxManager.render(0);*/
         damagerManager.render();
 
         // kutsub Playeris playeri renderimise välja
@@ -181,6 +190,7 @@ public class GameScreen implements Screen, ContactListener {
         gibsManager.render();
 
         explosionManager.render();
+        vfxManager.render(2);
 
         uiManager.update();
         uiManager.render();
@@ -188,7 +198,7 @@ public class GameScreen implements Screen, ContactListener {
         batch.end();
 
         // debug camera render
-        debugRenderer.render(world, camera.combined);
+        /*debugRenderer.render(world, camera.combined);*/
 
         // input checks koos touchpadiga
         player.inputs();
@@ -243,6 +253,7 @@ public class GameScreen implements Screen, ContactListener {
         bgManager.dispose();
         tolm.dispose();
         explosionManager.dispose();
+        vfxManager.dispose();
         damagerManager.dispose();
         waveManager.dispose();
         uiManager.dispose();
