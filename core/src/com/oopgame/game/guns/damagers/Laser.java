@@ -2,6 +2,7 @@ package com.oopgame.game.guns.damagers;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -10,10 +11,12 @@ import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.oopgame.game.Time;
 
+import java.util.List;
+
 import helpers.GameInfo;
 
 public class Laser extends Sprite implements Damager {
-    private static String keyType = "laser";
+    public static String keyType = "laser";
 
     private DamagerManager damagerManager;
 
@@ -34,13 +37,15 @@ public class Laser extends Sprite implements Damager {
 
     private Vector2 movementVector;
 
+    private boolean hit;
 
-    public Laser(DamagerManager damagerManager, World world, Sprite sprite, Time time,
+
+    public Laser(DamagerManager damagerManager, World world, List<Sprite> graphics, Time time,
                  Integer damage, Integer faction,
                  Vector2 source,
                  Float speed, float angle,
                  BodyDef bodyDef, Shape shape) {
-        super(sprite);
+        super(graphics.get(0));
 
         this.damagerManager = damagerManager;
         this.time = time;
@@ -113,7 +118,9 @@ public class Laser extends Sprite implements Damager {
 
     @Override
     public void hit() {
-        // TODO: tabamise efektid!!! PLAHVATUSED!!!
+        hit = true;
+
+        damagerManager.impactEffect(this);
 
         damagerManager.poolDamager(this);
     }
@@ -148,6 +155,8 @@ public class Laser extends Sprite implements Damager {
         setFactionColor();
 
         setupTimers();
+
+        hit = false;
     }
 
     public void deactivate() {
@@ -161,5 +170,15 @@ public class Laser extends Sprite implements Damager {
     @Override
     public Body getBody() {
         return body;
+    }
+
+    @Override
+    public float getAngle() {
+        return body.getAngle() * MathUtils.radiansToDegrees;
+    }
+
+    @Override
+    public boolean didHit() {
+        return hit;
     }
 }
