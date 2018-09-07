@@ -3,9 +3,11 @@ package com.oopgame.game.guns.damagers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
@@ -37,7 +39,7 @@ public class DamagerManager {
     private Deque<Damager> toDeactivate = new LinkedList<Damager>();
 
     // map, kus hoiame tekstuure
-    private Map<String, Sprite> spriteMap = new HashMap<String, Sprite>();
+    private Map<String, List<Sprite>> graphicsMap = new HashMap<String, List<Sprite>>();
 
     // map, kus hoiame soundfx-e
     private Map<String, Sound> soundMap = new HashMap<String, Sound>();
@@ -58,39 +60,6 @@ public class DamagerManager {
         this.world = world;
         this.time = time;
         this.vfxManager = vfxManager;
-
-        // laser
-        Sprite sprite = new Sprite(new Texture(Gdx.files.internal("damagers/laser1.png")));
-        sprite.setSize(sprite.getTexture().getWidth() * GameInfo.SCALING,
-                sprite.getTexture().getHeight() * GameInfo.SCALING);
-
-        spriteMap.put("laser", sprite);
-        soundMap.put("laser", Gdx.audio.newSound(Gdx.files.internal("lask.wav")));
-
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDefMap.put("laser", bodyDef);
-
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(sprite.getWidth() * 0.5f, sprite.getHeight() * 0.5f);
-        shapeMap.put("laser", shape);
-
-        // minilaser
-        sprite = new Sprite(new Texture(Gdx.files.internal("damagers/laser1.png")));
-        sprite.setSize(sprite.getTexture().getWidth() * GameInfo.SCALING * 0.5f,
-                sprite.getTexture().getHeight() * GameInfo.SCALING * 0.5f);
-
-        spriteMap.put("miniLaser", sprite);
-        soundMap.put("miniLaser", Gdx.audio.newSound(Gdx.files.internal("lask.wav")));
-
-        bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDefMap.put("miniLaser", bodyDef);
-
-        shape = new PolygonShape();
-        shape.setAsBox(sprite.getWidth() * 0.5f, sprite.getHeight() * 0.5f);
-        shapeMap.put("miniLaser", shape);
-
     }
 
     public void render() {
@@ -99,6 +68,7 @@ public class DamagerManager {
     }
 
     public void update() {
+        // deactivation of damagers
         for (Damager damager = toDeactivate.poll(); damager != null; damager = toDeactivate.poll()) {
             aliveDamagers.remove(damager);
 
@@ -113,10 +83,20 @@ public class DamagerManager {
 
             Vector2 pos = damager.getBody().getPosition();
 
-            vfxManager.addBloom(2, pos.x , pos.y,
-                    0.2f, damager.getColor(), 0.5f);
+            if (damager.didHit())
+                vfxManager.addBloom(2, pos.x, pos.y,
+                        2, damager.getColor(), 10,
+                        1, 0.5f, 0,
+                        0, 0);
+
+            /*if (damager.getFaction() == 0)
+                vfxManager.addPortal(2,
+                        pos.x*//*GameInfo.W_WIDTH * 0.5f*//*, pos.y*//*GameInfo.W_HEIGHT * 0.5f*//*,
+                        10, 300, 0.5f, 0.6f);*/
 
             damager.deactivate();
+
+            checkPool(key);
 
             damagerPools.get(key).add(damager);
         }
@@ -126,8 +106,9 @@ public class DamagerManager {
     }
 
     public void dispose() {
-        for (Sprite sprite : spriteMap.values())
-            sprite.getTexture().dispose();
+        for (List<Sprite> sprites : graphicsMap.values())
+            for (Sprite sprite : sprites)
+                sprite.getTexture().dispose();
 
         for (Sound sound : soundMap.values())
             sound.dispose();
@@ -139,11 +120,29 @@ public class DamagerManager {
     public void shootLaser(
             Integer damage, Integer faction,
             Vector2 source, Float speed, float angle) {
-        // meetod mida kutsuda, et laserit lasta
-        String key = "laser";
 
-        if (!damagerPools.containsKey(key))
-            damagerPools.put(key, new LinkedList<Damager>());
+        String key = Laser.keyType;
+
+        if (!graphicsMap.containsKey(key)) {
+            Sprite sprite = new Sprite(new Texture(Gdx.files.internal("damagers/laser1.png")));
+            sprite.setSize(sprite.getTexture().getWidth() * GameInfo.SCALING,
+                    sprite.getTexture().getHeight() * GameInfo.SCALING);
+
+            List<Sprite> sprites = new ArrayList<Sprite>();
+            sprites.add(sprite);
+            graphicsMap.put(key, sprites);
+            /*soundMap.put(key, Gdx.audio.newSound(Gdx.files.internal("lask.wav")));*/
+
+            BodyDef bodyDef = new BodyDef();
+            bodyDef.type = BodyDef.BodyType.DynamicBody;
+            bodyDefMap.put(key, bodyDef);
+
+            PolygonShape shape = new PolygonShape();
+            shape.setAsBox(sprite.getWidth() * 0.5f, sprite.getHeight() * 0.5f);
+            shapeMap.put(key, shape);
+        }
+
+        checkPool(key);
 
         Damager damager = damagerPools.get(key).poll();
 
@@ -151,24 +150,42 @@ public class DamagerManager {
             ((Laser) damager).reset(damage, faction, source, speed, angle);
         } else
             damager = new Laser(
-                    this, world, spriteMap.get("laser"), time,
+                    this, world, graphicsMap.get(key), time,
                     damage, faction, source, speed, angle,
-                    bodyDefMap.get("laser"), shapeMap.get("laser"));
+                    bodyDefMap.get(key), shapeMap.get(key));
 
         aliveDamagers.add(damager);
 
-        if (faction == 0)
-            soundMap.get("laser").play(0.35f);
+        /*if (faction == 0)
+            soundMap.get(key).play(0.35f);*/
     }
 
     public void shootMiniLaser(
             Integer damage, Integer faction,
             Vector2 source, Float speed, float angle) {
-        // meetod mida kutsuda, et minilaserit lasta
-        String key = "miniLaser";
 
-        if (!damagerPools.containsKey(key))
-            damagerPools.put(key, new LinkedList<Damager>());
+        String key = MiniLaser.keyType;
+
+        if (!graphicsMap.containsKey(key)) {
+            Sprite sprite = new Sprite(new Texture(Gdx.files.internal("damagers/laser1.png")));
+            sprite.setSize(sprite.getTexture().getWidth() * GameInfo.SCALING * 0.5f,
+                    sprite.getTexture().getHeight() * GameInfo.SCALING * 0.5f);
+
+            List<Sprite> sprites = new ArrayList<Sprite>();
+            sprites.add(sprite);
+            graphicsMap.put(key, sprites);
+            /*soundMap.put(key, Gdx.audio.newSound(Gdx.files.internal("lask.wav")));*/
+
+            BodyDef bodyDef = new BodyDef();
+            bodyDef.type = BodyDef.BodyType.DynamicBody;
+            bodyDefMap.put(key, bodyDef);
+
+            PolygonShape shape = new PolygonShape();
+            shape.setAsBox(sprite.getWidth() * 0.5f, sprite.getHeight() * 0.5f);
+            shapeMap.put(key, shape);
+        }
+
+        checkPool(key);
 
         Damager damager = damagerPools.get(key).poll();
 
@@ -176,19 +193,98 @@ public class DamagerManager {
             ((MiniLaser) damager).reset(damage, faction, source, speed, angle);
         } else
             damager = new MiniLaser(
-                    this, world, spriteMap.get("miniLaser"), time,
+                    this, world, graphicsMap.get(key), time,
                     damage, faction, source, speed, angle,
-                    bodyDefMap.get("miniLaser"), shapeMap.get("miniLaser"));
+                    bodyDefMap.get(key), shapeMap.get(key));
 
         aliveDamagers.add(damager);
 
-        if (faction == 0)
-            soundMap.get("miniLaser").play(0.25f);
+        /*if (faction == 0)
+            soundMap.get(key).play(0.25f);*/
+    }
+
+    public LaserBeam shootLaserBeam(
+            Vector2 source, float angle,
+            Integer damage, Integer faction) {
+
+        String key = LaserBeam.keyType;
+
+        if (!graphicsMap.containsKey(key)) {
+            float hx = 0;
+            float hy = 0;
+
+            List<Sprite> sprites = new ArrayList<Sprite>();
+
+            for (String part : new String[]{"start", "mid"}) {
+                Sprite sprite = new Sprite(new Texture(
+                        Gdx.files.internal("damagers/laserBeam1" + part + ".png")));
+
+                sprite.setSize(
+                        ("mid".equals(part) ?
+                                GameInfo.CAM_SCALING * GameInfo.OUTER_RADIUS :
+                                sprite.getWidth() * GameInfo.SCALING),
+                        sprite.getHeight() * GameInfo.SCALING);
+
+                sprite.setOrigin(0, sprite.getHeight() * 0.5f);
+
+                hx += sprite.getWidth();
+                hy = sprite.getHeight();
+
+                sprites.add(sprite);
+            }
+            graphicsMap.put(key, sprites);
+
+            BodyDef bodyDef = new BodyDef();
+            bodyDef.type = BodyDef.BodyType.DynamicBody;
+            bodyDefMap.put(key, bodyDef);
+
+            PolygonShape shape = new PolygonShape();
+            shape.setAsBox(hx * 0.5f, hy * 0.3f);
+            shapeMap.put(key, shape);
+        }
+
+        checkPool(key);
+
+        Damager damager = damagerPools.get(key).poll();
+        LaserBeam laserBeam;
+
+        if (damager != null) {
+            laserBeam = (LaserBeam) damager;
+            laserBeam.reconfigure(source, angle, damage, faction);
+        } else
+            laserBeam = new LaserBeam(source, angle, world, time, damage, faction,
+                    bodyDefMap.get(key), shapeMap.get(key), graphicsMap.get(key),
+                    this);
+
+        aliveDamagers.add(laserBeam);
+
+        return laserBeam;
+    }
+
+    private void checkPool(String key) {
+        if (!damagerPools.containsKey(key))
+            damagerPools.put(key, new LinkedList<Damager>());
     }
 
     public void poolDamager(Damager damager) {
         // siin ei tohi laserite listist midagi eemaldada,
         // sest seda listi võibolla läbitakse selle meetodi kutsumise ajal
         toDeactivate.add(damager);
+    }
+
+    public void impactEffect(Damager damager) {
+        if (damager instanceof Laser || damager instanceof MiniLaser) {
+            Vector2 pos = damager.getBody().getPosition();
+            Color color = damager.getColor();
+            float angle = damager.getAngle();
+
+            for (int i = 0; i < MathUtils.random(3, 6); i++)
+                vfxManager.addLaserEffect(2, pos.x, pos.y,
+                        MathUtils.random(angle + 120, angle + 240),
+                        MathUtils.random(0.5f, 0.75f),
+                        color, 10, MathUtils.random(0.5f, 1),
+                        1, 0.5f, 0,
+                        0, 0.9f);
+        }
     }
 }
