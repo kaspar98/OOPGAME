@@ -6,6 +6,7 @@ public class GameInfo {
     public static final int WIDTH = 1600;
     public static final int HEIGHT = 900;
     public static final boolean FULLSCREEN = false;
+    public static final int FPS = 60;
 
     public static final float INNER_RADIUS = (WIDTH < HEIGHT ? WIDTH : HEIGHT);
     public static final float OUTER_RADIUS = new Vector2(WIDTH, HEIGHT).len() / 2f;
