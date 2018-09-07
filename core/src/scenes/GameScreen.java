@@ -30,6 +30,7 @@ import com.oopgame.game.Player;
 import com.oopgame.game.Sein;
 import com.oopgame.game.guns.damagers.Damager;
 import com.oopgame.game.guns.damagers.DamagerManager;
+import com.oopgame.game.guns.damagers.DamagerRepeat;
 import com.oopgame.game.inputs.GameControls;
 import com.oopgame.game.ui.UIManager;
 import com.oopgame.game.WaveManager;
@@ -45,7 +46,7 @@ public class GameScreen implements Screen, ContactListener {
     private OrthographicCamera camera;
     private Stage stage;
 
-    private boolean paused;
+    private boolean paused; // läheb kasutusse, kui pause menu teeme
 
     private Player player;
 
@@ -106,7 +107,7 @@ public class GameScreen implements Screen, ContactListener {
                 world, stage, camera,
                 damagerManager, gibsManager, explosionManager);
 
-        uiManager = new UIManager(batch, camera, player);
+        uiManager = new UIManager(batch, camera, stage, player);
 
         // taustamuusika jaoks MusicManager()
         musicManager = new MusicManager();
@@ -130,7 +131,7 @@ public class GameScreen implements Screen, ContactListener {
         // debug renderer
         debugRenderer = new Box2DDebugRenderer();
 
-        gameControls = new GameControls(player);
+        gameControls = new GameControls(this, player);
         Gdx.input.setInputProcessor(gameControls);
     }
 
@@ -164,7 +165,8 @@ public class GameScreen implements Screen, ContactListener {
 
     @Override
     public void render(float delta) {
-        if (!paused) update(delta);
+        if (!paused)
+            update(delta);
 
         batch.setProjectionMatrix(camera.combined);
 
@@ -177,15 +179,18 @@ public class GameScreen implements Screen, ContactListener {
         bgManager.update();
         bgManager.render();
 
-        tolm.render();
 
-        /*vfxManager.render(0);*/
+        vfxManager.render(0);
+        vfxManager.render(1);
+
+        waveManager.render();
+
         damagerManager.render();
 
         // kutsub Playeris playeri renderimise välja
         player.draw(batch);
 
-        waveManager.render();
+        tolm.render();
 
         gibsManager.render();
 
@@ -204,7 +209,7 @@ public class GameScreen implements Screen, ContactListener {
         player.inputs();
 
         // stage loodud touchpadi jaoks
-        stage.act(/*Gdx.graphics.getDeltaTime()*/delta);
+        stage.act(delta);
         stage.draw();
 
         if (player.isDone()) {
@@ -231,14 +236,20 @@ public class GameScreen implements Screen, ContactListener {
         stage.getViewport().update(width, height);
     }
 
+    public boolean isPaused() {
+        return paused;
+    }
+
     @Override
     public void pause() {
-
+        paused = true;
+        uiManager.placeOverlay(0, 0, 0, 0.5f);
     }
 
     @Override
     public void resume() {
-
+        paused = false;
+        uiManager.removeOverlay();
     }
 
     @Override
@@ -286,9 +297,12 @@ public class GameScreen implements Screen, ContactListener {
         }
 
         if (first instanceof Damager)
-            damagerCheck(first, second);
+            damagerStart(first, second);
         else if (second instanceof Damager)
-            damagerCheck(second, first);
+            damagerStart(second, first);
+
+        /*if (first instanceof MotherShip1 || second instanceof MotherShip1)
+            System.out.println(time.getTime() + " started");*/
     }
 
 
@@ -310,6 +324,14 @@ public class GameScreen implements Screen, ContactListener {
                 player.subForce(sein.getForce());
             }
         }
+
+        if (first instanceof DamagerRepeat)
+            damagerEnd(first, second);
+        else if (second instanceof DamagerRepeat)
+            damagerEnd(second, first);
+
+        /*if (first instanceof MotherShip1 || second instanceof MotherShip1)
+            System.out.println(time.getTime() + " ended");*/
     }
 
     @Override
@@ -322,7 +344,7 @@ public class GameScreen implements Screen, ContactListener {
 
     }
 
-    private void damagerCheck(Object damagerObject, Object object) {
+    private void damagerStart(Object damagerObject, Object object) {
         // siinkohas me veel ühtegi body modifitseerida ei saa, seega pidin damagerManagerile
         // tegema eraldi süsteemi, millega kuule deactivate'ida ja poolida
 
@@ -330,9 +352,23 @@ public class GameScreen implements Screen, ContactListener {
             Hittable hittable = (Hittable) object;
             Damager damager = (Damager) damagerObject;
 
-            if (hittable.isHit(damager) && hittable.getFaction() != 0) {
-                hitmarker.play(0.5f);
+            if (hittable.isHit(damager)) {
+                if (damager instanceof DamagerRepeat)
+                    ((DamagerRepeat) damager).addHittable(hittable);
+
+                if (hittable.getFaction() != 0)
+                    // TODO: MOVE TO ENEMYMANAGER SO IT WOULD WORK ON REPEATING DAMAGE!
+                    hitmarker.play(0.5f);
             }
+        }
+    }
+
+    private void damagerEnd(Object damagerObject, Object object) {
+        if (object instanceof Hittable) {
+            Hittable hittable = (Hittable) object;
+            DamagerRepeat damager = (DamagerRepeat) damagerObject;
+
+            damager.removeHittable(hittable);
         }
     }
 
