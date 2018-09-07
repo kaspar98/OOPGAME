@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -15,7 +14,6 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.OOPGame;
-
 
 import helpers.GameInfo;
 
@@ -61,6 +59,7 @@ public class MainMenuScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
 
         background = new Sprite(new Texture(Gdx.files.internal("title_space.png")));
+        background.setSize(GameInfo.WIDTH, GameInfo.HEIGHT);
         background.setCenter(
                 GameInfo.WIDTH * 0.5f,
                 GameInfo.HEIGHT * 0.5f);
@@ -72,7 +71,7 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0f, 1);
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         background.setCenter(
