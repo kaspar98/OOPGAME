@@ -4,11 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import com.oopgame.game.enemies.EnemyManager;
+import com.oopgame.game.enemies.ships.MotherShip1;
 import com.oopgame.game.guns.damagers.DamagerManager;
 import com.oopgame.game.ui.UIManager;
 import com.oopgame.game.vfx.VisualEffectsManager;
@@ -81,7 +83,12 @@ public class WaveManager {
                 for (int i = 0; i < enemyAmount; i++)
                     enemyManagerOld.addEnemy();
 
-                enemyManager.addEnemy(1/*2*/);
+                Vector2 spawnPoint = enemyManager.posNearPlayer(
+                        GameInfo.OUTER_RADIUS * GameInfo.SCALING);
+
+                enemyManager.addEnemyPlacer(spawnPoint.x, spawnPoint.y, 0,
+                        MotherShip1.keyType,
+                        5000, 5000, 1);
             }
         } else if (enemyManagerOld.getEnemyCount() == 0) {
             waveActive = false;
