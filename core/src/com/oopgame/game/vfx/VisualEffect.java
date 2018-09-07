@@ -3,7 +3,7 @@ package com.oopgame.game.vfx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public interface VisualEffect {
-    void start(int layer, float x, float y);
+    void restart();
 
     void update();
 
@@ -14,4 +14,7 @@ public interface VisualEffect {
     String getKeyType();
 
     void deactivate();
+
+    // selleks, et suuremad VisualEffectid saaksid mugavamalt alam-efekte hallata
+    void setVisualEffectKeeper(VisualEffectKeeper vfxKeeper);
 }
