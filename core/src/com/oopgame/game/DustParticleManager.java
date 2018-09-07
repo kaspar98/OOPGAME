@@ -32,7 +32,7 @@ public class DustParticleManager {
 
         tekstuur = new Texture(Gdx.files.internal("bgl_motiondust_1_t.png"));
 
-        while (tolm.size < 20)
+        while (tolm.size < 60 * GameInfo.WIDTH / 1920f)
             tolm.add(new DustParticle(tekstuur,
                     uusAsukoht(true, true)));
     }
