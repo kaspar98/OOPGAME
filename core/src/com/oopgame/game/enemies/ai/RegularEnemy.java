@@ -8,6 +8,8 @@ import com.oopgame.game.enemies.ships.EnemyShip;
 import helpers.GameInfo;
 
 public class RegularEnemy implements EnemyAI {
+    public static String keyType = "regular";
+
     private static float optDistance = GameInfo.INNER_RADIUS * 0.5f * GameInfo.SCALING;
 
     private Player player;
