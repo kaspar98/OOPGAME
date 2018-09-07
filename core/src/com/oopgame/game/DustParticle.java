@@ -22,7 +22,7 @@ public class DustParticle extends Sprite {
                 getY() - vel.y / GameInfo.PLAYER_MAXSPEED * 2f
         );
 
-        setSize(vel.len() / 12, getHeight());
+        setSize(vel.len() / 9f, getHeight());
         setRotation(vel.angle());
     }
 
