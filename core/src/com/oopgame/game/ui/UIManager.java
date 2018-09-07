@@ -1,11 +1,15 @@
 package com.oopgame.game.ui;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
 import com.oopgame.game.Player;
 
@@ -14,6 +18,8 @@ import helpers.GameInfo;
 public class UIManager {
     private SpriteBatch batch;
     private OrthographicCamera camera;
+    private Stage stage;
+
     private Player player;
 
     private Sprite compass;
@@ -29,9 +35,14 @@ public class UIManager {
     private UIBar shield;
     private Sprite shield_back;
 
-    public UIManager(SpriteBatch batch, OrthographicCamera camera, Player player) {
+    private Image screenOverlay = new Image(new Sprite(new Texture(
+            Gdx.files.internal("ui/screenOverlay.jpg"))));
+
+    public UIManager(SpriteBatch batch, OrthographicCamera camera, Stage stage,
+                     Player player) {
         this.batch = batch;
         this.camera = camera;
+        this.stage = stage;
         this.player = player;
 
         // compassi elemendi loomine
@@ -75,6 +86,11 @@ public class UIManager {
                 health_back.getWidth(),
                 health_back.getHeight());
         shield_back.setFlip(true, false);
+
+        screenOverlay.setSize(GameInfo.WIDTH, GameInfo.HEIGHT);
+        screenOverlay.setColor(0, 0, 0, 0);
+
+        stage.addActor(screenOverlay);
     }
 
     public void update() {
@@ -101,6 +117,14 @@ public class UIManager {
         compass.draw(batch);
         for (UIMarker marker : compass_markers)
             marker.draw(batch);
+    }
+
+    public void placeOverlay(float r, float g, float b, float a) {
+        screenOverlay.setColor(r, g, b, a);
+    }
+
+    public void removeOverlay() {
+        placeOverlay(0, 0, 0, 0);
     }
 
     public void dispose() {
