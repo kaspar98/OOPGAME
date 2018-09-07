@@ -12,29 +12,33 @@ public class GunList {
     // relvade kohad:
     // 0 - LaserGun
     // 1 - MiniGun
-    // 2 - ?
+    // 2 - LaserBeamGun
     // 3 - ?
     // 4 - ?
-    private Gun[] guns = new Gun[2];
+    private Gun[] guns = new Gun[3];
     private int selected = 0;
 
     public GunList(DamagerManager damagerManager, Vector2 source, Integer faction) {
         guns[0] = new LaserGun(damagerManager, source, faction);
         guns[1] = new MiniGun(damagerManager, source, faction);
+        /*guns[2] = new LaserBeamGun(damagerManager, source, faction);*/
+    }
+
+    public void update() {
+
     }
 
     public boolean shoot(float angle) {
         return guns[selected].shoot(angle);
     }
 
-    public void selectGun(int number) {
-        // TODO: see meetod tuleb veel ära lõpetada
-        if (number >= 0 && number < guns.length && guns[number].ammoLeft() != 0)
-            selected = number;
+    public void selectGun(int index) {
+        if (index >= 0 && index < guns.length &&
+                guns[index] != null && guns[index].ammoLeft() != 0)
+            selected = index;
     }
 
     public void selectNext() {
-        // TODO: see meetod tuleb veel ära lõpetada
         for (int next = selected + 1; next != selected; next++) {
             if (next >= guns.length)
                 next = 0;
@@ -47,7 +51,6 @@ public class GunList {
     }
 
     public void selectPrevious() {
-        // TODO: see meetod tuleb veel ära lõpetada
         for (int previous = selected - 1; previous != selected; previous--) {
             if (previous < 0)
                 previous = guns.length - 1;
