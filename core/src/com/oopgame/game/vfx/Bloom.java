@@ -6,66 +6,81 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import java.util.List;
 
+import helpers.GameInfo;
+
 public class Bloom extends Sprite implements VisualEffect {
     public static String keyType = "bloom";
 
     private int layer;
 
-    private static int lastFrame = 10;
+    private int lastFrame = 10;
     private int frame = 0;
 
-    private float maxAlpha = 1;
+    private float alphaStart = 0;
+    private float alphaMid = 1;
+    private float alphaEnd = 0;
+    private float holdStart = 0 * lastFrame;
+    private float holdEnd = 0 * lastFrame;
 
-    private VisualEffectsManager vfxManager;
+    private VisualEffectKeeper vfxKeeper;
 
 
-    /*public Bloom(int layer, float x, float y,
-                 List<Sprite> frames, float scale,
-                 VisualEffectsManager vfxManager) {
-        this(layer, x, y, frames, scale, Color.WHITE, vfxManager);
-    }*/
-
-    public Bloom(int layer, float x, float y,
-                 List<Sprite> frames, float scale, Color color,
-                 VisualEffectsManager vfxManager, float maxAlpha) {
+    public Bloom(int layer, float x, float y, float scale,
+                 Color color, int lastFrame,
+                 float alphaStart, float alphaMid, float alphaEnd,
+                 float midpointMultiplier, float holdMultiplier,
+                 List<Sprite> frames, VisualEffectsManager vfxManager
+    ) {
         super(frames.get(0));
 
+        reconfigure(layer, x, y, scale,
+                color, lastFrame,
+                alphaStart, alphaMid, alphaEnd,
+                midpointMultiplier, holdMultiplier);
+
+        this.vfxKeeper = vfxManager;
+    }
+
+    public void reconfigure(int layer, float x, float y, float scale,
+                            Color color, int lastFrame,
+                            float alphaStart, float alphaMid, float alphaEnd,
+                            float midpointMultiplier, float holdMultiplier) {
         this.layer = layer;
-        this.maxAlpha = maxAlpha;
-        setAlpha(maxAlpha);
         setCenter(x, y);
-        setScale(scale);
+        setScale(scale * GameInfo.SCALING);
+        setColor(color);
 
-        if (color != Color.WHITE)
-            setColor(color);
+        this.lastFrame = lastFrame;
+        float midpoint = lastFrame * midpointMultiplier;
+        this.holdStart = midpoint - midpoint * holdMultiplier;
+        this.holdEnd = midpoint + (lastFrame - midpoint) * holdMultiplier;
 
-        this.vfxManager = vfxManager;
+        this.alphaStart = alphaStart;
+        this.alphaMid = alphaMid;
+        this.alphaEnd = alphaEnd;
+
+        setAlpha(alphaStart);
     }
 
     @Override
-    public void start(int layer, float x, float y) {
-        start(layer, x, y, 1, Color.WHITE, 1);
-    }
-
-    public void start(int layer, float x, float y, float scale, Color color, float maxAlpha) {
-        this.layer = layer;
-        this.maxAlpha = maxAlpha;
-        setCenter(x, y);
-        setScale(scale);
-        setColor(color);
-
+    public void restart() {
         frame = 0;
-        setAlpha(maxAlpha);
     }
 
     @Override
     public void update() {
-        setAlpha(maxAlpha * (lastFrame - ++frame) / (float) lastFrame);
+        // TODO: optimiseerida arvutamine!!! Hetkel on nulliga jagamine võimalik tekkima siin
+        if (frame < holdStart)
+            setAlpha(alphaStart + (alphaMid - alphaStart) * frame / holdStart);
+        else if (frame >= holdStart && frame < holdEnd)
+            setAlpha(alphaMid);
+        else if (frame >= holdEnd)
+            setAlpha(alphaMid + (alphaEnd - alphaMid) * (frame - holdEnd) / (lastFrame - holdEnd));
+        else
+            setAlpha(0);
 
-        if (frame == lastFrame) {
-            vfxManager.removeEffect(this);
-
-            deactivate();
+        if (frame++ == lastFrame) {
+            vfxKeeper.removeEffect(this);
         }
     }
 
@@ -87,5 +102,10 @@ public class Bloom extends Sprite implements VisualEffect {
     @Override
     public void deactivate() {
         setAlpha(0);
+    }
+
+    @Override
+    public void setVisualEffectKeeper(VisualEffectKeeper vfxKeeper) {
+        this.vfxKeeper = vfxKeeper;
     }
 }
