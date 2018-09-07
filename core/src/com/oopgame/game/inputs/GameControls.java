@@ -6,10 +6,14 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 import com.oopgame.game.Player;
 
+import scenes.GameScreen;
+
 public class GameControls implements InputProcessor {
     // InputProcessor on nagu Listener pmst (vähemalt nii ma aru sain),
     // seega sellega peaks me saama performance'i natuke paremaks ja
     // peaks inputtide süsteemi veits lihtsustama
+
+    private GameScreen gameScreen;
 
     private Player player;
 
@@ -28,8 +32,9 @@ public class GameControls implements InputProcessor {
     // vektor, mis antakse playerile ette, selle järgi pannakse player liikuma.
     private Vector2 movementVector = new Vector2(0, 0);
 
-    public GameControls(Player player) {
+    public GameControls(GameScreen gameScreen, Player player) {
         this.player = player;
+        this.gameScreen = gameScreen;
     }
 
     @Override
@@ -43,6 +48,9 @@ public class GameControls implements InputProcessor {
         if (keys[Input.Keys.NUM_2])
             player.getGunList().selectGun(1);
 
+        if (keys[Input.Keys.NUM_3])
+            player.getGunList().selectGun(2);
+
         return false;
     }
 
@@ -51,8 +59,12 @@ public class GameControls implements InputProcessor {
         // sündmused selleks, kui mõni klaviatuuri nupp lahti lastakse
         keys[keycode] = false;
 
-        if (keycode == Input.Keys.ESCAPE)
-            Gdx.app.exit();
+        if (keycode == Input.Keys.ESCAPE) {
+            if (gameScreen.isPaused())
+                gameScreen.resume();
+            else
+                gameScreen.pause();
+        }
 
         return false;
     }
