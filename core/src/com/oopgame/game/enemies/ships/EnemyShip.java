@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.oopgame.game.Hittable;
 
-public interface EnemyShip extends Hittable{
+public interface EnemyShip extends Hittable {
     void update();
 
     void draw(SpriteBatch batch);
@@ -24,5 +24,5 @@ public interface EnemyShip extends Hittable{
 
     void deactivate();
 
-    void reset(Vector2 spawn);
+    void reset();
 }
