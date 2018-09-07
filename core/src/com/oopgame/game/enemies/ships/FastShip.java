@@ -17,6 +17,8 @@ import com.oopgame.game.guns.LaserGun;
 import com.oopgame.game.guns.damagers.Damager;
 import com.oopgame.game.guns.damagers.DamagerManager;
 
+import java.util.List;
+
 import helpers.GameInfo;
 
 public class FastShip extends Sprite implements EnemyShip {
@@ -31,8 +33,10 @@ public class FastShip extends Sprite implements EnemyShip {
 
     private LaserGun laserGun;
 
-    private float health = 100;
-    private float shield = 25;
+    private static float maxHealth = 100;
+    private float health = maxHealth;
+    private static float maxShield = 25;
+    private float shield = maxShield;
 
     private Integer faction = 1;
 
@@ -45,20 +49,19 @@ public class FastShip extends Sprite implements EnemyShip {
     private static float turnModifier = 100f;
     private static int maxSpeed = 40;
 
-    public FastShip(Vector2 spawn, World world, Sprite sprite,
-                    Time time,
-                    BodyDef bodyDef, FixtureDef fixtureDef,
+    public FastShip(float x, float y, float angle, World world, Time time,
+                    List<Sprite> graphics, BodyDef bodyDef, FixtureDef fixtureDef,
                     EnemyManager enemyManager, DamagerManager damagerManager,
                     EnemyAI ai) {
-        super(sprite);
+        super(graphics.get(0));
 
         this.time = time;
         this.enemyManager = enemyManager;
-        this.ai = ai;
-
 
         body = world.createBody(bodyDef);
-        body.setTransform(spawn, 0);
+
+        reconfigure(x, y, angle, ai);
+
         body.setUserData(this);
 
         fixture = body.createFixture(fixtureDef);
@@ -66,6 +69,11 @@ public class FastShip extends Sprite implements EnemyShip {
         fixture.setUserData(this);
 
         this.laserGun = new LaserGun(damagerManager, body.getPosition(), faction);
+    }
+
+    public void reconfigure(float x, float y, float angle, EnemyAI ai) {
+        body.setTransform(x, y, angle);
+        this.ai = ai;
     }
 
     public void update() {
@@ -182,10 +190,9 @@ public class FastShip extends Sprite implements EnemyShip {
     }
 
     @Override
-    public void reset(Vector2 spawn) {
-        health = 100;
-
-        body.setTransform(spawn, 0);
+    public void reset() {
+        health = maxHealth;
+        shield = maxShield;
 
         body.setActive(true);
         setAlpha(1);
