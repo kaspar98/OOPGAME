@@ -70,6 +70,10 @@ public class LaserBeamGun implements Gun {
 
     @Override
     public int maxAmmo() {
-        return maxAmmo();
+        return -1;
+    }
+
+    @Override
+    public void resetAmmo() {
     }
 }

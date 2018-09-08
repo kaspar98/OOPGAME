@@ -178,6 +178,8 @@ public class EnemyOld extends Sprite implements Hittable {
 
             alive = true;
         }
+
+        laserGun.resetAmmo();
     }
 
     public static Vector2 uusAsukoht() {

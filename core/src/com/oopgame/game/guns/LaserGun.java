@@ -104,4 +104,9 @@ public class LaserGun implements Gun {
     public int maxAmmo() {
         return maxAmmo;
     }
+
+    @Override
+    public void resetAmmo() {
+        ammo = maxAmmo;
+    }
 }

@@ -75,4 +75,9 @@ public class GunList {
     public Gun[] getGuns() {
         return guns;
     }
+
+    public void resetAmmo() {
+        for (Gun gun : guns)
+            gun.resetAmmo();
+    }
 }

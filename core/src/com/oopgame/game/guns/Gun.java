@@ -20,4 +20,6 @@ public interface Gun {
     int ammoLeft();
 
     int maxAmmo();
+
+    void resetAmmo();
 }

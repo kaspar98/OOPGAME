@@ -230,6 +230,8 @@ public class FastShip extends Sprite implements EnemyShip {
 
         body.setActive(true);
         setAlpha(1);
+
+        laserGun.resetAmmo();
     }
 
     @Override
