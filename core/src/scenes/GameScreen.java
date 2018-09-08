@@ -107,7 +107,7 @@ public class GameScreen implements Screen, ContactListener {
                 world, stage, camera,
                 damagerManager, gibsManager, explosionManager);
 
-        uiManager = new UIManager(batch, camera, stage, player);
+        uiManager = new UIManager(batch, camera, stage, player, game.getFontManager());
 
         // taustamuusika jaoks MusicManager()
         musicManager = new MusicManager();
@@ -123,7 +123,7 @@ public class GameScreen implements Screen, ContactListener {
 
         waveManager = new WaveManager(batch, player, world, stage,
                 uiManager, damagerManager, musicManager,
-                explosionManager, gibsManager, game.getFont(), time,
+                explosionManager, gibsManager, game.getFontManager(), time,
                 vfxManager);
 
         hitmarker = Gdx.audio.newSound(Gdx.files.internal("hitmarker.wav"));
