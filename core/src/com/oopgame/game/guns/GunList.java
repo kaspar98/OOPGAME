@@ -15,17 +15,20 @@ public class GunList {
     // 2 - LaserBeamGun
     // 3 - ?
     // 4 - ?
-    private Gun[] guns = new Gun[3];
+    private Gun[] guns = new Gun[2];
     private int selected = 0;
 
     public GunList(DamagerManager damagerManager, Vector2 source, Integer faction) {
         guns[0] = new LaserGun(damagerManager, source, faction);
         guns[1] = new MiniGun(damagerManager, source, faction);
         /*guns[2] = new LaserBeamGun(damagerManager, source, faction);*/
+
+        selectGun(0);
     }
 
     public void update() {
-
+        for (Gun gun : guns)
+            gun.update();
     }
 
     public boolean shoot(float angle) {
@@ -34,8 +37,11 @@ public class GunList {
 
     public void selectGun(int index) {
         if (index >= 0 && index < guns.length &&
-                guns[index] != null && guns[index].ammoLeft() != 0)
+                guns[index] != null && guns[index].ammoLeft() != 0) {
+            guns[selected].setSelected(false);
             selected = index;
+            guns[selected].setSelected(true);
+        }
     }
 
     public void selectNext() {
@@ -44,7 +50,7 @@ public class GunList {
                 next = 0;
 
             if (guns[next].ammoLeft() != 0) {
-                selected = next;
+                selectGun(next);
                 break;
             }
         }
@@ -56,7 +62,7 @@ public class GunList {
                 previous = guns.length - 1;
 
             if (guns[previous].ammoLeft() != 0) {
-                selected = previous;
+                selectGun(previous);
                 break;
             }
          }
@@ -64,5 +70,9 @@ public class GunList {
 
     public int getSelected() {
         return selected;
+    }
+
+    public Gun[] getGuns() {
+        return guns;
     }
 }

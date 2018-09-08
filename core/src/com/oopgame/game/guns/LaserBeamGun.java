@@ -6,6 +6,7 @@ import com.oopgame.game.guns.damagers.LaserBeam;
 
 public class LaserBeamGun implements Gun {
     public static String keyType = "laserBeam";
+    public static String name = "laser beam";
 
     private DamagerManager damagerManager;
 
@@ -18,11 +19,18 @@ public class LaserBeamGun implements Gun {
 
     private LaserBeam beam;
 
+    private boolean selected;
+
     public LaserBeamGun(DamagerManager damagerManager,
                         Vector2 source, Integer faction) {
         this.damagerManager = damagerManager;
         this.source = source;
         this.faction = faction;
+    }
+
+    @Override
+    public void update() {
+
     }
 
     @Override
@@ -36,7 +44,32 @@ public class LaserBeamGun implements Gun {
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getKeyType() {
+        return keyType;
+    }
+
+    @Override
+    public void setSelected(boolean value) {
+        selected = value;
+    }
+
+    @Override
+    public boolean isSelected() {
+        return selected;
+    }
+
+    @Override
     public int ammoLeft() {
         return -1;
+    }
+
+    @Override
+    public int maxAmmo() {
+        return maxAmmo();
     }
 }
