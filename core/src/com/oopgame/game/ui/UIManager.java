@@ -6,12 +6,18 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
+import com.oopgame.game.FontManager;
 import com.oopgame.game.Player;
+import com.oopgame.game.guns.Gun;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import helpers.GameInfo;
 
@@ -38,8 +44,10 @@ public class UIManager {
     private Image screenOverlay = new Image(new Sprite(new Texture(
             Gdx.files.internal("ui/screenOverlay.jpg"))));
 
+    private List<GunInfoButton> gunButtons = new ArrayList<GunInfoButton>();
+
     public UIManager(SpriteBatch batch, OrthographicCamera camera, Stage stage,
-                     Player player) {
+                     Player player, FontManager fontManager) {
         this.batch = batch;
         this.camera = camera;
         this.stage = stage;
@@ -91,6 +99,52 @@ public class UIManager {
         screenOverlay.setColor(0, 0, 0, 0);
 
         stage.addActor(screenOverlay);
+
+        int count;
+        Gun[] guns = player.getGunList().getGuns();
+        if ((count = guns.length) > 0) {
+            FreeTypeFontGenerator.FreeTypeFontParameter parameter =
+                    new FreeTypeFontGenerator.FreeTypeFontParameter();
+
+            parameter.size = 40;
+
+            fontManager.generateFont("rational-integer", parameter, "gunInfo");
+
+            Color color = new Color(0, 0.68f, 1, 1);
+            Color colorUsable = Color.WHITE.cpy();
+            colorUsable.a = 0.25f;
+            Color colorEmpty = Color.RED.cpy();
+
+            Label.LabelStyle usableStyle =
+                    new Label.LabelStyle(fontManager.getFont("gunInfo"), colorUsable);
+            Label.LabelStyle selectedStyle =
+                    new Label.LabelStyle(fontManager.getFont("gunInfo"), color);
+            Label.LabelStyle emptyStyle =
+                    new Label.LabelStyle(fontManager.getFont("gunInfo"), colorEmpty);
+
+
+            for (int i = 0; i < count; i++) {
+                Gun gun = guns[i];
+
+                GunInfoButton button = new GunInfoButton(i + 1, gun, stage,
+                        usableStyle, selectedStyle, emptyStyle);
+
+                gunButtons.add(button);
+
+                stage.addActor(button);
+            }
+
+            float spacing = gunButtons.get(0).getWidth() * (1.025f);
+            float start = 0.5f * (GameInfo.WIDTH - spacing * (count - 1));
+
+            float y = gunButtons.get(0).getHeight() * 0.6f;
+
+            for (int i = 0; i < count; i++) {
+                GunInfoButton button = gunButtons.get(i);
+
+                button.setCenter(start + i * spacing, y);
+            }
+        }
     }
 
     public void update() {
@@ -107,6 +161,10 @@ public class UIManager {
         shield_back.setPosition(
                 shield.getX() + shield.getWidth() - shield_back.getWidth(),
                 shield.getY());
+
+        for (GunInfoButton button : gunButtons) {
+            button.update();
+        }
     }
 
     public void render() {
@@ -146,7 +204,7 @@ public class UIManager {
         marker = new UIMarker(
                 compass_marker_appearance,
                 camera, compass.getWidth() * 0.5f,
-                point);
+                point, this);
 
         compass_markers.add(marker);
 
