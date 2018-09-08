@@ -4,7 +4,6 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
@@ -12,28 +11,21 @@ import scenes.MainMenuScreen;
 
 public class OOPGame extends Game {
     private SpriteBatch batch;
-    private BitmapFont font;
+    private FontManager fontManager;
 
     private int highscore = 0;
 
     public void create() {
         batch = new SpriteBatch();
 
-        // teeme valmis sobiva suurusega fonti
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-                Gdx.files.internal("fonts/rational-integer/ratio___.ttf"));
+        fontManager = new FontManager(this);
+
         FreeTypeFontGenerator.FreeTypeFontParameter parameter =
                 new FreeTypeFontGenerator.FreeTypeFontParameter();
 
         parameter.size = 64;
         parameter.color = Color.WHITE;
-
-        font = generator.generateFont(parameter);
-
-        generator.dispose();
-
-        // commenti kõik selle ja eelmise commenti vahelt ja uncommenti järgmine rida pärast seda commenti, et katsetada ilma uue fonti lugemiseta
-        /*font = new BitmapFont();*/
+        fontManager.generateFont("rational-integer", parameter, "main");
 
         // highscore sisselugemine
         FileHandle handle = Gdx.files.local("highscore.txt");
@@ -52,11 +44,11 @@ public class OOPGame extends Game {
     public void dispose() {
         getScreen().dispose();
         batch.dispose();
-        font.dispose();
+        fontManager.dispose();
     }
 
-    public BitmapFont getFont() {
-        return font;
+    public FontManager getFontManager() {
+        return fontManager;
     }
 
     public SpriteBatch getBatch() {
