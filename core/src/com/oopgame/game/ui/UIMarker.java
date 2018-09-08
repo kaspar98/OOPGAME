@@ -7,14 +7,19 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 public class UIMarker extends Sprite {
+    private UIManager uiManager;
+
     private Vector3 camPos;
 
     private Vector2 enemyPos;
 
     private float radius;
 
-    public UIMarker(Sprite appearance, OrthographicCamera camera, float radius, Vector2 enemyPos) {
+    public UIMarker(Sprite appearance, OrthographicCamera camera,
+                    float radius, Vector2 enemyPos, UIManager uiManager) {
         super(appearance);
+
+        this.uiManager = uiManager;
 
         this.camPos = camera.position;
         this.radius = radius;
@@ -29,5 +34,9 @@ public class UIMarker extends Sprite {
                 camPos.y + MathUtils.sinDeg(angle) * radius);
 
         setRotation(angle);
+    }
+
+    public void disable() {
+        uiManager.removeMarker(this);
     }
 }
