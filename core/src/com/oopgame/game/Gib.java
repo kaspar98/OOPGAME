@@ -41,7 +41,7 @@ public class Gib extends Sprite {
     private Vector2 suvalineVektor(Vector2 vektor) {
         if (vektor.len() < 30f)
             return vektor.cpy()
-                    .setLength(MathUtils.random(30f,120f))
+                    .set(MathUtils.random(30f,120f), 0)
                     .setAngle(MathUtils.random(0,360));
         return vektor.cpy().setAngle(vektor.angle() + MathUtils.random(-60f, 60f));
     }
