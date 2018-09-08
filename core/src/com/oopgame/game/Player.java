@@ -69,6 +69,7 @@ public class Player extends Sprite implements Hittable {
 
     private long timeDeath;
 
+    private Vector2 mousePos = new Vector2(-1, -1);
     private Vector2 aiming = new Vector2(0, 0);
     private Sprite pointer;
     private float pointerAlpha;
@@ -260,6 +261,8 @@ public class Player extends Sprite implements Hittable {
 
         updateBooster();
 
+
+        gunList.update();
 
         // väike shield regen
         if (shield < maxShield && health > 0) {
@@ -482,7 +485,13 @@ public class Player extends Sprite implements Hittable {
         return done;
     }
 
-    public void aimPointer(int x, int y) {
+    private void aimPointer() {
+        aimPointer(mousePos.x, mousePos.y);
+    }
+
+    public void aimPointer(float x, float y) {
+        mousePos.set(x, y);
+
         aiming = new Vector2(
                 cameraPos.x + (x - 0.5f * GameInfo.WIDTH) * GameInfo.CAM_SCALING,
                 cameraPos.y + (0.5f * GameInfo.HEIGHT - y) * GameInfo.CAM_SCALING);
@@ -503,6 +512,8 @@ public class Player extends Sprite implements Hittable {
     }
 
     public void shoot() {
+        aimPointer();
+
         pointerAlpha = 1.5f;
 
         if (health > 0) {
