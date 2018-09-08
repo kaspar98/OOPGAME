@@ -10,12 +10,16 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
+import com.oopgame.game.GibsManager;
 import com.oopgame.game.Time;
 import com.oopgame.game.enemies.EnemyManager;
 import com.oopgame.game.enemies.ai.EnemyAI;
 import com.oopgame.game.guns.LaserGun;
 import com.oopgame.game.guns.damagers.Damager;
 import com.oopgame.game.guns.damagers.DamagerManager;
+import com.oopgame.game.ui.UIManager;
+import com.oopgame.game.ui.UIMarker;
+import com.oopgame.game.vfx.VisualEffectsManager;
 
 import java.util.List;
 
@@ -28,6 +32,11 @@ public class FastShip extends Sprite implements EnemyShip {
     private Fixture fixture;
 
     private EnemyManager enemyManager;
+    private UIManager uiManager;
+    private GibsManager gibsManager;
+    private VisualEffectsManager vfxManager;
+
+    private UIMarker uiMarker;
 
     private EnemyAI ai;
 
@@ -51,12 +60,16 @@ public class FastShip extends Sprite implements EnemyShip {
 
     public FastShip(float x, float y, float angle, World world, Time time,
                     List<Sprite> graphics, BodyDef bodyDef, FixtureDef fixtureDef,
-                    EnemyManager enemyManager, DamagerManager damagerManager,
-                    EnemyAI ai) {
+                    EnemyManager enemyManager, UIManager uiManager,
+                    DamagerManager damagerManager, VisualEffectsManager vfxManager,
+                    GibsManager gibsManager, EnemyAI ai) {
         super(graphics.get(0));
 
         this.time = time;
         this.enemyManager = enemyManager;
+        this.uiManager = uiManager;
+        this.vfxManager = vfxManager;
+        this.gibsManager = gibsManager;
 
         body = world.createBody(bodyDef);
 
@@ -74,6 +87,13 @@ public class FastShip extends Sprite implements EnemyShip {
     public void reconfigure(float x, float y, float angle, EnemyAI ai) {
         body.setTransform(x, y, angle);
         this.ai = ai;
+
+        if (uiMarker != null) {
+            uiMarker.disable();
+            uiMarker = null;
+        }
+
+        uiMarker = uiManager.addMarker(body.getPosition());
     }
 
     public void update() {
@@ -181,12 +201,26 @@ public class FastShip extends Sprite implements EnemyShip {
     }
 
     @Override
+    public void killGraphics() {
+        Vector2 pos = body.getPosition();
+        float x = pos.x;
+        float y = pos.y;
+
+        gibsManager.createGibs(keyType, x, y, body.getLinearVelocity());
+
+        vfxManager.addExplosion(2, x, y, 1, Color.WHITE);
+    }
+
+    @Override
     public void deactivate() {
         body.setLinearVelocity(0, 0);
         body.setTransform(-GameInfo.W_WIDTH, 0, 0);
         body.setActive(false);
 
         setAlpha(0);
+
+        uiMarker.disable();
+        uiMarker = null;
     }
 
     @Override

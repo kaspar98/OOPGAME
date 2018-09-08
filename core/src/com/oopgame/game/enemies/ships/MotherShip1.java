@@ -10,11 +10,14 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
+import com.oopgame.game.GibsManager;
 import com.oopgame.game.Time;
 import com.oopgame.game.enemies.EnemyManager;
 import com.oopgame.game.enemies.ai.EnemyAI;
 import com.oopgame.game.guns.damagers.Damager;
 import com.oopgame.game.guns.damagers.DamagerManager;
+import com.oopgame.game.ui.UIManager;
+import com.oopgame.game.ui.UIMarker;
 import com.oopgame.game.vfx.VisualEffectsManager;
 
 import java.util.List;
@@ -29,7 +32,11 @@ public class MotherShip1 extends Sprite implements EnemyCarrier {
     private Fixture fixture;
 
     private EnemyManager enemyManager;
+    private UIManager uiManager;
     private VisualEffectsManager vfxManager;
+    private GibsManager gibsManager;
+
+    private UIMarker uiMarker;
 
     private EnemyAI ai;
 
@@ -57,13 +64,16 @@ public class MotherShip1 extends Sprite implements EnemyCarrier {
                        Time time, int millisSpawnInterval,
                        int fastShips,
                        List<Sprite> graphics, BodyDef bodyDef, FixtureDef fixtureDef,
-                       EnemyManager enemyManager, DamagerManager damagerManager,
-                       VisualEffectsManager vfxManager) {
+                       EnemyManager enemyManager, UIManager uiManager,
+                       DamagerManager damagerManager, VisualEffectsManager vfxManager,
+                       GibsManager gibsManager) {
         super(graphics.get(0));
 
         this.time = time;
         this.enemyManager = enemyManager;
+        this.uiManager = uiManager;
         this.vfxManager = vfxManager;
+        this.gibsManager = gibsManager;
 
         body = world.createBody(bodyDef);
 
@@ -88,6 +98,13 @@ public class MotherShip1 extends Sprite implements EnemyCarrier {
         this.timeNextSpawn = time.getTime() + millisSpawnInterval;
 
         enemies[0] = fastShips;
+
+        if (uiMarker != null) {
+            uiMarker.disable();
+            uiMarker = null;
+        }
+
+        uiMarker = uiManager.addMarker(body.getPosition());
     }
 
     @Override
@@ -153,12 +170,22 @@ public class MotherShip1 extends Sprite implements EnemyCarrier {
     }
 
     @Override
+    public void killGraphics() {
+        vfxManager.addExplosion(
+                2, pos.x, pos.y,
+                2, Color.WHITE);
+    }
+
+    @Override
     public void deactivate() {
         body.setLinearVelocity(0, 0);
         body.setTransform(-GameInfo.W_WIDTH, 0, 0);
         body.setActive(false);
 
         setAlpha(0);
+
+        uiMarker.disable();
+        uiMarker = null;
     }
 
     @Override

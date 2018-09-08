@@ -22,6 +22,8 @@ public interface EnemyShip extends Hittable {
 
     String getKeyType();
 
+    void killGraphics();
+
     void deactivate();
 
     void reset();
