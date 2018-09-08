@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.OOPGame;
+import com.oopgame.game.inputs.MainMenuControls;
 
 import helpers.GameInfo;
 
@@ -22,6 +23,8 @@ public class MainMenuScreen implements Screen {
     private SpriteBatch batch;
     private OrthographicCamera camera;
     private Stage stage;
+
+    private MainMenuControls controls = new MainMenuControls(this);
 
     private Viewport viewport;
 
@@ -47,7 +50,7 @@ public class MainMenuScreen implements Screen {
         info = new Label(
                 "Highscore " + highscore + "\n" +
                         "TAP ANYWHERE TO BEGIN",
-                new Label.LabelStyle(game.getFont(), Color.ORANGE));
+                new Label.LabelStyle(game.getFontManager().getFont("main"), Color.ORANGE));
 
         info.setAlignment(Align.center);
         info.setPosition(
@@ -63,6 +66,8 @@ public class MainMenuScreen implements Screen {
         background.setCenter(
                 GameInfo.WIDTH * 0.5f,
                 GameInfo.HEIGHT * 0.5f);
+
+        Gdx.input.setInputProcessor(controls);
     }
 
     @Override
@@ -94,11 +99,6 @@ public class MainMenuScreen implements Screen {
         stage.act(Gdx.graphics.getDeltaTime());
 
         stage.draw();
-
-        if (Gdx.input.isTouched()) {
-            game.setScreen(new GameScreen(game));
-            dispose();
-        }
     }
 
     @Override
@@ -124,5 +124,10 @@ public class MainMenuScreen implements Screen {
         stage.dispose();
         title.getTexture().dispose();
         background.getTexture().dispose();
+    }
+
+    public void proceed() {
+        game.setScreen(new GameScreen(game));
+        dispose();
     }
 }
