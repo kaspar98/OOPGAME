@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.Align;
 import com.oopgame.game.enemies.EnemyManager;
 import com.oopgame.game.enemies.ships.MotherShip1;
 import com.oopgame.game.guns.damagers.DamagerManager;
+import com.oopgame.game.old.EnemyManagerOld;
 import com.oopgame.game.ui.UIManager;
 import com.oopgame.game.vfx.VisualEffectsManager;
 
@@ -39,7 +40,7 @@ public class WaveManager {
     public WaveManager(SpriteBatch batch, Player player, World world, Stage stage,
                        UIManager uiManager, DamagerManager damagerManager,
                        MusicManager musicManager, ExplosionManager explosionManager,
-                       GibsManager gibsManager, BitmapFont font, Time time,
+                       GibsManager gibsManager, FontManager fontManager, Time time,
                        VisualEffectsManager vfxManager) {
         this.time = time;
         this.timeNextWave = time.getTime() + timeWaitWave;
@@ -49,10 +50,11 @@ public class WaveManager {
                 vfxManager);
 
         enemyManager = new EnemyManager(batch, world, time, player,
-                damagerManager, vfxManager);
+                uiManager, damagerManager, vfxManager, gibsManager);
 
 
-        Label.LabelStyle style = new Label.LabelStyle(font, Color.WHITE);
+        Label.LabelStyle style = new Label.LabelStyle(fontManager.getFont("main"),
+                Color.WHITE);
 
         currentScore = new Label("", style);
         currentScore.setAlignment(Align.left);
