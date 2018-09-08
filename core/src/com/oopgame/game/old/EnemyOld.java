@@ -1,4 +1,4 @@
-package com.oopgame.game;
+package com.oopgame.game.old;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -11,6 +11,8 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.oopgame.game.GibsManager;
+import com.oopgame.game.Hittable;
 import com.oopgame.game.guns.LaserGun;
 import com.oopgame.game.guns.damagers.Damager;
 import com.oopgame.game.guns.damagers.DamagerManager;
@@ -28,7 +30,7 @@ public class EnemyOld extends Sprite implements Hittable {
     private Vector2 playerPos;
     private Vector2 playerVektor;
 
-    private com.oopgame.game.ui.UIMarker uiMarker;
+    private UIMarker uiMarker;
     private GibsManager gibsManager;
 
     private boolean alive;
