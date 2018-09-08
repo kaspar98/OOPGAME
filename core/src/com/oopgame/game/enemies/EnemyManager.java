@@ -13,6 +13,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.oopgame.game.GibsManager;
 import com.oopgame.game.Player;
 import com.oopgame.game.Time;
 import com.oopgame.game.enemies.ai.EnemyAI;
@@ -21,6 +22,7 @@ import com.oopgame.game.enemies.ships.EnemyShip;
 import com.oopgame.game.enemies.ships.FastShip;
 import com.oopgame.game.enemies.ships.MotherShip1;
 import com.oopgame.game.guns.damagers.DamagerManager;
+import com.oopgame.game.ui.UIManager;
 import com.oopgame.game.vfx.VisualEffectsManager;
 
 import java.util.ArrayList;
@@ -40,8 +42,10 @@ public class EnemyManager {
 
     private Vector2 playerPos;
 
+    private UIManager uiManager;
     private DamagerManager damagerManager;
     private VisualEffectsManager vfxManager;
+    private GibsManager gibsManager;
 
     // sprite'ide hoidmiseks
     private Map<String, List<Sprite>> spriteMap = new HashMap<String, List<Sprite>>();
@@ -67,18 +71,17 @@ public class EnemyManager {
 
 
     public EnemyManager(SpriteBatch batch, World world, Time time, Player player,
-                        DamagerManager damagerManager, VisualEffectsManager vfxManager) {
+                        UIManager uiManager, DamagerManager damagerManager,
+                        VisualEffectsManager vfxManager, GibsManager gibsManager) {
         this.batch = batch;
         this.world = world;
         this.time = time;
         this.playerPos = player.getPosition();
 
+        this.uiManager = uiManager;
         this.damagerManager = damagerManager;
         this.vfxManager = vfxManager;
-
-        // TODO: vb saab seda mappide valmispanemise protsessi vastaste loomise juurde tõsta?
-
-        // paneme valmis FastShip objektide loomiseks vajalikud objektid
+        this.gibsManager = gibsManager;
 
         aiMap.put(RegularEnemy.keyType, new RegularEnemy(player));
     }
@@ -95,16 +98,7 @@ public class EnemyManager {
 
             String key = ship.getKeyType();
 
-            Body shipBody = ship.getBody();
-            float scale = 1;
-            if (ship instanceof MotherShip1)
-                scale = 2;
-
-            vfxManager.addExplosion(2,
-                    shipBody.getPosition().x,
-                    shipBody.getPosition().y,
-                    scale, Color.WHITE);
-
+            ship.killGraphics();
             ship.deactivate();
 
             if (!shipPools.containsKey(key))
@@ -208,7 +202,7 @@ public class EnemyManager {
                     time, millisSpawnInterval,
                     fastShips,
                     spriteMap.get(key), bodyDefMap.get(key), fixtureDefMap.get(key),
-                    this, damagerManager, vfxManager);
+                    this, uiManager, damagerManager, vfxManager, gibsManager);
         }
 
         toAdd.add(carrier);
@@ -260,7 +254,8 @@ public class EnemyManager {
         } else {
             fastShip = new FastShip(x, y, angle, world, time,
                     spriteMap.get(key), bodyDefMap.get(key), fixtureDefMap.get(key),
-                    this, damagerManager, aiMap.get("regular"));
+                    this, uiManager, damagerManager, vfxManager, gibsManager,
+                    aiMap.get("regular"));
         }
 
         toAdd.add(fastShip);
