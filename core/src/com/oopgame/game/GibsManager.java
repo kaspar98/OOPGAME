@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.oopgame.game.enemies.ships.FastShip;
 
 import helpers.GameInfo;
 
@@ -33,7 +34,8 @@ public class GibsManager {
 
         for (int i = 1; i < 9; i++) {
             Sprite sprite = new Sprite(
-                    new Texture(Gdx.files.internal(key + "_gibs_" + i + "_t.png")));
+                    new Texture(Gdx.files.internal(
+                            "ships/" + key + "_gibs_" + i + "_t.png")));
 
             sprite.setSize(
                     sprite.getWidth() * GameInfo.SCALING,
@@ -85,6 +87,10 @@ public class GibsManager {
     }
 
     public void createGibs(String key, float x, float y, Vector2 vektor) {
+        if (FastShip.keyType.equals(key)) {
+            key = "enemy_alien_fighter_1b";
+        }
+
         if (dead.get(key).size == 0) {
             // teeme uued gibsid
             Gibs gibs = new Gibs(appearances, key, batch, world, x, y, vektor);
