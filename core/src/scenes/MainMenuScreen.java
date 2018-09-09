@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.oopgame.game.OOPGame;
 import com.oopgame.game.inputs.MainMenuControls;
+import com.oopgame.game.main_menu_bg.MainMenuBackground;
 
 import helpers.GameInfo;
 
@@ -32,7 +33,7 @@ public class MainMenuScreen implements Screen {
 
     private Label info;
 
-    private Sprite background;
+    private MainMenuBackground bgManager;
 
     public MainMenuScreen(final OOPGame game, int highscore) {
         this.game = game;
@@ -61,11 +62,7 @@ public class MainMenuScreen implements Screen {
         stage.addActor(info);
         Gdx.input.setInputProcessor(stage);
 
-        background = new Sprite(new Texture(Gdx.files.internal("title_space.png")));
-        background.setSize(GameInfo.WIDTH, GameInfo.HEIGHT);
-        background.setCenter(
-                GameInfo.WIDTH * 0.5f,
-                GameInfo.HEIGHT * 0.5f);
+        bgManager = new MainMenuBackground(batch);
 
         Gdx.input.setInputProcessor(controls);
     }
@@ -79,9 +76,7 @@ public class MainMenuScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        background.setCenter(
-                GameInfo.WIDTH * 0.5f + -Gdx.input.getAccelerometerY() * 10f,
-                GameInfo.HEIGHT * 0.5f + -Gdx.input.getAccelerometerX() * 10f);
+        bgManager.update();
 
         camera.update();
 
@@ -90,7 +85,7 @@ public class MainMenuScreen implements Screen {
 
         batch.begin();
 
-        background.draw(batch);
+        bgManager.render();
         title.draw(batch);
 
         batch.end();
@@ -123,7 +118,8 @@ public class MainMenuScreen implements Screen {
     public void dispose() {
         stage.dispose();
         title.getTexture().dispose();
-        background.getTexture().dispose();
+        /*background.getTexture().dispose();*/
+        bgManager.dispose();
     }
 
     public void proceed() {
