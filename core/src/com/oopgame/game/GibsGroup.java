@@ -10,14 +10,14 @@ import com.badlogic.gdx.utils.TimeUtils;
 
 import helpers.GameInfo;
 
-public class Gibs {
+public class GibsGroup {
     private SpriteBatch batch;
     private Array<Gib> gibs = new Array<Gib>();
     private long timeExpires;
     private boolean alive;
 
-    public Gibs(ObjectMap<String, Array<Sprite>> appearances, String key,
-                SpriteBatch batch, World world, float x, float y, Vector2 vektor) {
+    public GibsGroup(ObjectMap<String, Array<Sprite>> appearances, String key,
+                     SpriteBatch batch, World world, float x, float y, Vector2 vektor) {
 
         this.batch = batch;
 

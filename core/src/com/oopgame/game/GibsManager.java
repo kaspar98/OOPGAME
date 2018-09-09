@@ -19,8 +19,8 @@ public class GibsManager {
     private ObjectMap<String, Array<Sprite>> appearances =
             new ObjectMap<String, Array<Sprite>>();
 
-    private ObjectMap<String, Array<Gibs>> alive = new ObjectMap<String, Array<Gibs>>();
-    private ObjectMap<String, Array<Gibs>> dead = new ObjectMap<String, Array<Gibs>>();
+    private ObjectMap<String, Array<GibsGroup>> alive = new ObjectMap<String, Array<GibsGroup>>();
+    private ObjectMap<String, Array<GibsGroup>> dead = new ObjectMap<String, Array<GibsGroup>>();
 
     public GibsManager(World world, SpriteBatch batch) {
         this.world = world;
@@ -63,27 +63,27 @@ public class GibsManager {
         }
 
         for (String appearance : appearances.keys()) {
-            alive.put(appearance, new Array<Gibs>());
-            dead.put(appearance, new Array<Gibs>());
+            alive.put(appearance, new Array<GibsGroup>());
+            dead.put(appearance, new Array<GibsGroup>());
         }
     }
 
     public void update() {
         for (String key : alive.keys()) {
-            for (Gibs gibs : alive.get(key)) {
-                if (!gibs.isAlive()) {
-                    alive.get(key).removeValue(gibs, false);
-                    dead.get(key).add(gibs);
+            for (GibsGroup gibsGroup : alive.get(key)) {
+                if (!gibsGroup.isAlive()) {
+                    alive.get(key).removeValue(gibsGroup, false);
+                    dead.get(key).add(gibsGroup);
                 } else
-                    gibs.update();
+                    gibsGroup.update();
             }
         }
     }
 
     public void render() {
-        for (Array<Gibs> list : alive.values())
-            for (Gibs gibs : list)
-                gibs.draw();
+        for (Array<GibsGroup> list : alive.values())
+            for (GibsGroup gibsGroup : list)
+                gibsGroup.draw();
     }
 
     public void createGibs(String key, float x, float y, Vector2 vektor) {
@@ -93,15 +93,15 @@ public class GibsManager {
 
         if (dead.get(key).size == 0) {
             // teeme uued gibsid
-            Gibs gibs = new Gibs(appearances, key, batch, world, x, y, vektor);
+            GibsGroup gibsGroup = new GibsGroup(appearances, key, batch, world, x, y, vektor);
 
-            alive.get(key).add(gibs);
+            alive.get(key).add(gibsGroup);
         } else {
-            Gibs gibs = dead.get(key).pop();
+            GibsGroup gibsGroup = dead.get(key).pop();
 
-            gibs.start(x, y, vektor);
+            gibsGroup.start(x, y, vektor);
 
-            alive.get(key).add(gibs);
+            alive.get(key).add(gibsGroup);
         }
     }
 
