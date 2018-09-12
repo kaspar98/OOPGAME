@@ -59,9 +59,9 @@ public class GameControls implements InputProcessor {
         keys[keycode] = false;
 
         if (keycode == Input.Keys.ESCAPE) {
-            if (gameScreen.isPaused())
+            /*if (gameScreen.isPaused())
                 gameScreen.resume();
-            else
+            else*/
                 gameScreen.pause();
         }
 
