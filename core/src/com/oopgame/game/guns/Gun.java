@@ -1,11 +1,13 @@
 package com.oopgame.game.guns;
 
+import com.badlogic.gdx.math.Vector2;
+
 public interface Gun {
     void update();
 
     // meetod tulistamiseks, siin iga relv toimiks omamoodi aka
     // iga relv vaatab oma intervalli, seab kuuli kiiruse, tüübi jne
-    boolean shoot(float angle);
+    boolean shoot(float angle, Vector2 force);
 
     String getName();
 
@@ -17,9 +19,9 @@ public interface Gun {
 
     // et näha kui palju ammot alles veel on,
     // negatiivsed arvud, eelistatavalt -1, on hetkel infinite
-    int ammoLeft();
+    int getAmmoLeft();
 
-    int maxAmmo();
+    int getMaxAmmo();
 
     void resetAmmo();
 }
