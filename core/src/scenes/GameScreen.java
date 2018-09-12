@@ -32,6 +32,7 @@ import com.oopgame.game.guns.damagers.Damager;
 import com.oopgame.game.guns.damagers.DamagerManager;
 import com.oopgame.game.guns.damagers.DamagerRepeat;
 import com.oopgame.game.inputs.GameControls;
+import com.oopgame.game.inputs.GamePausedControls;
 import com.oopgame.game.ui.UIManager;
 import com.oopgame.game.WaveManager;
 import com.oopgame.game.vfx.VisualEffectsManager;
@@ -67,6 +68,7 @@ public class GameScreen implements Screen, ContactListener {
     private Sound hitmarker;
 
     private GameControls gameControls;
+    private GamePausedControls pausedControls;
 
     private Time time;
 
@@ -92,13 +94,13 @@ public class GameScreen implements Screen, ContactListener {
         // loome lava, millele touchpadi paigutada + loome touchpadi inpute töötleva protsessori
         stage = new Stage(new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT), batch);
 
-        vfxManager = new VisualEffectsManager(batch, world);
+        explosionManager = new ExplosionManager(batch);
+
+        vfxManager = new VisualEffectsManager(batch, world, explosionManager);
 
         damagerManager = new DamagerManager(batch, world, time, vfxManager);
 
         gibsManager = new GibsManager(world, batch);
-
-        explosionManager = new ExplosionManager(batch);
 
         // loome Playeri mänguvälja keskele
         player = new Player(
@@ -132,6 +134,7 @@ public class GameScreen implements Screen, ContactListener {
         debugRenderer = new Box2DDebugRenderer();
 
         gameControls = new GameControls(this, player);
+        pausedControls = new GamePausedControls(this);
         Gdx.input.setInputProcessor(gameControls);
     }
 
@@ -209,7 +212,8 @@ public class GameScreen implements Screen, ContactListener {
         player.inputs();
 
         // stage loodud touchpadi jaoks
-        stage.act(delta);
+        if (!paused)
+            stage.act(delta);
         stage.draw();
 
         if (player.isDone()) {
@@ -244,12 +248,14 @@ public class GameScreen implements Screen, ContactListener {
     public void pause() {
         paused = true;
         uiManager.placeOverlay(0, 0, 0, 0.5f);
+        Gdx.input.setInputProcessor(pausedControls);
     }
 
     @Override
     public void resume() {
         paused = false;
         uiManager.removeOverlay();
+        Gdx.input.setInputProcessor(gameControls);
     }
 
     @Override
