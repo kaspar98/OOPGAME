@@ -1,4 +1,4 @@
-package com.oopgame.game.inputs;
+package com.oopgame.game.inputs.Devices_OLD;
 
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;

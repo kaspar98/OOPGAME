@@ -1,4 +1,4 @@
-package com.oopgame.game.inputs;
+package com.oopgame.game.inputs.Devices_OLD;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
