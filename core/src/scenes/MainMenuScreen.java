@@ -8,11 +8,13 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.oopgame.game.FontManager;
 import com.oopgame.game.OOPGame;
 import com.oopgame.game.inputs.MainMenuControls;
 import com.oopgame.game.main_menu_bg.MainMenuBackground;
@@ -33,6 +35,8 @@ public class MainMenuScreen implements Screen {
 
     private Label info;
 
+    private Label credits;
+
     private MainMenuBackground bgManager;
 
     public MainMenuScreen(final OOPGame game, int highscore) {
@@ -48,10 +52,12 @@ public class MainMenuScreen implements Screen {
         title = new Sprite(new Texture(Gdx.files.internal("title_OOPGame.png")));
         title.setCenter(GameInfo.WIDTH * 0.5f, GameInfo.HEIGHT * 0.75f);
 
+        FontManager fontManager = game.getFontManager();
+
         info = new Label(
                 "Highscore " + highscore + "\n" +
-                        "TAP ANYWHERE TO BEGIN",
-                new Label.LabelStyle(game.getFontManager().getFont("main"), Color.ORANGE));
+                        "PRESS ANY KEY TO BEGIN!",
+                new Label.LabelStyle(fontManager.getFont("main"), Color.ORANGE));
 
         info.setAlignment(Align.center);
         info.setPosition(
@@ -60,7 +66,22 @@ public class MainMenuScreen implements Screen {
                 Align.center);
 
         stage.addActor(info);
-        Gdx.input.setInputProcessor(stage);
+
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter =
+                new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 24;
+        parameter.color = Color.WHITE;
+
+        fontManager.generateFont("rational-integer", parameter, "credits");
+
+        credits = new Label("Game made by Kaspar and Oliver. Music by The Hamster Alliance.",
+                new Label.LabelStyle(
+                        fontManager.getFont("credits"),
+                        new Color(1,1,1,0.5f)));
+
+        credits.setAlignment(Align.bottomLeft);
+        credits.setPosition(10,10,Align.bottomLeft);
+        stage.addActor(credits);
 
         bgManager = new MainMenuBackground(batch);
 
@@ -118,7 +139,6 @@ public class MainMenuScreen implements Screen {
     public void dispose() {
         stage.dispose();
         title.getTexture().dispose();
-        /*background.getTexture().dispose();*/
         bgManager.dispose();
     }
 
