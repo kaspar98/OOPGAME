@@ -119,7 +119,8 @@ public class DamagerManager {
 
     public void shootLaser(
             Integer damage, Integer faction,
-            Vector2 source, Float speed, float angle) {
+            Vector2 source, Float speed, float angle,
+            Vector2 force) {
 
         String key = Laser.keyType;
 
@@ -147,11 +148,11 @@ public class DamagerManager {
         Damager damager = damagerPools.get(key).poll();
 
         if (damager != null) {
-            ((Laser) damager).reset(damage, faction, source, speed, angle);
+            ((Laser) damager).reconfigure(damage, faction, source, speed, angle, force);
         } else
             damager = new Laser(
                     this, world, graphicsMap.get(key), time,
-                    damage, faction, source, speed, angle,
+                    damage, faction, source, speed, angle, force,
                     bodyDefMap.get(key), shapeMap.get(key));
 
         aliveDamagers.add(damager);
@@ -162,7 +163,7 @@ public class DamagerManager {
 
     public void shootMiniLaser(
             Integer damage, Integer faction,
-            Vector2 source, Float speed, float angle) {
+            Vector2 source, Float speed, float angle, Vector2 force) {
 
         String key = MiniLaser.keyType;
 
@@ -190,11 +191,11 @@ public class DamagerManager {
         Damager damager = damagerPools.get(key).poll();
 
         if (damager != null) {
-            ((MiniLaser) damager).reset(damage, faction, source, speed, angle);
+            ((MiniLaser) damager).reconfigure(damage, faction, source, speed, angle, force);
         } else
             damager = new MiniLaser(
                     this, world, graphicsMap.get(key), time,
-                    damage, faction, source, speed, angle,
+                    damage, faction, source, speed, angle, force,
                     bodyDefMap.get(key), shapeMap.get(key));
 
         aliveDamagers.add(damager);
