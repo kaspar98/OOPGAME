@@ -34,7 +34,7 @@ public class LaserBeamGun implements Gun {
     }
 
     @Override
-    public boolean shoot(float angle) {
+    public boolean shoot(float angle, Vector2 force) {
         if (beam != null && beam.isActive())
             beam.setPos(angle);
         else
@@ -64,12 +64,12 @@ public class LaserBeamGun implements Gun {
     }
 
     @Override
-    public int ammoLeft() {
+    public int getAmmoLeft() {
         return -1;
     }
 
     @Override
-    public int maxAmmo() {
+    public int getMaxAmmo() {
         return -1;
     }
 
