@@ -23,7 +23,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.oopgame.game.guns.GunList;
 import com.oopgame.game.guns.damagers.Damager;
 import com.oopgame.game.guns.damagers.DamagerManager;
-import com.oopgame.game.inputs.Pult;
+import com.oopgame.game.inputs.Devices_OLD.Pult;
 
 import helpers.GameInfo;
 
@@ -34,9 +34,9 @@ public class Player extends Sprite implements Hittable {
     private boolean done = false;
 
     // TODO: health ja shield tagasi korda panna!!!
-    private float maxHealth = 10000;
+    private float maxHealth = 100;
     private float health = maxHealth;
-    private float maxShield = 10000;
+    private float maxShield = 100;
     private float shield = maxShield;
 
     private boolean damaged = false;
@@ -153,7 +153,7 @@ public class Player extends Sprite implements Hittable {
                 touchpadL.getHeight() * 0.5f);
         touchpadL.setPosition(15, 15);
 
-        stage.addActor(touchpadL);
+        /*stage.addActor(touchpadL);*/
 
 
         // parem - tulistamine
@@ -169,7 +169,7 @@ public class Player extends Sprite implements Hittable {
                 GameInfo.WIDTH - touchpadR.getWidth() - 15,
                 15);
 
-        stage.addActor(touchpadR);
+        /*stage.addActor(touchpadR);*/
 
         damagedSound = Gdx.audio.newSound(Gdx.files.internal("damaged.wav"));
         explosionSound = Gdx.audio.newSound(Gdx.files.internal("explosion.wav"));
@@ -321,10 +321,13 @@ public class Player extends Sprite implements Hittable {
         explosionSound.dispose();
         damagedSound.dispose();
 
+
         pointer.getTexture().dispose();
 
         for (TouchPad touchPad : touchPads)
             touchPad.dispose();
+
+        gunList.dispose();
     }
 
     private void updateCam() {
@@ -376,6 +379,17 @@ public class Player extends Sprite implements Hittable {
 
             setBoosterPower();
         }
+    }
+
+    public void slowDown() {
+        Vector2 current = body.getLinearVelocity();
+        float length = current.len();
+
+        // et lõpmatult aeglustama ei jääks
+        if (length < 0.1)
+            body.setLinearVelocity(0, 0);
+        else
+            movementVector.add(current.cpy().scl(-1).setLength((length > 1 ? 1 : length)));
     }
 
     private void setBoosterPower() {
@@ -517,21 +531,10 @@ public class Player extends Sprite implements Hittable {
         pointerAlpha = 1.5f;
 
         if (health > 0) {
-            if (!gunList.shoot(aiming.angle())) {
+            if (!gunList.shoot(aiming.angle(), body.getLinearVelocity())) {
                 // vb lisab mingi sound effecti, millega saab aru, et tulistamine ei õnnestunud
             }
         }
-    }
-
-    public void slowDown() {
-        Vector2 current = body.getLinearVelocity();
-        float length = current.len();
-
-        // et lõpmatult aeglustama ei jääks
-        if (length < 0.1)
-            body.setLinearVelocity(0, 0);
-        else
-            movementVector.add(current.cpy().scl(-1).setLength((length > 1 ? 1 : length)));
     }
 
     public void movementVector(Vector2 vector) {
@@ -539,8 +542,8 @@ public class Player extends Sprite implements Hittable {
     }
 
     public boolean isVisible(Vector2 position) {
-        float halfWidth = GameInfo.CAM_SCALING/*GameInfo.SCALING*/ * 2 * GameInfo.WIDTH * 0.5f;
-        float halfHeight = GameInfo.CAM_SCALING/*GameInfo.SCALING*/ * 2 * GameInfo.HEIGHT * 0.5f;
+        float halfWidth = GameInfo.CAM_SCALING * GameInfo.WIDTH * 0.5f;
+        float halfHeight = GameInfo.CAM_SCALING * GameInfo.HEIGHT * 0.5f;
 
         return position.x > cameraPos.x - halfWidth &&
                 position.x < cameraPos.x + halfWidth &&
