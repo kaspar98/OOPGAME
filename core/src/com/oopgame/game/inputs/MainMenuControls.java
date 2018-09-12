@@ -1,5 +1,7 @@
 package com.oopgame.game.inputs;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 
 import scenes.MainMenuScreen;
@@ -13,13 +15,16 @@ public class MainMenuControls implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        screen.proceed();
-
         return false;
     }
 
     @Override
     public boolean keyUp(int keycode) {
+        if (Input.Keys.ESCAPE == keycode)
+            Gdx.app.exit();
+        else
+            screen.proceed();
+
         return false;
     }
 
@@ -30,13 +35,13 @@ public class MainMenuControls implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        screen.proceed();
-
         return false;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        screen.proceed();
+
         return false;
     }
 
