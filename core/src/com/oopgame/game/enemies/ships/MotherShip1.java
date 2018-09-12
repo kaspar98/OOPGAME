@@ -14,6 +14,8 @@ import com.oopgame.game.GibsManager;
 import com.oopgame.game.Time;
 import com.oopgame.game.enemies.EnemyManager;
 import com.oopgame.game.enemies.ai.EnemyAI;
+import com.oopgame.game.guns.Gun;
+import com.oopgame.game.guns.LaserGun;
 import com.oopgame.game.guns.damagers.Damager;
 import com.oopgame.game.guns.damagers.DamagerManager;
 import com.oopgame.game.ui.UIManager;
@@ -26,10 +28,15 @@ import helpers.GameInfo;
 
 public class MotherShip1 extends Sprite implements EnemyCarrier {
     public static String keyType = "motherShip1";
+    private static int points = 100;
 
-    private Vector2 pos = new Vector2();
+    private Vector2 spawnPos = new Vector2();
+
+    private Vector2 pos;
     private Body body;
     private Fixture fixture;
+
+    private float topSpeed = GameInfo.PLAYER_MAXSPEED;
 
     private EnemyManager enemyManager;
     private UIManager uiManager;
@@ -39,10 +46,14 @@ public class MotherShip1 extends Sprite implements EnemyCarrier {
     private UIMarker uiMarker;
 
     private EnemyAI ai;
+    private String state = "spawning";
+    private boolean doneSpawning = false;
 
-    private static float maxHealth = 200;
+    private LaserGun laserGun;
+
+    private static float maxHealth = 300;
     private float health = maxHealth;
-    private static float maxShield = 100;
+    private static float maxShield = 200;
     private float shield = maxShield;
 
     private Integer faction = 1;
@@ -56,9 +67,13 @@ public class MotherShip1 extends Sprite implements EnemyCarrier {
     private long timeNextSpawn;
     private int[] enemies = new int[1];
 
+    private Vector2 enemySpawnPos = new Vector2();
+
     private Vector2 movementVector = new Vector2();
-    private static float turnModifier = 100f;
+    private static float turnModifier = 5f;
     private static int maxSpeed = 40;
+
+    private Vector2 spareVector = new Vector2();
 
     public MotherShip1(float x, float y, float angle, World world,
                        Time time, int millisSpawnInterval,
@@ -66,7 +81,7 @@ public class MotherShip1 extends Sprite implements EnemyCarrier {
                        List<Sprite> graphics, BodyDef bodyDef, FixtureDef fixtureDef,
                        EnemyManager enemyManager, UIManager uiManager,
                        DamagerManager damagerManager, VisualEffectsManager vfxManager,
-                       GibsManager gibsManager) {
+                       GibsManager gibsManager, EnemyAI ai) {
         super(graphics.get(0));
 
         this.time = time;
@@ -84,20 +99,26 @@ public class MotherShip1 extends Sprite implements EnemyCarrier {
         fixture = body.createFixture(fixtureDef);
         fixture.setSensor(true);
         fixture.setUserData(this);
+
+        this.laserGun = new LaserGun(damagerManager, body.getPosition(), faction);
     }
 
     public void reconfigure(float x, float y, float angle, EnemyAI ai,
                             int millisSpawnInterval,
                             int fastShips) {
-        this.pos.set(x, y);
-        body.setTransform(x, y, angle);
 
-        /*this.ai = ai;*/
+        spawnPos.set(x, y);
+
+        body.setTransform(x, y, angle * MathUtils.degreesToRadians);
+        this.pos = body.getPosition();
+
+        this.ai = ai;
 
         this.millisSpawnInterval = millisSpawnInterval;
         this.timeNextSpawn = time.getTime() + millisSpawnInterval;
 
         enemies[0] = fastShips;
+        doneSpawning = false;
 
         if (uiMarker != null) {
             uiMarker.disable();
@@ -105,10 +126,19 @@ public class MotherShip1 extends Sprite implements EnemyCarrier {
         }
 
         uiMarker = uiManager.addMarker(body.getPosition());
+
+        state = "spawning";
     }
 
     @Override
     public void update() {
+        spareVector.set(body.getLinearVelocity());
+
+        if (spareVector.len() > topSpeed)
+            body.setLinearVelocity(spareVector.setLength(topSpeed));
+
+        laserGun.update();
+
         setCenter(body.getPosition().x, body.getPosition().y);
         setRotation(MathUtils.radiansToDegrees * body.getAngle());
 
@@ -116,14 +146,21 @@ public class MotherShip1 extends Sprite implements EnemyCarrier {
 
         boolean enemySpawned = false;
 
-        if (time > timeNextSpawn) {
+        if (time > timeNextSpawn && !doneSpawning) {
             if (enemies[0] > 0) {
-                vfxManager.addBloom(2, pos.x, pos.y, 10,
+                float spawnAngle = body.getAngle() * MathUtils.radiansToDegrees +
+                        (MathUtils.random() >= 0.5f ? 90 : -90);
+                enemySpawnPos
+                        .set(getWidth() * 0.5f * GameInfo.SCALING, 0)
+                        .setAngle(spawnAngle)
+                        .add(pos);
+
+
+                vfxManager.addBloom(2, enemySpawnPos.x, enemySpawnPos.y, 10,
                         Color.WHITE, 10, 0.5f, 0.5f, 0,
                         0, 0);
 
-                enemyManager.addFastShip(pos.x, pos.y,
-                        body.getAngle() * MathUtils.radiansToDegrees);
+                enemyManager.addFastShip(enemySpawnPos.x, enemySpawnPos.y, spawnAngle);
 
                 enemies[0]--;
                 enemySpawned = true;
@@ -131,7 +168,13 @@ public class MotherShip1 extends Sprite implements EnemyCarrier {
 
             if (enemySpawned)
                 timeNextSpawn = time + millisSpawnInterval;
+            else {
+                state = "started";
+                doneSpawning = true;
+            }
         }
+
+        state = ai.getCommands(this, state);
 
         if (damaged && time > timeDamagedExpire) {
             setColor(Color.WHITE);
@@ -150,13 +193,27 @@ public class MotherShip1 extends Sprite implements EnemyCarrier {
     }
 
     @Override
+    public void turnTowards(float targetAngle) {
+        float current = body.getAngle() * MathUtils.radiansToDegrees;
+
+        float difference = targetAngle - current;
+
+        if (difference > 180)
+            difference -= 360;
+        else if (difference < -180)
+            difference += 360;
+
+        body.setAngularVelocity(MathUtils.degreesToRadians * turnModifier * difference);
+    }
+
+    @Override
     public void slowDown() {
 
     }
 
     @Override
     public void shoot(float angle) {
-
+        laserGun.shoot(angle, body.getLinearVelocity());
     }
 
     @Override
@@ -170,10 +227,12 @@ public class MotherShip1 extends Sprite implements EnemyCarrier {
     }
 
     @Override
-    public void killGraphics() {
+    public void deathGraphics() {
+        gibsManager.createGibs(keyType, pos.x, pos.y, body.getLinearVelocity());
+
         vfxManager.addExplosion(
                 2, pos.x, pos.y,
-                2, Color.WHITE);
+                4, Color.WHITE);
     }
 
     @Override
@@ -195,6 +254,28 @@ public class MotherShip1 extends Sprite implements EnemyCarrier {
 
         body.setActive(true);
         setAlpha(1);
+
+        laserGun.resetAmmo();
+    }
+
+    @Override
+    public int getPoints() {
+        return points;
+    }
+
+    @Override
+    public Vector2 getSpawnPos() {
+        return spawnPos;
+    }
+
+    @Override
+    public Gun getGun() {
+        return laserGun;
+    }
+
+    @Override
+    public float getMaxSpeed() {
+        return maxSpeed;
     }
 
     @Override
