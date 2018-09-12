@@ -9,6 +9,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.oopgame.game.enemies.ships.FastShip;
+import com.oopgame.game.enemies.ships.MotherShip1;
 
 import helpers.GameInfo;
 
@@ -40,6 +41,23 @@ public class GibsManager {
             sprite.setSize(
                     sprite.getWidth() * GameInfo.SCALING,
                     sprite.getHeight() * GameInfo.SCALING);
+
+            appearances.get(key).add(sprite);
+        }
+
+        key = "enemy_alien_fighter_1";
+
+        if (!appearances.containsKey(key))
+            appearances.put(key, new Array<Sprite>());
+
+        for (int i = 1; i < 9; i++) {
+            Sprite sprite = new Sprite(
+                    new Texture(Gdx.files.internal(
+                            "ships/" + key + "_gibs_" + i + "_t.png")));
+
+            sprite.setSize(
+                    sprite.getWidth() * GameInfo.SCALING * 2,
+                    sprite.getHeight() * GameInfo.SCALING * 2);
 
             appearances.get(key).add(sprite);
         }
@@ -89,6 +107,8 @@ public class GibsManager {
     public void createGibs(String key, float x, float y, Vector2 vektor) {
         if (FastShip.keyType.equals(key)) {
             key = "enemy_alien_fighter_1b";
+        } else if (MotherShip1.keyType.equals(key)) {
+            key = "enemy_alien_fighter_1";
         }
 
         if (dead.get(key).size == 0) {
