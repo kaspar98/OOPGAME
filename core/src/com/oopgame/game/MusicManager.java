@@ -9,8 +9,8 @@ public class MusicManager {
     private Music musicA;
     private Music musicB;
 
-    private float actionDistance = GameInfo.CAM_SCALING * GameInfo.OUTER_RADIUS;
-    private float calmDistance = actionDistance * 3;
+    private static float actionDistance = GameInfo.CAM_SCALING * GameInfo.OUTER_RADIUS;
+    private static float calmDistance = actionDistance * 2;
     private float targetVolume = 0;
     // kui palju heli tugevust muuta sekundis;
     private float fadeTime = 1f;
@@ -83,5 +83,9 @@ public class MusicManager {
     public void dispose() {
         musicA.dispose();
         musicB.dispose();
+    }
+
+    public float getCalmDistance() {
+        return calmDistance;
     }
 }
