@@ -11,25 +11,33 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.oopgame.game.FontManager;
 import com.oopgame.game.Player;
 import com.oopgame.game.guns.Gun;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import helpers.GameInfo;
 
 public class UIManager {
+    private List<Disposable> disposables = new ArrayList<Disposable>();
+
     private SpriteBatch batch;
     private OrthographicCamera camera;
     private Stage stage;
 
     private Player player;
 
-    private Sprite compass;
-    private Sprite compass_marker_appearance;
+    private Map<String, Sprite> graphics = new HashMap<String, Sprite>();
+
+    private Vector2 compassPos = new Vector2(GameInfo.WIDTH * 0.5f, GameInfo.HEIGHT * 0.5f);
+    private Image compass;
     private Array<UIMarker> compass_markers = new Array<UIMarker>();
 
     private float dx = 105 * GameInfo.CAM_SCALING;
@@ -43,6 +51,7 @@ public class UIManager {
 
     private Image screenOverlay = new Image(new Sprite(new Texture(
             Gdx.files.internal("ui/screenOverlay.jpg"))));
+    private Label pausedLabel;
 
     private List<GunInfoButton> gunButtons = new ArrayList<GunInfoButton>();
 
@@ -53,23 +62,22 @@ public class UIManager {
         this.stage = stage;
         this.player = player;
 
+        String key;
+        Sprite sprite;
+
         // compassi elemendi loomine
-        compass = new Sprite(new Texture("ui1_compass2_t.png"));
-        compass.setSize(
-                compass.getWidth() * GameInfo.CAM_SCALING,
-                compass.getHeight() * GameInfo.CAM_SCALING);
+        key = "compass";
+        graphics.put(key, new Sprite(new Texture("ui1_compass2_t.png")));
+        compass = new Image(graphics.get(key));
+        compass.setPosition(compassPos.x, compassPos.y, Align.center);
+        stage.addActor(compass);
 
         // compassil olevate markerite tekstuuri lugemine
-        compass_marker_appearance = new Sprite(
-                new Texture(Gdx.files.internal("ui1_compass_marker2_t.png")));
-
-        compass_marker_appearance.setSize(
-                compass_marker_appearance.getWidth() * GameInfo.CAM_SCALING,
-                compass_marker_appearance.getHeight() * GameInfo.CAM_SCALING);
-
-        compass_marker_appearance.setOrigin(
-                compass_marker_appearance.getWidth(),
-                compass_marker_appearance.getHeight() * 0.5f);
+        key = "compassMarker";
+        sprite = new Sprite(new Texture(
+                Gdx.files.internal("ui1_compass_marker2_t.png")));
+        sprite.setOrigin(sprite.getWidth() * 0.5f, sprite.getHeight() * 0.5f);
+        graphics.put(key, sprite);
 
         // health bari loomine
         health = new UIBar(new Texture("ui1_health2a_t.png"),
@@ -100,9 +108,23 @@ public class UIManager {
 
         stage.addActor(screenOverlay);
 
+        Label.LabelStyle style = new Label.LabelStyle(
+                fontManager.getFont("main"), Color.WHITE);
+        pausedLabel = new Label("paused", style);
+        pausedLabel.setPosition(0, 0, Align.topRight);
+        stage.addActor(pausedLabel);
+
         int count;
         Gun[] guns = player.getGunList().getGuns();
         if ((count = guns.length) > 0) {
+            Sprite back = new Sprite(new Texture(
+                    Gdx.files.internal("ui/gunButtons/gunButtonBack.png")));
+            Sprite frame = new Sprite(new Texture(
+                    Gdx.files.internal("ui/gunButtons/gunButtonFrame.png")));
+
+            disposables.add(back.getTexture());
+            disposables.add(frame.getTexture());
+
             FreeTypeFontGenerator.FreeTypeFontParameter parameter =
                     new FreeTypeFontGenerator.FreeTypeFontParameter();
 
@@ -127,7 +149,7 @@ public class UIManager {
                 Gun gun = guns[i];
 
                 GunInfoButton button = new GunInfoButton(i + 1, gun, stage,
-                        usableStyle, selectedStyle, emptyStyle);
+                        usableStyle, selectedStyle, emptyStyle, frame, back);
 
                 gunButtons.add(button);
 
@@ -148,10 +170,6 @@ public class UIManager {
     }
 
     public void update() {
-        compass.setCenter(
-                camera.position.x,
-                camera.position.y);
-
         for (UIMarker marker : compass_markers)
             marker.update();
 
@@ -172,22 +190,25 @@ public class UIManager {
         shield_back.draw(batch);
         health.draw(batch);
         shield.draw(batch);
-        compass.draw(batch);
-        for (UIMarker marker : compass_markers)
-            marker.draw(batch);
+        /*compass.draw(batch);*/
     }
 
     public void placeOverlay(float r, float g, float b, float a) {
         screenOverlay.setColor(r, g, b, a);
+        pausedLabel.setPosition(GameInfo.WIDTH * 0.5f, GameInfo.HEIGHT * 0.5f, Align.center);
     }
 
     public void removeOverlay() {
         placeOverlay(0, 0, 0, 0);
+        pausedLabel.setPosition(0, 0, Align.topRight);
     }
 
     public void dispose() {
-        compass.getTexture().dispose();
-        compass_marker_appearance.getTexture().dispose();
+        for (Sprite sprite : graphics.values())
+            sprite.getTexture().dispose();
+
+        for (Disposable disposable : disposables)
+            disposable.dispose();
 
         health.getTexture().dispose();
         shield.getTexture().dispose();
@@ -199,19 +220,16 @@ public class UIManager {
     }
 
     public UIMarker addMarker(Vector2 point) {
-        UIMarker marker;
-
-        marker = new UIMarker(
-                compass_marker_appearance,
-                camera, compass.getWidth() * 0.5f,
-                point, this);
+        UIMarker marker = new UIMarker(compassPos, compass.getWidth() * 0.5f,
+                camera, point, graphics.get("compassMarker"), this);
 
         compass_markers.add(marker);
+        stage.addActor(marker);
 
         return marker;
     }
 
-    public void removeMarker(UIMarker uiMarker) {
-        compass_markers.removeValue(uiMarker, false);
+    public void removeMarker(UIMarker marker) {
+        compass_markers.removeValue(marker, false);
     }
 }
