@@ -14,7 +14,7 @@ import helpers.GameInfo;
 public class MainMenuBackground {
     private static float maxRadius = GameInfo.WIDTH;
 
-    private static Sprite sprite = new Sprite(new Texture(
+    private Sprite sprite = new Sprite(new Texture(
             Gdx.files.internal("bgl_motiondust_1_t.png")));
 
     private Vector2 center = new Vector2(GameInfo.WIDTH * 0.5f, GameInfo.HEIGHT * 0.5f);
