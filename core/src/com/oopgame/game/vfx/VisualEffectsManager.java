@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.oopgame.game.ExplosionManager;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -31,9 +32,13 @@ public class VisualEffectsManager implements VisualEffectKeeper {
 
     private int frame = 0;
 
-    public VisualEffectsManager(SpriteBatch batch, World world) {
+    private ExplosionManager explosionManager;
+
+    public VisualEffectsManager(SpriteBatch batch, World world,
+                                ExplosionManager explosionManager) {
         this.batch = batch;
         this.world = world;
+        this.explosionManager = explosionManager;
 
         // basic physics bodyDef, kui mingi efekt seda vajama peaks
         bodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -70,7 +75,9 @@ public class VisualEffectsManager implements VisualEffectKeeper {
     }
 
     public void addExplosion(int layer, float x, float y, float scale, Color color) {
-        addBloom(layer, x, y, scale * 10,
+        explosionManager.addExplosion(x, y, scale * 0.5f);
+
+        addBloom(layer, x, y, scale * 12,
                 color, 10,
                 1, 0.6f, 0,
                 0, 0);
