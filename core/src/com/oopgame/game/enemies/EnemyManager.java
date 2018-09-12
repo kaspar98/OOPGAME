@@ -1,23 +1,24 @@
 package com.oopgame.game.enemies;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.oopgame.game.GibsManager;
+import com.oopgame.game.MusicManager;
 import com.oopgame.game.Player;
 import com.oopgame.game.Time;
+import com.oopgame.game.WaveManager;
 import com.oopgame.game.enemies.ai.EnemyAI;
-import com.oopgame.game.enemies.ai.RegularEnemy;
+import com.oopgame.game.enemies.ai.MotherShipAI;
+import com.oopgame.game.enemies.ai.RegularEnemyAI;
 import com.oopgame.game.enemies.ships.EnemyShip;
 import com.oopgame.game.enemies.ships.FastShip;
 import com.oopgame.game.enemies.ships.MotherShip1;
@@ -46,6 +47,8 @@ public class EnemyManager {
     private DamagerManager damagerManager;
     private VisualEffectsManager vfxManager;
     private GibsManager gibsManager;
+    private WaveManager waveManager;
+    private MusicManager musicManager;
 
     // sprite'ide hoidmiseks
     private Map<String, List<Sprite>> spriteMap = new HashMap<String, List<Sprite>>();
@@ -69,10 +72,15 @@ public class EnemyManager {
     private Deque<EnemyPlacer> toDeactivatePlacers = new LinkedList<EnemyPlacer>();
     private Deque<EnemyPlacer> placersPool = new LinkedList<EnemyPlacer>();
 
+    private Vector2 spareVector = new Vector2();
+
+    private int enemyCounter = 0;
+
 
     public EnemyManager(SpriteBatch batch, World world, Time time, Player player,
                         UIManager uiManager, DamagerManager damagerManager,
-                        VisualEffectsManager vfxManager, GibsManager gibsManager) {
+                        VisualEffectsManager vfxManager, GibsManager gibsManager,
+                        WaveManager waveManager, MusicManager musicManager) {
         this.batch = batch;
         this.world = world;
         this.time = time;
@@ -82,8 +90,16 @@ public class EnemyManager {
         this.damagerManager = damagerManager;
         this.vfxManager = vfxManager;
         this.gibsManager = gibsManager;
+        this.waveManager = waveManager;
+        this.musicManager = musicManager;
 
-        aiMap.put(RegularEnemy.keyType, new RegularEnemy(player));
+        EnemyAI ai = new RegularEnemyAI(player);
+        ai.setPaused(false);
+        aiMap.put(RegularEnemyAI.keyType, ai);
+
+        ai = new MotherShipAI(player);
+        ai.setPaused(false);
+        aiMap.put(MotherShipAI.keyType, ai);
     }
 
     public void update() {
@@ -98,7 +114,7 @@ public class EnemyManager {
 
             String key = ship.getKeyType();
 
-            ship.killGraphics();
+            ship.deathGraphics();
             ship.deactivate();
 
             if (!shipPools.containsKey(key))
@@ -107,11 +123,24 @@ public class EnemyManager {
             shipPools.get(key).add(ship);
         }
 
-        for (EnemyShip ship = toAdd.poll(); ship != null; ship = toAdd.poll())
-            aliveShips.add(ship);
+        for (EnemyShip ship = toAdd.poll(); ship != null; ship = toAdd.poll()) {
+            enemyCounter++;
 
-        for (EnemyShip ship : aliveShips)
+            aliveShips.add(ship);
+        }
+
+        float closest = musicManager.getCalmDistance();
+
+        for (EnemyShip ship : aliveShips) {
             ship.update();
+
+            float distance = spareVector.set(ship.getBody().getPosition()).sub(playerPos).len();
+
+            if (distance < closest)
+                closest = distance;
+        }
+
+        musicManager.setClosestEnemyDistance(closest);
 
         for (EnemyPlacer placer : placersAlive)
             placer.update();
@@ -131,17 +160,17 @@ public class EnemyManager {
             shape.dispose();
     }
 
-    public void addEnemyPlacer(float x, float y, float angle, String carrierKey,
+    public void addEnemyPlacer(float x, float y, String carrierKey,
                                int millisTillSpawn, int millisSpawnInterval,
                                int fastEnemies) {
         EnemyPlacer placer = placersPool.poll();
 
         if (placer != null)
-            placer.reconfigure(x, y, angle, carrierKey,
+            placer.reconfigure(x, y, playerPos, carrierKey,
                     millisTillSpawn, millisSpawnInterval,
                     fastEnemies);
         else
-            placer = new EnemyPlacer(x, y, angle, carrierKey,
+            placer = new EnemyPlacer(x, y, playerPos, carrierKey,
                     time, millisTillSpawn, millisSpawnInterval,
                     fastEnemies,
                     this, vfxManager);
@@ -194,15 +223,16 @@ public class EnemyManager {
 
         if (ship != null) {
             carrier = (MotherShip1) ship;
-            carrier.reconfigure(x, y, angle, null, millisSpawnInterval,
-                    fastShips);
+            carrier.reconfigure(x, y, angle, aiMap.get(MotherShipAI.keyType),
+                    millisSpawnInterval, fastShips);
             carrier.reset();
         } else {
             carrier = new MotherShip1(x, y, angle, world,
                     time, millisSpawnInterval,
                     fastShips,
                     spriteMap.get(key), bodyDefMap.get(key), fixtureDefMap.get(key),
-                    this, uiManager, damagerManager, vfxManager, gibsManager);
+                    this, uiManager, damagerManager, vfxManager, gibsManager,
+                    aiMap.get(MotherShipAI.keyType));
         }
 
         toAdd.add(carrier);
@@ -261,10 +291,6 @@ public class EnemyManager {
         toAdd.add(fastShip);
     }
 
-    public Vector2 posNearPlayer(float radius) {
-        return posNearPlayer(radius, new Vector2());
-    }
-
     public Vector2 posNearPlayer(float radius, Vector2 vector) {
         return vector.set(1, 0).setLength(radius)
                 .setAngle(MathUtils.random(360))
@@ -279,10 +305,17 @@ public class EnemyManager {
     }
 
     public void poolEnemyShip(EnemyShip ship) {
+        enemyCounter--;
+        waveManager.enemyKilled(ship);
+
         toDeactivate.add(ship);
     }
 
     public void poolEnemyPlacer(EnemyPlacer enemyPlacer) {
         toDeactivatePlacers.add(enemyPlacer);
+    }
+
+    public int getEnemyCount() {
+        return enemyCounter + placersAlive.size();
     }
 }
