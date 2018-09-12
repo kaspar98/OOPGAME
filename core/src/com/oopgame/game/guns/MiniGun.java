@@ -1,5 +1,6 @@
 package com.oopgame.game.guns;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.oopgame.game.guns.damagers.DamagerManager;
@@ -49,12 +50,13 @@ public class MiniGun implements Gun {
 
         if (ammo < maxAmmo && nextAmmo < time) {
             ammo++;
-            nextAmmo = time + interval * 2;
+            int dynInterval = MathUtils.round(interval * (maxAmmo / (float) ammo));
+            nextAmmo = time + (dynInterval > interval * 10 ? interval * 10 : dynInterval);
         }
     }
 
     @Override
-    public boolean shoot(float angle) {
+    public boolean shoot(float angle, Vector2 force) {
         // TODO: äkki annab aja pollimist veel optimiseerida
         long time = TimeUtils.millis();
 
@@ -67,7 +69,7 @@ public class MiniGun implements Gun {
             nextShot = time + interval;
             nextAmmo = time + interval * 10;
 
-            damagerManager.shootMiniLaser(damage, faction, source, speed, angle);
+            damagerManager.shootMiniLaser(damage, faction, source, speed, angle, force);
 
             return true;
         }
@@ -96,12 +98,12 @@ public class MiniGun implements Gun {
     }
 
     @Override
-    public int ammoLeft() {
+    public int getAmmoLeft() {
         return ammo;
     }
 
     @Override
-    public int maxAmmo() {
+    public int getMaxAmmo() {
         return maxAmmo;
     }
 
