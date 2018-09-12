@@ -14,6 +14,7 @@ import com.oopgame.game.GibsManager;
 import com.oopgame.game.Time;
 import com.oopgame.game.enemies.EnemyManager;
 import com.oopgame.game.enemies.ai.EnemyAI;
+import com.oopgame.game.guns.Gun;
 import com.oopgame.game.guns.LaserGun;
 import com.oopgame.game.guns.damagers.Damager;
 import com.oopgame.game.guns.damagers.DamagerManager;
@@ -27,9 +28,14 @@ import helpers.GameInfo;
 
 public class FastShip extends Sprite implements EnemyShip {
     public static String keyType = "fastShip";
+    private static int points = 10;
+
+    private Vector2 spawnPos = new Vector2();
 
     private Body body;
     private Fixture fixture;
+
+    private float topSpeed = 25;
 
     private EnemyManager enemyManager;
     private UIManager uiManager;
@@ -39,6 +45,7 @@ public class FastShip extends Sprite implements EnemyShip {
     private UIMarker uiMarker;
 
     private EnemyAI ai;
+    private String state = "started";
 
     private LaserGun laserGun;
 
@@ -55,8 +62,10 @@ public class FastShip extends Sprite implements EnemyShip {
     private long timeDamagedExpire;
 
     private Vector2 movementVector = new Vector2();
-    private static float turnModifier = 100f;
+    private static float turnModifier = 5f;
     private static int maxSpeed = 40;
+
+    private Vector2 spareVector = new Vector2();
 
     public FastShip(float x, float y, float angle, World world, Time time,
                     List<Sprite> graphics, BodyDef bodyDef, FixtureDef fixtureDef,
@@ -85,7 +94,10 @@ public class FastShip extends Sprite implements EnemyShip {
     }
 
     public void reconfigure(float x, float y, float angle, EnemyAI ai) {
-        body.setTransform(x, y, angle);
+        spawnPos.set(x, y);
+
+        body.setTransform(x, y, MathUtils.degreesToRadians * angle);
+
         this.ai = ai;
 
         if (uiMarker != null) {
@@ -97,15 +109,22 @@ public class FastShip extends Sprite implements EnemyShip {
     }
 
     public void update() {
+        spareVector.set(body.getLinearVelocity());
+
+        if (spareVector.len() > topSpeed)
+            body.setLinearVelocity(spareVector.setLength(topSpeed));
+
+        laserGun.update();
+
         setCenter(body.getPosition().x, body.getPosition().y);
         setRotation(MathUtils.radiansToDegrees * body.getAngle());
 
         long time = this.time.getTime();
 
         // siin peaks AI küsitlus toimuma
-        ai.getCommands(this);
+        state = ai.getCommands(this, state);
 
-        handleMovement();
+        /*handleMovement();*/
 
         if (damaged && time > timeDamagedExpire) {
             setColor(Color.WHITE);
@@ -120,7 +139,48 @@ public class FastShip extends Sprite implements EnemyShip {
 
     @Override
     public void movement(Vector2 movementVector) {
-        this.movementVector.add(movementVector);
+        /*this.movementVector.add(movementVector);*/
+
+        spareVector.set(movementVector);
+
+        if (spareVector.len() > topSpeed)
+            spareVector.setLength(topSpeed);
+
+        body.applyForceToCenter(spareVector, true);
+
+        turnTowards(spareVector.angle());
+    }
+
+    public void turnTowards(float targetAngle) {
+        float current = body.getAngle() * MathUtils.radiansToDegrees;
+
+        if (current - 1 <= targetAngle && targetAngle <= current + 1)
+            body.setAngularVelocity(0);
+
+        float difference = targetAngle - current;
+
+        if (difference > 180)
+            difference -= 360;
+        else if (difference < -180)
+            difference += 360;
+
+        body.setAngularVelocity(MathUtils.degreesToRadians * turnModifier * difference);
+    }
+
+    @Override
+    public void slowDown() {
+        Vector2 current = body.getLinearVelocity();
+        float length = current.len();
+
+        // et lõpmatult aeglustama ei jääks
+        if (length < 0.1)
+            body.setLinearVelocity(0, 0);
+        else {
+            movement(spareVector.set(current).scl(-1).setLength(GameInfo.FORCE_MULTIPLIER * 0.25f));
+            /*movementVector.add(current.cpy().scl(-1).setLength((length > 1 ? 1 : length)));*/
+            /*movement(spareVector.set(current).setLength(maxSpeed).scl(-1));*/
+            /*movement(spareVector.set(current).scl(-5));*/
+        }
     }
 
     private void handleMovement() {
@@ -174,20 +234,8 @@ public class FastShip extends Sprite implements EnemyShip {
     }
 
     @Override
-    public void slowDown() {
-        Vector2 current = body.getLinearVelocity();
-        float length = current.len();
-
-        // et lõpmatult aeglustama ei jääks
-        if (length < 0.1)
-            body.setLinearVelocity(0, 0);
-        else
-            movementVector.add(current.cpy().scl(-2).setLength((length > 1 ? 1 : length)));
-    }
-
-    @Override
     public void shoot(float angle) {
-        laserGun.shoot(angle);
+        laserGun.shoot(angle, body.getLinearVelocity());
     }
 
     @Override
@@ -201,7 +249,7 @@ public class FastShip extends Sprite implements EnemyShip {
     }
 
     @Override
-    public void killGraphics() {
+    public void deathGraphics() {
         Vector2 pos = body.getPosition();
         float x = pos.x;
         float y = pos.y;
@@ -232,6 +280,26 @@ public class FastShip extends Sprite implements EnemyShip {
         setAlpha(1);
 
         laserGun.resetAmmo();
+    }
+
+    @Override
+    public int getPoints() {
+        return points;
+    }
+
+    @Override
+    public Vector2 getSpawnPos() {
+        return spawnPos;
+    }
+
+    @Override
+    public Gun getGun() {
+        return laserGun;
+    }
+
+    @Override
+    public float getMaxSpeed() {
+        return maxSpeed;
     }
 
     @Override
