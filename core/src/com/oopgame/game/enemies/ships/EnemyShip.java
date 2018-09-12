@@ -4,11 +4,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.oopgame.game.Hittable;
+import com.oopgame.game.guns.Gun;
 
 public interface EnemyShip extends Hittable {
     void update();
 
     void draw(SpriteBatch batch);
+
+    void turnTowards(float targetAngle);
 
     // see meetod tuleks asendada äkki kahe eraldi meetodiga:
     // ühega saab määrata boosteri powerit ja teisega saab määrata liikumise suunda
@@ -22,9 +25,17 @@ public interface EnemyShip extends Hittable {
 
     String getKeyType();
 
-    void killGraphics();
+    void deathGraphics();
 
     void deactivate();
 
     void reset();
+
+    int getPoints();
+
+    Vector2 getSpawnPos();
+
+    Gun getGun();
+
+    float getMaxSpeed();
 }
