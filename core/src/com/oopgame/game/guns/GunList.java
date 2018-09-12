@@ -1,5 +1,7 @@
 package com.oopgame.game.guns;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Vector2;
 import com.oopgame.game.guns.damagers.DamagerManager;
 
@@ -18,6 +20,8 @@ public class GunList {
     private Gun[] guns = new Gun[2];
     private int selected = 0;
 
+    Sound sound = Gdx.audio.newSound(Gdx.files.internal("lask.wav"));
+
     public GunList(DamagerManager damagerManager, Vector2 source, Integer faction) {
         guns[0] = new LaserGun(damagerManager, source, faction);
         guns[1] = new MiniGun(damagerManager, source, faction);
@@ -31,13 +35,18 @@ public class GunList {
             gun.update();
     }
 
-    public boolean shoot(float angle) {
-        return guns[selected].shoot(angle);
+    public boolean shoot(float angle, Vector2 force) {
+        boolean state = guns[selected].shoot(angle, force);
+
+        if (state)
+            sound.play(0.35f);
+
+        return state;
     }
 
     public void selectGun(int index) {
         if (index >= 0 && index < guns.length &&
-                guns[index] != null && guns[index].ammoLeft() != 0) {
+                guns[index] != null && guns[index].getAmmoLeft() != 0) {
             guns[selected].setSelected(false);
             selected = index;
             guns[selected].setSelected(true);
@@ -49,7 +58,7 @@ public class GunList {
             if (next >= guns.length)
                 next = 0;
 
-            if (guns[next].ammoLeft() != 0) {
+            if (guns[next].getAmmoLeft() != 0) {
                 selectGun(next);
                 break;
             }
@@ -61,7 +70,7 @@ public class GunList {
             if (previous < 0)
                 previous = guns.length - 1;
 
-            if (guns[previous].ammoLeft() != 0) {
+            if (guns[previous].getAmmoLeft() != 0) {
                 selectGun(previous);
                 break;
             }
@@ -79,5 +88,9 @@ public class GunList {
     public void resetAmmo() {
         for (Gun gun : guns)
             gun.resetAmmo();
+    }
+
+    public void dispose() {
+        sound.dispose();
     }
 }
