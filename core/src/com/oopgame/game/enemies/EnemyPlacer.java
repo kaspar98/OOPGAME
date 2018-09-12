@@ -11,7 +11,7 @@ import helpers.GameInfo;
 
 public class EnemyPlacer {
     private Vector2 pos = new Vector2();
-    private float angle;
+    private Vector2 playerPos;
 
     private Time time;
     private long spawnTime;
@@ -25,7 +25,8 @@ public class EnemyPlacer {
     private EnemyManager enemyManager;
     private VisualEffectsManager vfxManager;
 
-    public EnemyPlacer(float x, float y, float angle, String carrierKey,
+
+    public EnemyPlacer(float x, float y, Vector2 playerPos, String carrierKey,
                        Time time, int millisTillSpawn, int millisSpawnInterval,
                        int fastEnemies,
                        EnemyManager enemyManager, VisualEffectsManager vfxManager) {
@@ -34,16 +35,16 @@ public class EnemyPlacer {
         this.enemyManager = enemyManager;
         this.vfxManager = vfxManager;
 
-        reconfigure(x, y, angle, carrierKey,
+        reconfigure(x, y, playerPos, carrierKey,
                 millisTillSpawn, millisSpawnInterval,
                 fastEnemies);
     }
 
-    public void reconfigure(float x, float y, float angle, String carrierKey,
+    public void reconfigure(float x, float y, Vector2 playerPos, String carrierKey,
                             int millisTillSpawn, int millisSpawnInterval,
                             int fastEnemies) {
         pos.set(x, y);
-        this.angle = angle;
+        this.playerPos = playerPos;
 
         this.carrierKey = carrierKey;
 
@@ -66,8 +67,9 @@ public class EnemyPlacer {
     public void update() {
         if (time.getTime() > spawnTime) {
             if (MotherShip1.keyType.equals(carrierKey))
-                enemyManager.addMotherShip1(pos.x, pos.y, angle, spawnInterval,
-                        enemyCounts[0]);
+                enemyManager.addMotherShip1(
+                        pos.x, pos.y, new Vector2().set(playerPos).sub(pos).angle(),
+                        spawnInterval, enemyCounts[0]);
 
             vfxManager.addBloom(2, pos.x, pos.y, 10,
                     Color.WHITE, 10, 0.5f, 0.5f, 0,
