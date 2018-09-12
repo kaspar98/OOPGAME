@@ -35,7 +35,7 @@ public class MiniLaser extends Sprite implements Damager {
     private Integer damage;
     private Integer faction;
 
-    private Vector2 movementVector;
+    private Vector2 spareVector = new Vector2();
 
     private boolean hit;
 
@@ -43,16 +43,12 @@ public class MiniLaser extends Sprite implements Damager {
     public MiniLaser(DamagerManager damagerManager, World world, List<Sprite> graphics, Time time,
                      Integer damage, Integer faction,
                      Vector2 source,
-                     Float speed, float angle,
+                     Float speed, float angle, Vector2 force,
                      BodyDef bodyDef, Shape shape) {
         super(graphics.get(0));
 
         this.damagerManager = damagerManager;
         this.time = time;
-        this.damage = damage;
-        this.faction = faction;
-
-        // TODO: Äkki annab seda ka optimiseerida: delegeerib kõik eelneva body loomisele
 
         body = world.createBody(bodyDef);
         body.setUserData(this);
@@ -64,11 +60,24 @@ public class MiniLaser extends Sprite implements Damager {
 
         setOrigin(getWidth() * 0.5f, getHeight() * 0.5f);
 
-        setupLocation(source, speed, angle);
+        reconfigure(damage, faction, source, speed, angle, force);
+    }
+
+    public void reconfigure(Integer damage, Integer faction,
+                            Vector2 source, Float speed, float angle, Vector2 force) {
+        this.damage = damage;
+        this.faction = faction;
+
+        setupLocation(source, speed, angle, force);
+
+        body.setActive(true);
+        setAlpha(1);
 
         setFactionColor();
 
         setupTimers();
+
+        hit = false;
     }
 
     private void setupTimers() {
@@ -130,33 +139,22 @@ public class MiniLaser extends Sprite implements Damager {
         super.draw(batch);
     }
 
-    private void setupLocation(Vector2 source, Float speed, float angle) {
-        movementVector = new Vector2(speed, 0).setAngle(angle);
+    private void setupLocation(Vector2 source, Float speed, float angle, Vector2 force) {
+        spareVector.set(speed, 0).setAngle(angle);
 
-        body.setLinearVelocity(movementVector.cpy().scl(5));
+        body.setTransform(source, spareVector.angleRad());
+        setRotation(spareVector.angle());
 
-        setRotation(movementVector.angle());
-        body.setTransform(source, movementVector.angleRad());
+        spareVector.scl(5);
+
+        if (force != null)
+            spareVector.add(force);
+
+        body.setLinearVelocity(spareVector);
 
         bodyPos = body.getPosition();
 
         setCenter(bodyPos.x, bodyPos.y);
-    }
-
-    public void reset(Integer damage, Integer faction, Vector2 source, Float speed, float angle) {
-        this.damage = damage;
-        this.faction = faction;
-
-        setupLocation(source, speed, angle);
-
-        body.setActive(true);
-        setAlpha(1);
-
-        setFactionColor();
-
-        setupTimers();
-
-        hit = false;
     }
 
     public void deactivate() {
