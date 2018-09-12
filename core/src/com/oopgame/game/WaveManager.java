@@ -1,8 +1,6 @@
 package com.oopgame.game;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
@@ -10,24 +8,22 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import com.oopgame.game.enemies.EnemyManager;
+import com.oopgame.game.enemies.ships.EnemyShip;
 import com.oopgame.game.enemies.ships.MotherShip1;
 import com.oopgame.game.guns.damagers.DamagerManager;
-import com.oopgame.game.old.EnemyManagerOld;
 import com.oopgame.game.ui.UIManager;
 import com.oopgame.game.vfx.VisualEffectsManager;
 
 import helpers.GameInfo;
 
 public class WaveManager {
-    private EnemyManagerOld enemyManagerOld;
-
     private EnemyManager enemyManager;
 
     private Time time;
 
     private boolean waveActive = false;
     private long timeNextWave;
-    private long timeWaitWave = 5000;
+    private int timeWaitWave = 5000;
 
     private int waveNumber = 0;
     private int enemyAmount = 2;
@@ -37,6 +33,8 @@ public class WaveManager {
     private Label currentScore;
     private Label wave;
 
+    private Vector2 spareVector = new Vector2();
+
     public WaveManager(SpriteBatch batch, Player player, World world, Stage stage,
                        UIManager uiManager, DamagerManager damagerManager,
                        MusicManager musicManager, ExplosionManager explosionManager,
@@ -45,12 +43,8 @@ public class WaveManager {
         this.time = time;
         this.timeNextWave = time.getTime() + timeWaitWave;
 
-        enemyManagerOld = new EnemyManagerOld(batch, player, world,
-                uiManager, damagerManager, musicManager, explosionManager, gibsManager,
-                vfxManager);
-
         enemyManager = new EnemyManager(batch, world, time, player,
-                uiManager, damagerManager, vfxManager, gibsManager);
+                uiManager, damagerManager, vfxManager, gibsManager, this, musicManager);
 
 
         Label.LabelStyle style = new Label.LabelStyle(fontManager.getFont("main"),
@@ -64,15 +58,9 @@ public class WaveManager {
 
         stage.addActor(currentScore);
         stage.addActor(wave);
-        Gdx.input.setInputProcessor(stage);
     }
 
     public void update() {
-        // TODO: enemy count balance - kahe astmetena on veits op :D
-        enemyManagerOld.update();
-        score += enemyManagerOld.getNewPoints();
-        enemyManagerOld.resetPoints();
-
         enemyManager.update();
 
         long time = this.time.getTime();
@@ -80,19 +68,16 @@ public class WaveManager {
         if (!waveActive) {
             if (timeNextWave < time) {
                 waveActive = true;
-                score = score + waveNumber++;
-
-                for (int i = 0; i < enemyAmount; i++)
-                    enemyManagerOld.addEnemy();
+                score = score + (waveNumber++ * 100);
 
                 Vector2 spawnPoint = enemyManager.posNearPlayer(
-                        GameInfo.OUTER_RADIUS * GameInfo.SCALING);
+                        GameInfo.OUTER_RADIUS * GameInfo.SCALING,
+                        spareVector);
 
-                enemyManager.addEnemyPlacer(spawnPoint.x, spawnPoint.y, 0,
-                        MotherShip1.keyType,
-                        5000, 5000, 1);
+                enemyManager.addEnemyPlacer(spawnPoint.x, spawnPoint.y, MotherShip1.keyType,
+                        5000, 5000, enemyAmount);
             }
-        } else if (enemyManagerOld.getEnemyCount() == 0) {
+        } else if (enemyManager.getEnemyCount() == 0) {
             waveActive = false;
             timeNextWave = time + timeWaitWave;
 
@@ -101,8 +86,6 @@ public class WaveManager {
     }
 
     public void render() {
-        enemyManagerOld.render();
-
         enemyManager.render();
 
         currentScore.setPosition(10, GameInfo.HEIGHT - 40);
@@ -135,8 +118,10 @@ public class WaveManager {
     }
 
     public void dispose() {
-        enemyManagerOld.dispose();
-
         enemyManager.dispose();
+    }
+
+    public void enemyKilled(EnemyShip ship) {
+        score += ship.getPoints();
     }
 }
