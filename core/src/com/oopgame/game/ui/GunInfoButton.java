@@ -1,7 +1,5 @@
 package com.oopgame.game.ui;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -12,12 +10,7 @@ import com.oopgame.game.guns.Gun;
 import java.util.HashMap;
 
 public class GunInfoButton extends Image {
-    private static Sprite back = new Sprite(new Texture(
-            Gdx.files.internal("ui/gunButtons/gunButtonBack.png")));
-    private static Sprite frame = new Sprite(new Texture(
-            Gdx.files.internal("ui/gunButtons/gunButtonFrame.png")));
-
-    private Image backImage = new Image(back);
+    private Image backImage;
 
     private float x;
     private float y;
@@ -37,8 +30,11 @@ public class GunInfoButton extends Image {
     public GunInfoButton(int number, Gun gun, Stage stage,
                          Label.LabelStyle usableStyle,
                          Label.LabelStyle selectedStyle,
-                         Label.LabelStyle emptyStyle) {
+                         Label.LabelStyle emptyStyle,
+                         Sprite frame, Sprite back) {
         super(frame);
+
+        backImage = new Image(back);
 
         stage.addActor(backImage);
         backImage.setColor(0, 0, 0, 0.5f);
@@ -65,9 +61,9 @@ public class GunInfoButton extends Image {
 
         labels.put("number", new Label("" + number, usableStyle));
 
-        labels.put("ammo", new Label("" + gun.ammoLeft(), usableStyle));
+        labels.put("ammo", new Label("" + gun.getAmmoLeft(), usableStyle));
 
-        labels.put("ammoMax", new Label("/" + gun.maxAmmo(), usableStyle));
+        labels.put("ammoMax", new Label("/" + gun.getMaxAmmo(), usableStyle));
 
         for (Label label : labels.values())
             stage.addActor(label);
@@ -82,8 +78,8 @@ public class GunInfoButton extends Image {
         super.setPosition(x, y, Align.center);
         backImage.setPosition(x, y, Align.center);
 
-        float frameWidth = frame.getWidth();
-        float frameHeight = frame.getHeight();
+        float frameWidth = super.getWidth();
+        float frameHeight = super.getHeight();
 
         labels.get("name").setPosition(x + frameWidth * 0.425f, y, Align.bottomRight);
         labels.get("number").setPosition(x - frameWidth * 0.425f, y, Align.bottomLeft);
@@ -98,12 +94,12 @@ public class GunInfoButton extends Image {
     public void update() {
         selected = gun.isSelected();
 
-        int ammoLeft = gun.ammoLeft();
+        int ammoLeft = gun.getAmmoLeft();
         labels.get("ammo").setText("" + ammoLeft);
 
         Label.LabelStyle style = usableStyle;
 
-        if (gun.ammoLeft() == 0)
+        if (gun.getAmmoLeft() == 0)
             style = emptyStyle;
         else if (selected)
             style = selectedStyle;
@@ -112,10 +108,5 @@ public class GunInfoButton extends Image {
             label.setStyle(style);
 
         super.setColor(style.fontColor);
-    }
-
-    public void dispose() {
-        back.getTexture().dispose();
-        frame.getTexture().dispose();
     }
 }
