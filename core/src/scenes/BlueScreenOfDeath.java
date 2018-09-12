@@ -20,7 +20,7 @@ public class BlueScreenOfDeath implements Screen {
 
     private Viewport viewport;
 
-    private Sprite bsod;
+    private Sprite bsod = new Sprite(new Texture(Gdx.files.internal("bsod.png")));
 
     private int highscore;
 
@@ -35,7 +35,6 @@ public class BlueScreenOfDeath implements Screen {
         camera.setToOrtho(false, GameInfo.WIDTH, GameInfo.HEIGHT);
         viewport = new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT, camera);
 
-        bsod = new Sprite(new Texture(Gdx.files.internal("bsod.png")));
         bsod.setSize(GameInfo.WIDTH, GameInfo.HEIGHT);
         bsod.setOrigin(bsod.getWidth() * 0.5f, bsod.getHeight() * 0.5f);
         bsod.setOriginBasedPosition(GameInfo.WIDTH * 0.5f, GameInfo.HEIGHT * 0.5f);
